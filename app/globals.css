@@ -20,7 +20,7 @@ body {
   overscroll-behavior: none;
 }
 
-/* Mobile: prevent scroll bounce on iOS */
+/* Required for min-h-screen in Safari; overscroll-behavior handles bounce */
 html, body {
   height: 100%;
 }
