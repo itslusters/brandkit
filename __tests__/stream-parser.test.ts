@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import { buildBrandPrompt, parseNamingCandidates, parseStyleBrief } from '@/lib/claude'
 import type { BrandInput, StyleBrief } from '@/lib/types'
@@ -77,5 +78,8 @@ describe('parseStyleBrief', () => {
   })
   it('throws on invalid JSON', () => {
     expect(() => parseStyleBrief('not json')).toThrow()
+  })
+  it('throws on structurally incomplete JSON', () => {
+    expect(() => parseStyleBrief(JSON.stringify({ recommendedStyle: 'x' }))).toThrow()
   })
 })

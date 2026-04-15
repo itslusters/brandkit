@@ -3,7 +3,6 @@ import type { BrandInput, NamingCandidate, StyleBrief } from './types'
 
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true,
 })
 
 export function buildBrandPrompt(input: BrandInput): string {
@@ -40,5 +39,12 @@ export function parseNamingCandidates(raw: string): NamingCandidate[] {
 }
 
 export function parseStyleBrief(raw: string): StyleBrief {
-  return JSON.parse(raw.trim()) as StyleBrief
+  const parsed = JSON.parse(raw.trim())
+  const required: (keyof StyleBrief)[] = [
+    'recommendedStyle', 'colorPalette', 'typography', 'avoidList', 'moodImages'
+  ]
+  for (const key of required) {
+    if (parsed[key] === undefined) throw new Error(`StyleBrief missing field: ${key}`)
+  }
+  return parsed as StyleBrief
 }
