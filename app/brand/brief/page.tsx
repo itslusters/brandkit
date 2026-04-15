@@ -30,6 +30,7 @@ export default function BriefPage() {
       <StyleBriefDisplay brief={result.styleBrief} />
 
       <button
+        type="button"
         disabled
         className="mt-10 w-full py-3 rounded-xl bg-zinc-800 text-zinc-500 font-semibold text-sm cursor-not-allowed"
       >
