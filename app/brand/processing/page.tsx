@@ -7,7 +7,10 @@ import type { StreamTask } from '@/lib/types'
 // DEMO: cycles through task states with setTimeout
 // Replace with real SSE/streaming in MVP-2
 export default function ProcessingPage() {
-  const [tasks, setTasks] = useState<StreamTask[]>(INITIAL_STREAM_TASKS)
+  // TODO MVP-2: replace demo with real Claude streaming; read brandInput via getSession('brandInput')
+  const [tasks, setTasks] = useState<StreamTask[]>(() =>
+    INITIAL_STREAM_TASKS.map(t => ({ ...t }))
+  )
   const [elapsed, setElapsed] = useState(0)
   const ESTIMATED = 12
 

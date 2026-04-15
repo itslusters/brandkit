@@ -11,7 +11,8 @@ interface Props {
 }
 
 export function StreamingDashboard({ tasks, estimatedSeconds, elapsedSeconds }: Props) {
-  const progress = Math.min((elapsedSeconds / estimatedSeconds) * 100, 95)
+  const safeDivisor = estimatedSeconds > 0 ? estimatedSeconds : 1
+  const progress = Math.min((elapsedSeconds / safeDivisor) * 100, 95)
   const remaining = Math.max(Math.ceil(estimatedSeconds - elapsedSeconds), 0)
 
   return (
@@ -19,6 +20,7 @@ export function StreamingDashboard({ tasks, estimatedSeconds, elapsedSeconds }: 
       <ProgressBar progress={progress} />
       <motion.p
         className="text-xs text-zinc-600 text-center tabular-nums"
+        initial={{ opacity: 1 }}
         animate={{ opacity: remaining === 0 ? 0 : 1 }}
       >
         ~{remaining}s remaining
