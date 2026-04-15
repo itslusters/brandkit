@@ -3,25 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-bg: #09090b;
+  --brand-surface: #18181b;
+  --brand-border: #27272a;
+  --brand-text: #fafafa;
+  --brand-muted: #71717a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--brand-bg);
+  color: var(--brand-text);
+  overscroll-behavior: none;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Mobile: prevent scroll bounce on iOS */
+html, body {
+  height: 100%;
 }
