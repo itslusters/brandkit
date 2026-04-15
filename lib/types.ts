@@ -27,3 +27,9 @@ export interface StreamTask {
   status: StreamTaskStatus
   content: string        // streamed text, empty when pending
 }
+
+export interface BrandResult {
+  industry: string
+  namingCandidates: NamingCandidate[]
+  styleBrief: StyleBrief
+}
