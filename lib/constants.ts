@@ -1,3 +1,5 @@
+import type { StreamTask } from './types'
+
 export const TONE_KEYWORDS = [
   'Bold', 'Minimal', 'Playful', 'Premium',
   'Trusted', 'Innovative', 'Warm', 'Technical',
@@ -19,7 +21,7 @@ export const INDUSTRIES = [
   'Other',
 ] as const
 
-export const INITIAL_STREAM_TASKS: import('./types').StreamTask[] = [
+export const INITIAL_STREAM_TASKS: StreamTask[] = [
   { id: 'industry', label: 'Analyzing your industry...', status: 'pending', content: '' },
   { id: 'naming',   label: 'Generating name ideas...',  status: 'pending', content: '' },
   { id: 'brief',    label: 'Defining brand direction...', status: 'pending', content: '' },
