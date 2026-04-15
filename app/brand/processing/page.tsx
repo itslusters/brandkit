@@ -30,9 +30,10 @@ export default function ProcessingPage() {
 
   // Elapsed timer
   useEffect(() => {
+    if (isDone || hasError) return
     const tick = setInterval(() => setElapsed(s => s + 1), 1000)
     return () => clearInterval(tick)
-  }, [])
+  }, [isDone, hasError])
 
   // SSE stream — re-runs on retry
   useEffect(() => {
@@ -51,11 +52,14 @@ export default function ProcessingPage() {
           signal: controller.signal,
         })
 
-        const reader = res.body!.getReader()
+        if (!res.ok) { setHasError(true); return }
+        if (!res.body) { setHasError(true); return }
+
+        const reader = res.body.getReader()
         const decoder = new TextDecoder()
         let buf = ''
 
-        while (!aborted) {
+        while (true) {
           const { done, value } = await reader.read()
           if (done) break
           buf += decoder.decode(value, { stream: true })
@@ -92,7 +96,7 @@ export default function ProcessingPage() {
 
     run()
     return () => { aborted = true; controller.abort() }
-  }, [retryCount])
+  }, [retryCount]) // retryCount acts as a manual trigger; incrementing it re-runs the stream
 
   function retry() {
     setHasError(false)
