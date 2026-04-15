@@ -1,34 +1,106 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { StreamingDashboard } from '@/components/ui/StreamingDashboard'
 import { INITIAL_STREAM_TASKS } from '@/lib/constants'
-import type { StreamTask } from '@/lib/types'
+import { getSession, setSession } from '@/lib/session'
+import type { StreamTask, BrandInput, BrandResult } from '@/lib/types'
 
-// DEMO: cycles through task states with setTimeout
-// Replace with real SSE/streaming in MVP-2
+type SSEEvent =
+  | { type: 'token'; section: string; text: string }
+  | { type: 'section_done'; section: string }
+  | { type: 'done'; result: BrandResult }
+  | { type: 'error'; message: string }
+
 export default function ProcessingPage() {
-  // TODO MVP-2: replace demo with real Claude streaming; read brandInput via getSession('brandInput')
+  const router = useRouter()
   const [tasks, setTasks] = useState<StreamTask[]>(() =>
     INITIAL_STREAM_TASKS.map(t => ({ ...t }))
   )
   const [elapsed, setElapsed] = useState(0)
-  const ESTIMATED = 12
+  const [isDone, setIsDone] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const ESTIMATED = 20
 
+  // Session guard
+  useEffect(() => {
+    if (!getSession('brandInput')) router.replace('/brand/new')
+  }, [router])
+
+  // Elapsed timer
   useEffect(() => {
     const tick = setInterval(() => setElapsed(s => s + 1), 1000)
     return () => clearInterval(tick)
   }, [])
 
-  // Demo: activate each task in sequence
+  // SSE stream — re-runs on retry
   useEffect(() => {
-    const t1 = setTimeout(() => setTasks(prev => activate(prev, 'industry', 'SaaS B2B — clean, minimal, trusted aesthetics')), 800)
-    const t2 = setTimeout(() => setTasks(prev => done(prev, 'industry')), 3500)
-    const t3 = setTimeout(() => setTasks(prev => activate(prev, 'naming', '')), 3600)
-    const t4 = setTimeout(() => setTasks(prev => done(prev, 'naming', 'Nexio, Veltro, Clyra, Foundr, Arkos')), 7000)
-    const t5 = setTimeout(() => setTasks(prev => activate(prev, 'brief', '')), 7100)
-    const t6 = setTimeout(() => setTasks(prev => done(prev, 'brief', 'Geometric Minimal — charcoal + white + accent gold')), 11000)
-    return () => [t1,t2,t3,t4,t5,t6].forEach(clearTimeout)
-  }, [])
+    const input = getSession<BrandInput>('brandInput')
+    if (!input) return
+
+    let aborted = false
+    const controller = new AbortController()
+
+    async function run() {
+      try {
+        const res = await fetch('/api/brand/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(input),
+          signal: controller.signal,
+        })
+
+        const reader = res.body!.getReader()
+        const decoder = new TextDecoder()
+        let buf = ''
+
+        while (!aborted) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buf += decoder.decode(value, { stream: true })
+          const messages = buf.split('\n\n')
+          buf = messages.pop() ?? ''
+          for (const msg of messages) {
+            if (!msg.startsWith('data: ')) continue
+            handle(JSON.parse(msg.slice(6)) as SSEEvent)
+          }
+        }
+      } catch {
+        if (!aborted) setHasError(true)
+      }
+    }
+
+    function handle(event: SSEEvent) {
+      if (event.type === 'token') {
+        setTasks(prev => prev.map(t =>
+          t.id === event.section
+            ? { ...t, status: 'active', content: t.content + event.text }
+            : t
+        ))
+      } else if (event.type === 'section_done') {
+        setTasks(prev => prev.map(t =>
+          t.id === event.section ? { ...t, status: 'done' } : t
+        ))
+      } else if (event.type === 'done') {
+        setSession('brandResult', event.result)
+        setIsDone(true)
+      } else if (event.type === 'error') {
+        setHasError(true)
+      }
+    }
+
+    run()
+    return () => { aborted = true; controller.abort() }
+  }, [retryCount])
+
+  function retry() {
+    setHasError(false)
+    setIsDone(false)
+    setElapsed(0)
+    setTasks(INITIAL_STREAM_TASKS.map(t => ({ ...t })))
+    setRetryCount(c => c + 1)
+  }
 
   return (
     <div className="pt-4 pb-12">
@@ -41,16 +113,25 @@ export default function ProcessingPage() {
         estimatedSeconds={ESTIMATED}
         elapsedSeconds={elapsed}
       />
+      {isDone && (
+        <button
+          onClick={() => router.push('/brand/naming')}
+          className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
+        >
+          이름 선택하기 →
+        </button>
+      )}
+      {hasError && (
+        <div className="mt-8 text-center">
+          <p className="text-zinc-500 text-sm mb-4">문제가 발생했어요.</p>
+          <button
+            onClick={retry}
+            className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
+          >
+            다시 시도
+          </button>
+        </div>
+      )}
     </div>
-  )
-}
-
-function activate(tasks: StreamTask[], id: string, content: string): StreamTask[] {
-  return tasks.map(t => t.id === id ? { ...t, status: 'active', content } : t)
-}
-
-function done(tasks: StreamTask[], id: string, content?: string): StreamTask[] {
-  return tasks.map(t =>
-    t.id === id ? { ...t, status: 'done', content: content ?? t.content } : t
   )
 }
