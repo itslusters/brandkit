@@ -27,10 +27,13 @@ export function ToneSelector({ selected, onChange }: Props) {
             <button
               key={tone}
               type="button"
+              aria-pressed={active}
               onClick={() => toggle(tone)}
               className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                 active
                   ? 'bg-white text-black border-white'
+                  : selected.length === 3
+                  ? 'opacity-40 cursor-not-allowed bg-transparent text-zinc-400 border-zinc-700'
                   : 'bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500'
               }`}
             >

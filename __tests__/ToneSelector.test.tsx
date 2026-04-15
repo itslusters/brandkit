@@ -34,4 +34,16 @@ describe('ToneSelector', () => {
     render(<ToneSelector selected={['Bold', 'Minimal', 'Playful']} onChange={() => {}} />)
     expect(screen.getByText('3/3 selected')).toBeInTheDocument()
   })
+
+  it('calls onChange with tone removed when clicking selected at cap (3/3)', async () => {
+    const onChange = vi.fn()
+    render(<ToneSelector selected={['Bold', 'Minimal', 'Playful']} onChange={onChange} />)
+    await userEvent.click(screen.getByText('Bold'))
+    expect(onChange).toHaveBeenCalledWith(['Minimal', 'Playful'])
+  })
+
+  it('renders 12 tone keyword buttons', () => {
+    render(<ToneSelector selected={[]} onChange={() => {}} />)
+    expect(screen.getAllByRole('button')).toHaveLength(12)
+  })
 })
