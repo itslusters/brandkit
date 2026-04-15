@@ -29,4 +29,14 @@ describe('StreamCard', () => {
     render(<StreamCard task={{ ...base, content: 'hidden' }} index={0} />)
     expect(screen.queryByText('hidden')).not.toBeInTheDocument()
   })
+
+  it('shows content text when active with content', () => {
+    render(<StreamCard task={{ ...base, status: 'active', content: 'Streaming result...' }} index={0} />)
+    expect(screen.getByText('Streaming result...')).toBeInTheDocument()
+  })
+
+  it('does NOT show spinner when done', () => {
+    render(<StreamCard task={{ ...base, status: 'done', content: 'Done' }} index={0} />)
+    expect(document.querySelector('.animate-spin')).not.toBeInTheDocument()
+  })
 })

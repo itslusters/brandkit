@@ -18,7 +18,7 @@ export function StreamCard({ task, index }: Props) {
       layout
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08 }}
+      transition={{ delay: index * 0.08, layout: { duration: 0.3, ease: 'easeOut' } }}
       className={`rounded-xl border p-4 transition-colors duration-300 ${
         isDone
           ? 'border-zinc-700 bg-zinc-900'
