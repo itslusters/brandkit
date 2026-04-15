@@ -14,7 +14,11 @@ export default function NamingPage() {
 
   useEffect(() => {
     const r = getSession<BrandResult>('brandResult')
-    if (!r) { router.replace('/brand/new'); return }
+    if (!r) {
+      const hasInput = getSession('brandInput')
+      router.replace(hasInput ? '/brand/processing' : '/brand/new')
+      return
+    }
     setResult(r)
   }, [router])
 
@@ -39,9 +43,9 @@ export default function NamingPage() {
       </div>
 
       <div className="space-y-3">
-        {result.namingCandidates.map(c => (
+        {result.namingCandidates.map((c, i) => (
           <NamingCard
-            key={c.name}
+            key={i}
             candidate={c}
             selected={!useCustom && selected === c.name}
             onSelect={name => { setUseCustom(false); setSelected(name) }}
@@ -50,27 +54,31 @@ export default function NamingPage() {
       </div>
 
       <div className="mt-3">
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setUseCustom(true)}
-          className={`w-full text-left rounded-xl border p-4 transition-colors duration-200 ${
+          onKeyDown={e => { if (e.key === 'Enter') setUseCustom(true) }}
+          className={`w-full text-left rounded-xl border p-4 transition-colors duration-200 cursor-pointer ${
             useCustom ? 'border-white bg-zinc-900' : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
           }`}
         >
-          <p className="text-sm font-medium text-zinc-400">직접 입력</p>
+          <p className="text-sm font-medium text-zinc-400">직接 입력</p>
           {useCustom && (
             <input
               autoFocus
               value={customName}
               onChange={e => setCustomName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') confirm() }}
               placeholder="브랜드 이름 입력"
               className="mt-2 w-full bg-transparent text-white text-base outline-none placeholder:text-zinc-700"
             />
           )}
-        </button>
+        </div>
       </div>
 
       <button
+        type="button"
         onClick={confirm}
         disabled={!activeName}
         className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
