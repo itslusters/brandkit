@@ -39,14 +39,10 @@ export async function POST(req: Request) {
             if (line === '[INDUSTRY_START]') {
               currentSection = 'industry'
             } else if (line === '[NAMING_START]') {
-              if (currentSection === 'industry') {
-                controller.enqueue(sse({ type: 'section_done', section: 'industry' }))
-              }
+              if (currentSection) controller.enqueue(sse({ type: 'section_done', section: currentSection }))
               currentSection = 'naming'
             } else if (line === '[BRIEF_START]') {
-              if (currentSection === 'naming') {
-                controller.enqueue(sse({ type: 'section_done', section: 'naming' }))
-              }
+              if (currentSection) controller.enqueue(sse({ type: 'section_done', section: currentSection }))
               currentSection = 'brief'
             } else if (currentSection && line.trim()) {
               const text = line + '\n'
@@ -56,16 +52,21 @@ export async function POST(req: Request) {
           }
         }
 
+        // Flush remaining lineBuffer content
+        if (lineBuffer.trim() && currentSection) {
+          buffers[currentSection] += lineBuffer
+        }
+
         // Parse final result
         const result: BrandResult = {
           industry: buffers.industry.trim(),
           namingCandidates: parseNamingCandidates(buffers.naming),
           styleBrief: parseStyleBrief(buffers.brief),
         }
-        controller.enqueue(sse({ type: 'section_done', section: 'brief' }))
+        if (currentSection) controller.enqueue(sse({ type: 'section_done', section: currentSection }))
         controller.enqueue(sse({ type: 'done', result }))
       } catch (err) {
-        controller.enqueue(sse({ type: 'error', message: String(err) }))
+        controller.enqueue(sse({ type: 'error', message: err instanceof Error ? err.message : 'Streaming failed' }))
       } finally {
         controller.close()
       }
