@@ -1,6 +1,13 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+vi.mock('@/lib/ratelimit', () => ({
+  briefLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
+  logoLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
+  emailLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
+  getIp: () => '127.0.0.1',
+}))
+
 vi.mock('@/lib/gemini', () => ({
   genai: {
     models: {
@@ -88,12 +95,14 @@ describe('POST /api/brand/logo/generate', () => {
     expect(doneEvent).toBeDefined()
   })
 
-  it('emits error event when Gemini API throws', async () => {
+  it('emits image_error per failed image (others still proceed)', async () => {
     vi.mocked(genai.models.generateImages).mockRejectedValue(new Error('Imagen failed'))
     const res = await POST(makeRequest())
     const events = await collectSSE(res)
-    const errorEvent = events.find((e: any) => e.type === 'error') as any
-    expect(errorEvent).toBeDefined()
-    expect(errorEvent.message).toContain('Imagen failed')
+    const imageErrors = events.filter((e: any) => e.type === 'image_error')
+    expect(imageErrors).toHaveLength(3)
+    expect((imageErrors[0] as any).message).toContain('Imagen failed')
+    // done event still fires after all 3 settle
+    expect(events.find((e: any) => e.type === 'done')).toBeDefined()
   })
 })

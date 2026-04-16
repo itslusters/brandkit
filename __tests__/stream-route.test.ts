@@ -1,6 +1,14 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Mock rate limiter so tests don't hit Upstash
+vi.mock('@/lib/ratelimit', () => ({
+  briefLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
+  logoLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
+  emailLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
+  getIp: () => '127.0.0.1',
+}))
+
 // Mock the entire lib/claude module
 vi.mock('@/lib/claude', () => ({
   anthropic: {

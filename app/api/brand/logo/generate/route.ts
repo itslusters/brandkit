@@ -1,4 +1,5 @@
 import { genai, buildLogoPrompt } from '@/lib/gemini'
+import { logoLimiter, getIp } from '@/lib/ratelimit'
 import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
 
 interface RequestBody {
@@ -13,12 +14,21 @@ function sse(data: object): Uint8Array {
 }
 
 export async function POST(req: Request) {
+  const ip = getIp(req)
+  const { success } = await logoLimiter.limit(ip)
+  if (!success) {
+    return new Response(
+      JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),
+      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
   const { brandInput, brandResult, selectedName, logoType }: RequestBody = await req.json()
 
   const body = new ReadableStream({
     async start(controller) {
-      try {
-        const promises = [0, 1, 2].map(async (i) => {
+      const tasks = [0, 1, 2].map(async (i) => {
+        try {
           const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i)
           const response = await genai.models.generateImages({
             model: 'imagen-4.0-generate-001',
@@ -26,20 +36,19 @@ export async function POST(req: Request) {
             config: { numberOfImages: 1, outputMimeType: 'image/png' },
           })
           const base64 = response.generatedImages?.[0]?.image?.imageBytes ?? ''
-          const dataUrl = `data:image/png;base64,${base64}`
-          controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl }))
-        })
+          controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl: `data:image/png;base64,${base64}` }))
+        } catch (err) {
+          controller.enqueue(sse({
+            type: 'image_error',
+            index: i,
+            message: err instanceof Error ? err.message : 'Image generation failed',
+          }))
+        }
+      })
 
-        await Promise.all(promises)
-        controller.enqueue(sse({ type: 'done' }))
-      } catch (err) {
-        controller.enqueue(sse({
-          type: 'error',
-          message: err instanceof Error ? err.message : 'Image generation failed',
-        }))
-      } finally {
-        controller.close()
-      }
+      await Promise.allSettled(tasks)
+      controller.enqueue(sse({ type: 'done' }))
+      controller.close()
     },
   })
 

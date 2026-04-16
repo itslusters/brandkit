@@ -1,4 +1,5 @@
 import { anthropic, buildBrandPrompt, parseNamingCandidates, parseStyleBrief } from '@/lib/claude'
+import { briefLimiter, getIp } from '@/lib/ratelimit'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
 type Section = 'industry' | 'naming' | 'brief'
@@ -8,6 +9,15 @@ function sse(data: object): Uint8Array {
 }
 
 export async function POST(req: Request) {
+  const ip = getIp(req)
+  const { success } = await briefLimiter.limit(ip)
+  if (!success) {
+    return new Response(
+      `data: ${JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' })}\n\n`,
+      { status: 429, headers: { 'Content-Type': 'text/event-stream' } }
+    )
+  }
+
   const input: BrandInput = await req.json()
   const prompt = buildBrandPrompt(input)
 
