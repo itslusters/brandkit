@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             prompt,
             config: { numberOfImages: 1, outputMimeType: 'image/png' },
           })
-          const base64 = response.generatedImages[0].image.imageBytes
+          const base64 = response.generatedImages?.[0]?.image?.imageBytes ?? ''
           const dataUrl = `data:image/png;base64,${base64}`
           controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl }))
         })
