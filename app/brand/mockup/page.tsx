@@ -88,7 +88,14 @@ export default function MockupPage() {
       body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupTemplateIds }),
     })
     if (!res.ok) {
-      setErrorMessage(`Download failed: ${res.status}`)
+      let detail = ''
+      try {
+        const j = await res.json() as { message?: string; error?: string }
+        detail = j.message ?? j.error ?? ''
+      } catch {
+        detail = await res.text().catch(() => '')
+      }
+      setErrorMessage(`Download failed (${res.status}): ${detail}`)
       setHasError(true)
       return
     }
