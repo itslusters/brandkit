@@ -33,3 +33,5 @@ export interface BrandResult {
   namingCandidates: NamingCandidate[]
   styleBrief: StyleBrief
 }
+
+export type LogoType = 'wordmark' | 'symbol-text' | 'emblem'
