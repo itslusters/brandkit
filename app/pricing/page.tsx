@@ -19,7 +19,7 @@ export default function PricingPage() {
         <p className="text-zinc-500 text-sm mt-1">Pay once. Get a complete brand kit.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <PricingCard
           name="Free"
           price="$0"
