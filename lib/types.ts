@@ -12,6 +12,7 @@ export interface StyleBrief {
   typography: string[]   // 2 pairings e.g. ['Inter + Playfair Display']
   avoidList: string[]    // 3 items
   moodImages: string[]   // 3 public image paths
+  recommendedMockups: string[]
 }
 
 export interface NamingCandidate {
@@ -35,3 +36,19 @@ export interface BrandResult {
 }
 
 export type LogoType = 'wordmark' | 'symbol-text' | 'emblem'
+
+export type MockupCategory = 'print' | 'digital' | 'social' | 'merch'
+
+export interface MockupTemplate {
+  id: string
+  name: string
+  category: MockupCategory
+  image: string
+  logoZone: { x: number; y: number; width: number; height: number }
+  aspectRatio: string
+}
+
+export interface MockupResult {
+  templateId: string
+  dataUrl: string
+}
