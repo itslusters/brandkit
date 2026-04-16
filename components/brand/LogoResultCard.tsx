@@ -10,9 +10,13 @@ interface Props {
 
 export function LogoResultCard({ state, dataUrl, selected, onSelect }: Props) {
   return (
-    <div
-      className="relative aspect-square rounded-xl overflow-hidden cursor-pointer"
+    <motion.button
+      type="button"
       onClick={() => state === 'result' && onSelect()}
+      disabled={state === 'skeleton'}
+      whileTap={state === 'result' ? { scale: 0.97 } : undefined}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className="relative aspect-square rounded-xl overflow-hidden w-full disabled:cursor-default cursor-pointer"
     >
       <AnimatePresence mode="wait">
         {state === 'skeleton' ? (
@@ -32,7 +36,7 @@ export function LogoResultCard({ state, dataUrl, selected, onSelect }: Props) {
             initial={{ opacity: 0, filter: 'blur(16px)', scale: 1.04 }}
             animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
             transition={{ type: 'spring', stiffness: 180, damping: 28 }}
-            className="w-full h-full object-contain bg-white"
+            className="w-full h-full object-contain bg-white pointer-events-none"
           />
         )}
       </AnimatePresence>
@@ -49,6 +53,6 @@ export function LogoResultCard({ state, dataUrl, selected, onSelect }: Props) {
           />
         )}
       </AnimatePresence>
-    </div>
+    </motion.button>
   )
 }
