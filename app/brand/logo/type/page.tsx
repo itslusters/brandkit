@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useUser } from '@clerk/nextjs'
 import { LogoTypeCard } from '@/components/brand/LogoTypeCard'
 import { EmailGateModal } from '@/components/brand/EmailGateModal'
 import { getSession, setSession } from '@/lib/session'
@@ -27,6 +28,7 @@ const LOGO_TYPES: { type: LogoType; label: string; description: string }[] = [
 
 export default function LogoTypePage() {
   const router = useRouter()
+  const { isLoaded, isSignedIn, user } = useUser()
   const [ready, setReady] = useState(false)
   const [selected, setSelected] = useState<LogoType | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
@@ -41,7 +43,12 @@ export default function LogoTypePage() {
   function confirm() {
     if (!selected) return
     setSession('logoType', selected)
-    if (getSession<boolean>('emailCaptured')) {
+    const alreadyCaptured = getSession<boolean>('emailCaptured')
+    const isAuthEmail = isLoaded && isSignedIn && !!user?.primaryEmailAddress?.emailAddress
+    if (alreadyCaptured || isAuthEmail) {
+      if (isAuthEmail) {
+        setSession('emailCaptured', true)
+      }
       router.push('/brand/logo/studio')
     } else {
       setModalOpen(true)
