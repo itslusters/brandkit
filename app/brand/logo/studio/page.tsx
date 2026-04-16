@@ -28,6 +28,7 @@ export default function LogoStudioPage() {
   const [selected, setSelected] = useState<number | null>(null)
   const [isDone, setIsDone] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [retryCount, setRetryCount] = useState(0)
 
   // Session guard
@@ -45,7 +46,7 @@ export default function LogoStudioPage() {
     const selectedName = getSession<string>('selectedName')
     const logoType = getSession<LogoType>('logoType')
     if (!brandResult || !selectedName || !logoType) return
-    if (!brandInput) { setHasError(true); return }
+    if (!brandInput) { setErrorMessage('Missing brand input'); setHasError(true); return }
 
     let aborted = false
     const controller = new AbortController()
@@ -59,8 +60,8 @@ export default function LogoStudioPage() {
           signal: controller.signal,
         })
 
-        if (!res.ok) { setHasError(true); return }
-        if (!res.body) { setHasError(true); return }
+        if (!res.ok) { setErrorMessage(`Server error: ${res.status}`); setHasError(true); return }
+        if (!res.body) { setErrorMessage('No response body'); setHasError(true); return }
 
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
@@ -77,8 +78,11 @@ export default function LogoStudioPage() {
             handle(JSON.parse(msg.slice(6)) as SSEEvent)
           }
         }
-      } catch {
-        if (!aborted) setHasError(true)
+      } catch (err) {
+        if (!aborted) {
+          setErrorMessage(err instanceof Error ? err.message : 'Connection failed')
+          setHasError(true)
+        }
       }
     }
 
@@ -90,6 +94,7 @@ export default function LogoStudioPage() {
       } else if (event.type === 'done') {
         setIsDone(true)
       } else if (event.type === 'error') {
+        setErrorMessage(event.message)
         setHasError(true)
       }
     }
@@ -100,6 +105,7 @@ export default function LogoStudioPage() {
 
   function retry() {
     setHasError(false)
+    setErrorMessage('')
     setIsDone(false)
     setSelected(null)
     setCards([{ state: 'skeleton' }, { state: 'skeleton' }, { state: 'skeleton' }])
@@ -148,7 +154,10 @@ export default function LogoStudioPage() {
 
       {hasError && (
         <div className="mt-8 text-center">
-          <p className="text-zinc-500 text-sm mb-4">Something went wrong.</p>
+          <p className="text-zinc-500 text-sm mb-2">Something went wrong.</p>
+          {errorMessage && (
+            <p className="text-zinc-600 text-xs mb-4 font-mono break-all px-4">{errorMessage}</p>
+          )}
           <button
             type="button"
             onClick={retry}
