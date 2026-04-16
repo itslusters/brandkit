@@ -1,7 +1,4 @@
-// Use the standalone build — it inlines the .afm font files so Vercel's
-// bundler doesn't have to trace them separately (the default pdfkit build
-// reads them from disk relative to __dirname, which breaks after bundling).
-import PDFDocument from 'pdfkit/js/pdfkit.standalone'
+import PDFDocument from 'pdfkit'
 import sharp from 'sharp'
 import type { BrandResult } from './types'
 
