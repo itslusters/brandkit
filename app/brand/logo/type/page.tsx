@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { LogoTypeCard } from '@/components/brand/LogoTypeCard'
+import { EmailGateModal } from '@/components/brand/EmailGateModal'
 import { getSession, setSession } from '@/lib/session'
 import type { BrandResult, LogoType } from '@/lib/types'
 
@@ -28,6 +29,7 @@ export default function LogoTypePage() {
   const router = useRouter()
   const [ready, setReady] = useState(false)
   const [selected, setSelected] = useState<LogoType | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   useEffect(() => {
     const r = getSession<BrandResult>('brandResult')
@@ -39,6 +41,24 @@ export default function LogoTypePage() {
   function confirm() {
     if (!selected) return
     setSession('logoType', selected)
+    if (getSession<boolean>('emailCaptured')) {
+      router.push('/brand/logo/studio')
+    } else {
+      setModalOpen(true)
+    }
+  }
+
+  async function handleEmailSubmit(email: string) {
+    const brandName = getSession<string>('selectedName') ?? 'unknown'
+    const res = await fetch('/api/brand/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, brandName }),
+    })
+    if (res.status === 429) throw new Error('daily_limit')
+    if (!res.ok) throw new Error('network')
+    setSession('emailCaptured', true)
+    setModalOpen(false)
     router.push('/brand/logo/studio')
   }
 
@@ -78,6 +98,12 @@ export default function LogoTypePage() {
       >
         Create logo →
       </button>
+
+      <EmailGateModal
+        open={modalOpen}
+        onSubmit={handleEmailSubmit}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   )
 }
