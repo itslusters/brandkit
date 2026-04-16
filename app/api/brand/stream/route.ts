@@ -21,6 +21,21 @@ export async function POST(req: Request) {
   const input: BrandInput = await req.json()
   const prompt = buildBrandPrompt(input)
 
+  // If a mood image was uploaded, attach it as a vision content block alongside the text prompt
+  const userContent = input.moodImageDataUrl
+    ? (() => {
+        const match = input.moodImageDataUrl.match(/^data:(image\/(?:jpeg|png|webp|gif));base64,(.+)$/)
+        if (!match) return prompt
+        return [
+          {
+            type: 'image' as const,
+            source: { type: 'base64' as const, media_type: match[1] as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif', data: match[2] },
+          },
+          { type: 'text' as const, text: prompt },
+        ]
+      })()
+    : prompt
+
   const body = new ReadableStream({
     async start(controller) {
       try {
@@ -28,7 +43,7 @@ export async function POST(req: Request) {
           model: 'claude-sonnet-4-6',
           max_tokens: 1500,
           stream: true,
-          messages: [{ role: 'user', content: prompt }],
+          messages: [{ role: 'user', content: userContent }],
         })
 
         let currentSection: Section | null = null

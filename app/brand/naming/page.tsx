@@ -100,7 +100,7 @@ export default function NamingPage() {
             </button>
           </div>
 
-          <div className="relative h-80 mb-8">
+          <div className="relative max-w-sm mx-auto aspect-[4/5] mb-8">
             <AnimatePresence>
               {candidates.slice(index, Math.min(index + 3, candidates.length)).map((c, i) => (
                 <SwipeCard

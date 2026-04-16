@@ -6,6 +6,7 @@ export interface BrandInput {
   competitor: string     // optional, can be empty string
   existingName?: string  // if set, naming step is skipped — Claude generates only the brief
   customTone?: string    // free-text tone description — appended to picker tones in prompt
+  moodImageDataUrl?: string  // 'data:image/jpeg;base64,...' — visual reference passed to Claude vision
 }
 
 export interface StyleBrief {

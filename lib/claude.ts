@@ -8,6 +8,7 @@ export const anthropic = new Anthropic({
 export function buildBrandPrompt(input: BrandInput): string {
   const skipNaming = !!input.existingName?.trim()
   const tones = [input.tones.join(', '), input.customTone?.trim()].filter(Boolean).join('. Also: ')
+  const hasMoodImage = !!input.moodImageDataUrl
 
   const namingSection = skipNaming
     ? ''
@@ -18,13 +19,17 @@ Output exactly 5 lines. Each line format: Name|One-sentence rationale in English
     ? `Brand name (already chosen): ${input.existingName!.trim()}`
     : `Company: ${input.companyName}`
 
+  const moodImageNote = hasMoodImage
+    ? '\nA reference image is attached — use it as primary visual inspiration for the color palette, typography mood, and recommendedStyle. Match the energy and aesthetic of the image.'
+    : ''
+
   return `You are a brand strategist. Analyze the following company and output exactly ${skipNaming ? 'two' : 'three'} sections using the delimiters below. No preamble, no text outside the sections.
 
 ${nameLine}
 Industry: ${input.industry}
 Target customer: ${input.targetCustomer}
 Brand tone: ${tones}
-Competitor reference: ${input.competitor || 'none'}
+Competitor reference: ${input.competitor || 'none'}${moodImageNote}
 
 [INDUSTRY_START]
 Write 1-2 sentences: the industry archetype and the aesthetic expectations startup founders in this space should meet.
