@@ -31,10 +31,10 @@ export default function BriefPage() {
 
       <button
         type="button"
-        disabled
-        className="mt-10 w-full py-3 rounded-xl bg-zinc-800 text-zinc-500 font-semibold text-sm cursor-not-allowed"
+        onClick={() => router.push('/brand/logo/type')}
+        className="mt-10 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
       >
-        로고 만들기 → (MVP-B에서 오픈)
+        로고 만들기 →
       </button>
     </div>
   )
