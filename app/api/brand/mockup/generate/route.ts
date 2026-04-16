@@ -1,4 +1,6 @@
 import { composeMockupById } from '@/lib/mockups-compose'
+import { applyWatermark } from '@/lib/watermark'
+import { getUserTier } from '@/lib/tier'
 import type { MockupResult } from '@/lib/types'
 
 interface RequestBody {
@@ -16,6 +18,9 @@ export async function POST(req: Request) {
     return Response.json({ error: 'invalid_logo' }, { status: 400 })
   }
 
+  const tier = await getUserTier()
+  const isFree = tier === 'free'
+
   const base64 = logoDataUrl.split(',')[1] ?? ''
   const logoBuffer = Buffer.from(base64, 'base64')
 
@@ -23,9 +28,10 @@ export async function POST(req: Request) {
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
       const composed = await composeMockupById(id, logoBuffer)
+      const final = isFree ? await applyWatermark(composed) : composed
       const result: MockupResult = {
         templateId: id,
-        dataUrl: `data:image/png;base64,${composed.toString('base64')}`,
+        dataUrl: `data:image/png;base64,${final.toString('base64')}`,
       }
       return result
     })
