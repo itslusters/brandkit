@@ -4,10 +4,10 @@ import { motion } from 'framer-motion'
 
 export default function Hero() {
   return (
-    // Full-bleed: escape parent's max-w + horizontal padding using viewport-width breakout.
-    // -mx-4 cancels the parent <main> px-4 on mobile; on md+ the breakout extends to full viewport.
-    <section className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
-      <div className="relative w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-black">
+    // Full-bleed: escape parent main padding/max-w. No card chrome, no rounded corners.
+    // Section fills the viewport (svh = small viewport height, accounts for mobile browser UI).
+    <section className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen -mt-8 md:-mt-8">
+      <div className="relative w-full h-[100svh] min-h-[640px] overflow-hidden bg-black">
         <img
           src="/landing/hero.png"
           alt=""
@@ -15,15 +15,15 @@ export default function Hero() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Vignette + bottom darken so text reads over any dither variance */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/85" />
 
         <div className="absolute inset-0 flex items-end">
-          <div className="w-full max-w-3xl mx-auto px-6 sm:px-10 pb-10 sm:pb-14">
+          <div className="w-full max-w-3xl mx-auto px-6 sm:px-10 pb-12 sm:pb-20">
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.05]"
+              className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.05]"
             >
               From company info<br />to a complete brand kit<br />in minutes.
             </motion.h1>
@@ -56,6 +56,16 @@ export default function Hero() {
             </motion.div>
           </div>
         </div>
+
+        {/* Subtle scroll cue */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest text-zinc-500 hidden sm:block"
+        >
+          Scroll
+        </motion.div>
       </div>
     </section>
   )
