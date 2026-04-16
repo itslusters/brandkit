@@ -19,6 +19,7 @@ export interface SavedBrand {
   mockupUrls: { templateId: string; url: string }[]
   createdAt: number
   updatedAt: number
+  public?: boolean
 }
 
 interface CreateArgs {
@@ -65,4 +66,25 @@ export async function deleteBrand(userId: string, brandId: string): Promise<void
 
 export async function countBrands(userId: string): Promise<number> {
   return (await redis.zcard(userIndexKey(userId))) ?? 0
+}
+
+export async function setPublicBrand(userId: string, brandId: string, isPublic: boolean): Promise<SavedBrand | null> {
+  const brand = await getBrand(userId, brandId)
+  if (!brand) return null
+  const updated: SavedBrand = { ...brand, public: isPublic, updatedAt: Date.now() }
+  await redis.set(brandKey(userId, brandId), updated)
+  // Secondary index for fast public lookup
+  if (isPublic) {
+    await redis.set(`public:${brandId}`, userId)
+  } else {
+    await redis.del(`public:${brandId}`)
+  }
+  return updated
+}
+
+export async function getPublicBrand(brandId: string): Promise<SavedBrand | null> {
+  const ownerId = await redis.get<string>(`public:${brandId}`)
+  if (!ownerId) return null
+  const brand = await getBrand(ownerId, brandId)
+  return brand?.public ? brand : null
 }

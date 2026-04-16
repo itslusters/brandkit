@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Download, FileText, Package } from 'lucide-react'
 import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
+import { ShareToggle } from './ShareToggle'
 import type { SavedBrand } from '@/lib/brands'
 
 async function urlToDataUrl(url: string): Promise<string> {
@@ -105,6 +106,10 @@ export function SavedBrandView({ brand }: Props) {
           </div>
         </section>
       )}
+
+      <div className="mt-8">
+        <ShareToggle brandId={brand.id} initialPublic={brand.public ?? false} />
+      </div>
 
       {/* Re-download actions */}
       <div className="mt-8 space-y-3">

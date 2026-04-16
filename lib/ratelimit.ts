@@ -31,6 +31,13 @@ export const waitlistLimiter = new Ratelimit({
   analytics: false,
 })
 
+export const publicBrandLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.fixedWindow(60, '1 h'),
+  prefix: 'rl:public-brand',
+  analytics: false,
+})
+
 export function getIp(req: Request): string {
   const fwd = req.headers.get('x-forwarded-for')
   if (fwd) return fwd.split(',')[0].trim()
