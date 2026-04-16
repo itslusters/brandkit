@@ -29,6 +29,16 @@ export default async function AccountPage() {
       </section>
 
       <section className="mb-6">
+        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Library</p>
+        <a
+          href="/account/brands"
+          className="inline-block text-sm text-zinc-300 hover:text-white underline"
+        >
+          Your saved brands →
+        </a>
+      </section>
+
+      <section className="mb-6">
         <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Waitlist signups</p>
         {waitlists.length === 0 ? (
           <p className="text-sm text-zinc-500">
