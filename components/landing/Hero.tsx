@@ -4,53 +4,57 @@ import { motion } from 'framer-motion'
 
 export default function Hero() {
   return (
-    <section className="relative py-12 md:py-20">
-      {/* Bayer-dithered hero background */}
-      <div className="relative w-full aspect-[16/9] overflow-hidden rounded-2xl border border-zinc-800 bg-black">
+    // Full-bleed: escape parent's max-w + horizontal padding using viewport-width breakout.
+    // -mx-4 cancels the parent <main> px-4 on mobile; on md+ the breakout extends to full viewport.
+    <section className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
+      <div className="relative w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-black">
         <img
           src="/landing/hero.png"
           alt=""
           aria-hidden
-          className="absolute inset-0 w-full h-full object-cover opacity-90"
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Gradient for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+        {/* Vignette + bottom darken so text reads over any dither variance */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
 
-        {/* Text overlay (top-left, like the reference) */}
-        <div className="absolute inset-0 flex flex-col justify-between p-6 sm:p-10">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="max-w-xl"
-          >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-              From company info to a complete brand kit in minutes.
-            </h1>
-            <p className="mt-4 text-sm sm:text-base text-zinc-300 max-w-md">
+        <div className="absolute inset-0 flex items-end">
+          <div className="w-full max-w-3xl mx-auto px-6 sm:px-10 pb-10 sm:pb-14">
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.05]"
+            >
+              From company info<br />to a complete brand kit<br />in minutes.
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
+              className="mt-4 text-sm sm:text-base text-zinc-300 max-w-md"
+            >
               AI-generated naming, logos, mockups, and brand guide. Designer-polished tier available.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
-            className="flex flex-col sm:flex-row gap-3"
-          >
-            <a
-              href="/brand/new"
-              className="inline-flex items-center justify-center bg-white text-zinc-950 px-5 py-2.5 rounded-md font-medium hover:bg-zinc-200 transition-colors"
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+              className="mt-6 flex flex-col sm:flex-row gap-3"
             >
-              Try free →
-            </a>
-            <a
-              href="/pricing"
-              className="inline-flex items-center justify-center border border-zinc-600 bg-zinc-950/50 backdrop-blur-sm text-white px-5 py-2.5 rounded-md font-medium hover:border-zinc-400 transition-colors"
-            >
-              See pricing
-            </a>
-          </motion.div>
+              <a
+                href="/brand/new"
+                className="inline-flex items-center justify-center bg-white text-zinc-950 px-5 py-3 rounded-md font-medium hover:bg-zinc-200 transition-colors"
+              >
+                Try free →
+              </a>
+              <a
+                href="/pricing"
+                className="inline-flex items-center justify-center border border-zinc-500 bg-black/40 backdrop-blur-sm text-white px-5 py-3 rounded-md font-medium hover:border-zinc-300 transition-colors"
+              >
+                See pricing
+              </a>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

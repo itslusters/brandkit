@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en" className="dark">
-        <body className={`${inter.className} min-h-screen bg-zinc-950 text-white`}>
+        <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-hidden`}>
           <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
             <a href="/" className="text-sm font-semibold text-white">BrandKit</a>
             <div className="flex gap-3 items-center">

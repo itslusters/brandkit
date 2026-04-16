@@ -61,8 +61,8 @@ export default function Home() {
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8">How it works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {steps.map((s) => (
-            <div key={s.title} className="rounded-lg border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-              <div className="aspect-square bg-black border-b border-zinc-800 overflow-hidden">
+            <div key={s.title}>
+              <div className="aspect-square bg-black overflow-hidden rounded-lg">
                 <img
                   src={s.image}
                   alt=""
@@ -70,10 +70,8 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="p-5">
-                <h3 className="text-base font-semibold text-white">{s.title}</h3>
-                <p className="mt-2 text-sm text-zinc-400">{s.body}</p>
-              </div>
+              <h3 className="mt-4 text-base font-semibold text-white">{s.title}</h3>
+              <p className="mt-1 text-sm text-zinc-400">{s.body}</p>
             </div>
           ))}
         </div>

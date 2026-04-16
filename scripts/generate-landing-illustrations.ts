@@ -15,30 +15,32 @@ interface Item {
   aspect: '1:1' | '16:9'
 }
 
+// Style is consistent across all four — only the framing/composition changes.
+// Goal: atmospheric mood like the reference (lone figure, vast space, single
+// dramatic light), NOT literal explanations of each step.
+const STYLE =
+  'Cinematic black and white photograph, dramatic high contrast, monochrome, atmospheric and ethereal mood. Single dramatic directional light. Empty negative space. Grainy film stock feel. No text, no logos, no UI.'
+
 const ITEMS: Item[] = [
   {
     id: 'hero',
     aspect: '16:9',
-    prompt:
-      'Cinematic black and white photograph, dramatic high contrast, monochrome. A lone designer at a wooden desk, looking up at a swirling cosmos of floating brand symbols — logos, color swatches, geometric forms — descending like meteors from a starry night sky. Atmospheric, ethereal, classic Macintosh aesthetic. Strong rim lighting from above. No text.',
+    prompt: `${STYLE} A lone silhouetted figure standing on a vast empty plane, looking up at a sky filled with drifting cosmic dust and far-off light streaks. Wide cinematic frame, vast scale, sense of possibility and beginning.`,
   },
   {
     id: 'step-input',
     aspect: '1:1',
-    prompt:
-      'Cinematic black and white photograph, dramatic high contrast, monochrome. A close-up macro shot of an old typewriter or vintage form being filled out by hand, dramatic side light, papers scattered. Symbolic of telling a brand story. Atmospheric texture. No text.',
+    prompt: `${STYLE} A lone silhouetted figure at the edge of a cliff, looking out into a deep dark expanse with faint stars on the horizon. Sense of anticipation, contemplation before a journey.`,
   },
   {
     id: 'step-generate',
     aspect: '1:1',
-    prompt:
-      'Cinematic black and white photograph, dramatic high contrast, monochrome. An explosion of geometric shapes — circles, triangles, type letters, swatches — bursting outward from a central point against a pitch-black void. Sense of creative birth. Sharp edges, strong contrast. No text.',
+    prompt: `${STYLE} A lone silhouetted figure standing inside a single column of light pouring from above, dust and tiny particles swirling around them in the beam. Sense of transformation, energy, creation.`,
   },
   {
     id: 'step-download',
     aspect: '1:1',
-    prompt:
-      'Cinematic black and white photograph, dramatic high contrast, monochrome. A neat stack of physical design assets on a dark surface — printed business cards, a folded brochure, a USB drive, a sealed envelope — lit dramatically from one side. Studio still life. No text.',
+    prompt: `${STYLE} A lone silhouetted figure walking away into the distance toward a glowing horizon, footprints behind, vast open landscape. Sense of completion, departure, taking something with them.`,
   },
 ]
 
