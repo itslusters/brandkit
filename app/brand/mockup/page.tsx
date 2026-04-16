@@ -10,7 +10,8 @@ import { UpgradeModal } from '@/components/UpgradeModal'
 import { WaitlistModal } from '@/components/WaitlistModal'
 import { MOCKUP_TEMPLATES, getTemplateById } from '@/lib/mockups'
 import { getSession, setSession } from '@/lib/session'
-import type { BrandInput, BrandResult, MockupResult } from '@/lib/types'
+import { SavedBadge } from '@/components/brand/SavedBadge'
+import type { BrandInput, BrandResult, MockupResult, LogoType } from '@/lib/types'
 
 export default function MockupPage() {
   const router = useRouter()
@@ -24,6 +25,8 @@ export default function MockupPage() {
   const { user } = useUser()
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'limit' | 'error'>('idle')
+  const [saveMessage, setSaveMessage] = useState<string>('')
 
   // Session guard — runs FIRST before any render that depends on session data
   useEffect(() => {
@@ -44,6 +47,49 @@ export default function MockupPage() {
     if (cached) setResults(cached)
     setReady(true)
   }, [router])
+
+  // Auto-save when mockup generation completes (signed-in users only, once per session)
+  useEffect(() => {
+    if (saveState !== 'idle') return
+    if (!user) return
+    if (!results || results.length === 0) return
+    const successful = results.filter((r) => r.dataUrl)
+    if (successful.length === 0) return
+
+    const brandResult = getSession<BrandResult>('brandResult')
+    const brandName = getSession<string>('selectedName')
+    const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
+    const logoType = getSession<LogoType>('logoType')
+    if (!brandResult || !brandName || !selectedLogoDataUrl || !logoType) return
+
+    setSaveState('saving')
+    fetch('/api/brands/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: brandName,
+        brandInput: getSession<BrandInput>('brandInput'),
+        brandResult,
+        selectedLogoDataUrl,
+        selectedLogoType: logoType,
+        mockupResults: successful,
+      }),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          setSaveState('saved')
+          return
+        }
+        if (res.status === 402) {
+          const j = await res.json().catch(() => ({})) as { message?: string }
+          setSaveMessage(j.message ?? 'Free tier limit reached')
+          setSaveState('limit')
+          return
+        }
+        setSaveState('error')
+      })
+      .catch(() => setSaveState('error'))
+  }, [user, results, saveState])
 
   function toggle(id: string) {
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
@@ -146,9 +192,14 @@ export default function MockupPage() {
 
   return (
     <div className="pt-4 pb-12">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Pick your mockups</h1>
-        <p className="text-zinc-500 text-sm mt-1">Select which mockups to generate. Recommended ones are marked.</p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Pick your mockups</h1>
+          <p className="text-zinc-500 text-sm mt-1">Select which mockups to generate. Recommended ones are marked.</p>
+        </div>
+        <div className="shrink-0 pt-1">
+          <SavedBadge state={saveState} message={saveMessage} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
