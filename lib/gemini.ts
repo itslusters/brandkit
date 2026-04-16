@@ -17,6 +17,17 @@ const VARIATION_HINTS = [
   'stacked vertical composition',
 ]
 
+// BrandKit house aesthetic — injected silently into every logo prompt.
+// Job: force the model toward the polish bar of Pentagram / Apple / Linear
+// and away from the AI-image cliches that make vanilla Imagen outputs
+// read as "AI-generated": rainbow gradients, generic tech swoosh, chromatic
+// aberration, 3D renders, over-ornamented scripts, busy compositions.
+const HOUSE_AESTHETIC =
+  'Editorial-grade brand design, studio-level polish, confident simplicity, purposeful negative space, refined restraint. Think Pentagram, Collins, Apple, Linear, Stripe — not stock logo maker output. Modern, timeless, enduring.'
+
+const HOUSE_AVOID =
+  'rainbow gradients, generic tech swooshes, abstract globes, cliche lightbulbs, chromatic aberration, 3D bevels, lens flares, metallic gloss, drop shadows, over-ornamented scripts, busy arrangements, clip-art styling, stock logo marketplace look'
+
 function tonePrefix(l: number, s: number): string {
   let lightness = ''
   if (l < 0.2) lightness = 'very dark '
@@ -86,12 +97,13 @@ export function buildLogoPrompt(
   const { colorPalette, avoidList, recommendedStyle } = result.styleBrief
   const colors = colorPalette.map(hexToColorName)
   const modifier = iterationModifier ? `\nRefinement direction: ${ITERATION_MODIFIERS[iterationModifier]}` : ''
-  return `A clean, professional logo for the brand "${selectedName}".
+  return `A logo for the brand "${selectedName}".
 Logo type: ${LOGO_TYPE_DESCRIPTIONS[logoType]}.
-Aesthetic: ${recommendedStyle}.
+House aesthetic: ${HOUSE_AESTHETIC}
+Brand aesthetic direction: ${recommendedStyle}.
 Color palette: primarily ${colors[0]}, with ${colors[1]} as secondary and ${colors[2]} as accent. Use only these colors.
 Layout: ${VARIATION_HINTS[variationIndex]}.
-Avoid: ${avoidList.join(', ')}.${modifier}
+Avoid: ${[...avoidList, HOUSE_AVOID].join(', ')}.${modifier}
 The ONLY visible text in the image is the word "${selectedName}". Do not render any hex codes, color codes, font names, font samples, color swatches, labels, captions, taglines, watermarks, or annotations of any kind.
-White background. Vector-style. Crisp edges. High contrast. Print-ready.`
+White background. Pure vector feel. Crisp edges. High contrast. Print-ready. Flat 2D — absolutely no 3D rendering, no photorealism, no texture.`
 }
