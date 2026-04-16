@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises'
 import path from 'path'
-import { composeMockup, getTemplateById } from '@/lib/mockups'
+import { getTemplateById } from '@/lib/mockups'
+import { composeMockup } from '@/lib/mockups-compose'
 import type { MockupResult } from '@/lib/types'
 
 interface RequestBody {

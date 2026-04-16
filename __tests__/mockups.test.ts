@@ -1,6 +1,10 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest'
-import { MOCKUP_TEMPLATES, getTemplateById, composeMockup } from '@/lib/mockups'
+import { describe, it, expect, vi } from 'vitest'
+
+vi.mock('server-only', () => ({}))
+
+import { MOCKUP_TEMPLATES, getTemplateById } from '@/lib/mockups'
+import { composeMockup } from '@/lib/mockups-compose'
 import sharp from 'sharp'
 
 describe('MOCKUP_TEMPLATES', () => {
