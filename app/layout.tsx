@@ -13,8 +13,19 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'BrandKit — AI Branding Engine',
-  description: 'From company info to full brand package in minutes.',
+  title: { default: 'BrandKit — AI Brand Kit Generator', template: '%s · BrandKit' },
+  description: 'Get a complete brand identity in minutes — naming, logos, mockups, and brand guide PDF. AI-powered, designer-polished tier available.',
+  keywords: ['AI logo generator', 'brand kit', 'AI branding', 'startup branding', 'brand identity'],
+  openGraph: {
+    title: 'BrandKit — AI Brand Kit Generator',
+    description: 'Get a complete brand identity in minutes — naming, logos, mockups, brand guide.',
+    type: 'website',
+    url: 'https://brandkit-wheat.vercel.app',
+    siteName: 'BrandKit',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'BrandKit' }],
+  },
+  twitter: { card: 'summary_large_image', title: 'BrandKit', description: 'AI brand kit generator', images: ['/og.png'] },
+  metadataBase: new URL('https://brandkit-wheat.vercel.app'),
 }
 
 export const viewport: Viewport = {
