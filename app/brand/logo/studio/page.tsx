@@ -44,7 +44,8 @@ export default function LogoStudioPage() {
     const brandResult = getSession<BrandResult>('brandResult')
     const selectedName = getSession<string>('selectedName')
     const logoType = getSession<LogoType>('logoType')
-    if (!brandInput || !brandResult || !selectedName || !logoType) return
+    if (!brandResult || !selectedName || !logoType) return
+    if (!brandInput) { setHasError(true); return }
 
     let aborted = false
     const controller = new AbortController()
@@ -111,7 +112,9 @@ export default function LogoStudioPage() {
     const a = document.createElement('a')
     a.href = cards[selected].dataUrl!
     a.download = `${selectedName}-logo.png`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
   }
 
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined
