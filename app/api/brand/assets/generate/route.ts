@@ -2,13 +2,14 @@ import JSZip from 'jszip'
 import sharp from 'sharp'
 import { buildBrandGuidePDF } from '@/lib/pdf'
 import { pngToSvg } from '@/lib/vector'
-import type { BrandResult, MockupResult } from '@/lib/types'
+import { composeMockupById } from '@/lib/mockups-compose'
+import type { BrandResult } from '@/lib/types'
 
 interface RequestBody {
   brandName: string
   brandResult: BrandResult
   selectedLogoDataUrl: string
-  mockupResults?: MockupResult[]
+  mockupTemplateIds?: string[]
 }
 
 function dataUrlToBuffer(dataUrl: string): Buffer {
@@ -43,18 +44,20 @@ export async function POST(req: Request) {
     // SVG conversion can fail on complex images; ZIP still ships without it
   }
 
-  // Mockups
-  for (const m of body.mockupResults ?? []) {
-    if (m.dataUrl) {
-      zip.file(`mockups/${m.templateId}.png`, dataUrlToBuffer(m.dataUrl))
+  // Re-compose all selected mockups server-side (client sends only IDs)
+  const ids = body.mockupTemplateIds ?? []
+  const mockupOutcomes = await Promise.allSettled(ids.map((id) => composeMockupById(id, logoBuffer)))
+  mockupOutcomes.forEach((outcome, idx) => {
+    if (outcome.status === 'fulfilled') {
+      zip.file(`mockups/${ids[idx]}.png`, outcome.value)
     }
-  }
+  })
 
-  // PDF brand guide
-  const mockupPngs = (body.mockupResults ?? [])
-    .filter((m) => m.dataUrl)
+  // PDF brand guide — reuse the mockup buffers we just composed (top 3)
+  const mockupPngs = mockupOutcomes
+    .filter((o): o is PromiseFulfilledResult<Buffer> => o.status === 'fulfilled')
     .slice(0, 3)
-    .map((m) => dataUrlToBuffer(m.dataUrl))
+    .map((o) => o.value)
   const pdf = await buildBrandGuidePDF({
     brandName: body.brandName,
     result: body.brandResult,

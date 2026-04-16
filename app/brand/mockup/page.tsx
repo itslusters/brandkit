@@ -72,48 +72,45 @@ export default function MockupPage() {
     }
   }
 
-  async function downloadPdf() {
+  async function downloadBlob(apiPath: string, filename: string) {
     const brandResult = getSession<BrandResult>('brandResult')
     const brandName = getSession<string>('selectedName') ?? 'brand'
     const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
-    if (!brandResult || !selectedLogoDataUrl) return
-    const res = await fetch('/api/brand/guide/generate', {
+    if (!brandResult || !selectedLogoDataUrl) {
+      setErrorMessage('Missing session data. Refresh and try again.')
+      setHasError(true)
+      return
+    }
+    const mockupTemplateIds = (results ?? []).filter((r) => r.dataUrl).map((r) => r.templateId)
+    const res = await fetch(apiPath, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupResults: results ?? [] }),
+      body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupTemplateIds }),
     })
-    if (!res.ok) return
+    if (!res.ok) {
+      setErrorMessage(`Download failed: ${res.status}`)
+      setHasError(true)
+      return
+    }
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${brandName}-brand-guide.pdf`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
-  async function downloadZip() {
-    const brandResult = getSession<BrandResult>('brandResult')
+  async function downloadPdf() {
     const brandName = getSession<string>('selectedName') ?? 'brand'
-    const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
-    if (!brandResult || !selectedLogoDataUrl) return
-    const res = await fetch('/api/brand/assets/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupResults: results ?? [] }),
-    })
-    if (!res.ok) return
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${brandName}-brand-kit.zip`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    await downloadBlob('/api/brand/guide/generate', `${brandName}-brand-guide.pdf`)
+  }
+
+  async function downloadZip() {
+    const brandName = getSession<string>('selectedName') ?? 'brand'
+    await downloadBlob('/api/brand/assets/generate', `${brandName}-brand-kit.zip`)
   }
 
   function downloadSingleMockup(r: MockupResult) {

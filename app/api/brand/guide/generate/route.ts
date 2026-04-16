@@ -1,11 +1,12 @@
 import { buildBrandGuidePDF } from '@/lib/pdf'
-import type { BrandResult, MockupResult } from '@/lib/types'
+import { composeMockupById } from '@/lib/mockups-compose'
+import type { BrandResult } from '@/lib/types'
 
 interface RequestBody {
   brandName: string
   brandResult: BrandResult
   selectedLogoDataUrl: string
-  mockupResults?: MockupResult[]
+  mockupTemplateIds?: string[]
 }
 
 function dataUrlToBuffer(dataUrl: string): Buffer {
@@ -19,15 +20,19 @@ export async function POST(req: Request) {
     return Response.json({ error: 'invalid_logo' }, { status: 400 })
   }
 
-  const mockupPngs = (body.mockupResults ?? [])
-    .filter((m) => m.dataUrl)
-    .slice(0, 3)
-    .map((m) => dataUrlToBuffer(m.dataUrl))
+  const logoBuffer = dataUrlToBuffer(body.selectedLogoDataUrl)
+
+  // Re-compose up to 3 mockups server-side (client sends only IDs to stay under the 4.5MB body cap)
+  const ids = (body.mockupTemplateIds ?? []).slice(0, 3)
+  const mockupOutcomes = await Promise.allSettled(ids.map((id) => composeMockupById(id, logoBuffer)))
+  const mockupPngs = mockupOutcomes
+    .filter((o): o is PromiseFulfilledResult<Buffer> => o.status === 'fulfilled')
+    .map((o) => o.value)
 
   const pdf = await buildBrandGuidePDF({
     brandName: body.brandName,
     result: body.brandResult,
-    logoPng: dataUrlToBuffer(body.selectedLogoDataUrl),
+    logoPng: logoBuffer,
     mockupPngs,
   })
 
