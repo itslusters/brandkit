@@ -2,9 +2,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useUser } from '@clerk/nextjs'
 import { MockupTemplateCard } from '@/components/brand/MockupTemplateCard'
 import { MockupResultCard } from '@/components/brand/MockupResultCard'
 import { DownloadActions } from '@/components/brand/DownloadActions'
+import { UpgradeModal } from '@/components/UpgradeModal'
+import { WaitlistModal } from '@/components/WaitlistModal'
 import { MOCKUP_TEMPLATES, getTemplateById } from '@/lib/mockups'
 import { getSession, setSession } from '@/lib/session'
 import type { BrandInput, BrandResult, MockupResult } from '@/lib/types'
@@ -18,6 +21,9 @@ export default function MockupPage() {
   const [generating, setGenerating] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const { user } = useUser()
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)
 
   // Session guard — runs FIRST before any render that depends on session data
   useEffect(() => {
@@ -87,6 +93,10 @@ export default function MockupPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupTemplateIds }),
     })
+    if (res.status === 403) {
+      setUpgradeOpen(true)
+      return
+    }
     if (!res.ok) {
       let detail = ''
       try {
@@ -199,6 +209,19 @@ export default function MockupPage() {
         disabled={!hasResults}
         onDownloadPdf={downloadPdf}
         onDownloadZip={downloadZip}
+      />
+
+      <UpgradeModal
+        open={upgradeOpen}
+        reason="Free tier includes watermarked previews. Upgrade to remove watermarks and unlock vector SVG, PDF guide, and asset pack ZIP."
+        onClose={() => setUpgradeOpen(false)}
+        onChoosePlan={(plan) => { setUpgradeOpen(false); setWaitlistPlan(plan) }}
+      />
+      <WaitlistModal
+        open={waitlistPlan !== null}
+        plan={waitlistPlan ?? 'essentials'}
+        prefilledEmail={user?.primaryEmailAddress?.emailAddress ?? ''}
+        onClose={() => setWaitlistPlan(null)}
       />
     </div>
   )
