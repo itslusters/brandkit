@@ -5,14 +5,14 @@ const redis = Redis.fromEnv()
 
 export const briefLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.fixedWindow(3, '24 h'),
+  limiter: Ratelimit.fixedWindow(20, '24 h'),
   prefix: 'rl:brief',
   analytics: false,
 })
 
 export const logoLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.fixedWindow(2, '24 h'),
+  limiter: Ratelimit.fixedWindow(10, '24 h'),
   prefix: 'rl:logo',
   analytics: false,
 })
