@@ -18,13 +18,14 @@ function dataUrlToBuffer(dataUrl: string): Buffer {
 }
 
 export async function POST(req: Request) {
-  const body: RequestBody = await req.json()
-  if (!body.selectedLogoDataUrl?.startsWith('data:image/')) {
-    return Response.json({ error: 'invalid_logo' }, { status: 400 })
-  }
+  try {
+    const body: RequestBody = await req.json()
+    if (!body.selectedLogoDataUrl?.startsWith('data:image/')) {
+      return Response.json({ error: 'invalid_logo' }, { status: 400 })
+    }
 
-  const logoBuffer = dataUrlToBuffer(body.selectedLogoDataUrl)
-  const zip = new JSZip()
+    const logoBuffer = dataUrlToBuffer(body.selectedLogoDataUrl)
+    const zip = new JSZip()
 
   // Logo in 3 resolutions — sharp.resize with fit:inside keeps aspect + bounded memory
   const [logo1024, logo512, logo256] = await Promise.all([
@@ -74,12 +75,19 @@ export async function POST(req: Request) {
     `Brand: ${body.brandName}\nStyle: ${body.brandResult.styleBrief.recommendedStyle}\nPalette: ${palette}\nTypography: ${fonts}\nGenerated: ${new Date().toISOString()}\n`
   )
 
-  const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })
 
-  return new Response(new Uint8Array(zipBuffer), {
-    headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${body.brandName}-brand-kit.zip"`,
-    },
-  })
+    return new Response(new Uint8Array(zipBuffer), {
+      headers: {
+        'Content-Type': 'application/zip',
+        'Content-Disposition': `attachment; filename="${body.brandName}-brand-kit.zip"`,
+      },
+    })
+  } catch (err) {
+    console.error('[assets/generate] error:', err)
+    return Response.json(
+      { error: 'zip_failed', message: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    )
+  }
 }
