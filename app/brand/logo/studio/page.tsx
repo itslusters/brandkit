@@ -1,12 +1,22 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Sparkles } from 'lucide-react'
 import { LogoResultCard } from '@/components/brand/LogoResultCard'
 import { getSession, setSession } from '@/lib/session'
+import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
 const RETRY_CAP = 2
-import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
+const ITERATIONS_MAX = 3
+
+const ITERATION_CHIPS: { id: IterationModifier; label: string }[] = [
+  { id: 'bolder', label: 'Bolder' },
+  { id: 'minimal', label: 'More minimal' },
+  { id: 'geometric', label: 'More geometric' },
+  { id: 'organic', label: 'More organic' },
+  { id: 'playful', label: 'More playful' },
+]
 
 type CardState = 'skeleton' | 'result'
 
@@ -17,6 +27,7 @@ interface LogoCard {
 
 type SSEEvent =
   | { type: 'image_ready'; index: number; dataUrl: string }
+  | { type: 'image_error'; index: number; message: string }
   | { type: 'done' }
   | { type: 'error'; message: string }
 
@@ -32,6 +43,8 @@ export default function LogoStudioPage() {
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [retryCount, setRetryCount] = useState(0)
+  const [iterationsUsed, setIterationsUsed] = useState(0)
+  const [modifier, setModifier] = useState<IterationModifier | null>(null)
 
   // Session guard
   useEffect(() => {
@@ -41,7 +54,7 @@ export default function LogoStudioPage() {
     if (!r || !name || !type) { router.replace('/brand/new'); return }
   }, [router])
 
-  // SSE stream — re-runs on retry
+  // SSE stream — re-runs on retry / iteration
   useEffect(() => {
     const brandInput = getSession<BrandInput>('brandInput')
     const brandResult = getSession<BrandResult>('brandResult')
@@ -58,7 +71,13 @@ export default function LogoStudioPage() {
         const res = await fetch('/api/brand/logo/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ brandInput, brandResult, selectedName, logoType }),
+          body: JSON.stringify({
+            brandInput,
+            brandResult,
+            selectedName,
+            logoType,
+            iterationModifier: modifier ?? undefined,
+          }),
           signal: controller.signal,
         })
 
@@ -105,13 +124,25 @@ export default function LogoStudioPage() {
     return () => { aborted = true; controller.abort() }
   }, [retryCount])
 
-  function retry() {
-    if (retryCount >= RETRY_CAP) return
-    setHasError(false)
-    setErrorMessage('')
-    setIsDone(false)
+  function resetCards() {
     setSelected(null)
     setCards([{ state: 'skeleton' }, { state: 'skeleton' }, { state: 'skeleton' }])
+    setIsDone(false)
+    setHasError(false)
+    setErrorMessage('')
+  }
+
+  function retry() {
+    if (retryCount >= RETRY_CAP) return
+    resetCards()
+    setRetryCount(c => c + 1)
+  }
+
+  function iterate(mod: IterationModifier) {
+    if (iterationsUsed >= ITERATIONS_MAX) return
+    resetCards()
+    setModifier(mod)
+    setIterationsUsed(c => c + 1)
     setRetryCount(c => c + 1)
   }
 
@@ -122,13 +153,21 @@ export default function LogoStudioPage() {
   }
 
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined
+  const iterationsLeft = ITERATIONS_MAX - iterationsUsed
+  const canIterate = isDone && !hasError && iterationsLeft > 0
 
   return (
     <div className="pt-4 pb-12">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">Pick your logo</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          {isDone ? 'Select the logo you like best.' : 'AI is generating your logos...'}
+          {isDone
+            ? modifier
+              ? `Refined: ${ITERATION_CHIPS.find(c => c.id === modifier)?.label.toLowerCase()}. Pick one or refine again.`
+              : 'Select the one you like best — or refine below.'
+            : modifier
+              ? `Refining (${ITERATION_CHIPS.find(c => c.id === modifier)?.label.toLowerCase()})…`
+              : 'AI is generating your logos...'}
         </p>
       </div>
 
@@ -150,6 +189,49 @@ export default function LogoStudioPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Iterate chip row */}
+      <AnimatePresence>
+        {canIterate && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="mt-8"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs uppercase tracking-widest text-zinc-500 inline-flex items-center gap-1.5">
+                <Sparkles size={12} /> Refine
+              </p>
+              <p className="text-xs text-zinc-500 tabular-nums">
+                <span className="text-zinc-300 font-medium">{iterationsLeft}</span> left
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {ITERATION_CHIPS.map(chip => (
+                <motion.button
+                  key={chip.id}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => iterate(chip.id)}
+                  className="px-3 py-1.5 rounded-full border border-zinc-700 text-xs text-zinc-300 hover:border-white hover:text-white transition-colors"
+                >
+                  {chip.label}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+        {isDone && !hasError && iterationsLeft === 0 && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-6 text-xs text-zinc-600 text-center"
+          >
+            You&apos;ve used all 3 refinements this session.
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {hasError && (
         <div className="mt-8 text-center">

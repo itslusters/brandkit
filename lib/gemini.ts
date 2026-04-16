@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai'
-import type { BrandInput, BrandResult, LogoType } from './types'
+import type { BrandInput, BrandResult, LogoType, IterationModifier } from './types'
 
 export const genai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -67,21 +67,31 @@ export function hexToColorName(hex: string): string {
   return tonePrefix(l, s) + 'pink'
 }
 
+export const ITERATION_MODIFIERS: Record<IterationModifier, string> = {
+  bolder: 'Make it noticeably bolder, heavier weight, more visual presence.',
+  minimal: 'Make it more minimal, simpler, more refined, fewer elements.',
+  geometric: 'More geometric, sharper angles, mathematical precision.',
+  organic: 'More organic, softer curves, hand-drawn feel.',
+  playful: 'More playful, energetic, unexpected.',
+}
+
 export function buildLogoPrompt(
   input: BrandInput,
   result: BrandResult,
   selectedName: string,
   logoType: LogoType,
-  variationIndex: number
+  variationIndex: number,
+  iterationModifier?: IterationModifier
 ): string {
   const { colorPalette, avoidList, recommendedStyle } = result.styleBrief
   const colors = colorPalette.map(hexToColorName)
+  const modifier = iterationModifier ? `\nRefinement direction: ${ITERATION_MODIFIERS[iterationModifier]}` : ''
   return `A clean, professional logo for the brand "${selectedName}".
 Logo type: ${LOGO_TYPE_DESCRIPTIONS[logoType]}.
 Aesthetic: ${recommendedStyle}.
 Color palette: primarily ${colors[0]}, with ${colors[1]} as secondary and ${colors[2]} as accent. Use only these colors.
 Layout: ${VARIATION_HINTS[variationIndex]}.
-Avoid: ${avoidList.join(', ')}.
+Avoid: ${avoidList.join(', ')}.${modifier}
 The ONLY visible text in the image is the word "${selectedName}". Do not render any hex codes, color codes, font names, font samples, color swatches, labels, captions, taglines, watermarks, or annotations of any kind.
 White background. Vector-style. Crisp edges. High contrast. Print-ready.`
 }

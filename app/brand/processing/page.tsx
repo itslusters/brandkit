@@ -94,6 +94,11 @@ export default function ProcessingPage() {
         ))
       } else if (event.type === 'done') {
         setSession('brandResult', event.result)
+        // If the user provided their own brand name, skip naming and jump straight to brief
+        const stored = getSession<BrandInput>('brandInput')
+        if (stored?.existingName?.trim()) {
+          setSession('selectedName', stored.existingName.trim())
+        }
         setIsDone(true)
       } else if (event.type === 'error') {
         setErrorMessage(event.message)
@@ -126,14 +131,18 @@ export default function ProcessingPage() {
         estimatedSeconds={ESTIMATED}
         elapsedSeconds={elapsed}
       />
-      {isDone && (
-        <button
-          onClick={() => router.push('/brand/naming')}
-          className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
-        >
-          Choose a name →
-        </button>
-      )}
+      {isDone && (() => {
+        const stored = getSession<BrandInput>('brandInput')
+        const skipNaming = !!stored?.existingName?.trim()
+        return (
+          <button
+            onClick={() => router.push(skipNaming ? '/brand/brief' : '/brand/naming')}
+            className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
+          >
+            {skipNaming ? 'View brand brief →' : 'Choose a name →'}
+          </button>
+        )
+      })()}
       {hasError && (
         <div className="mt-8 text-center">
           <p className="text-zinc-500 text-sm mb-2">Something went wrong.</p>

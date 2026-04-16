@@ -4,6 +4,8 @@ export interface BrandInput {
   targetCustomer: string
   tones: string[]        // exactly 3 when submitted
   competitor: string     // optional, can be empty string
+  existingName?: string  // if set, naming step is skipped — Claude generates only the brief
+  customTone?: string    // free-text tone description — appended to picker tones in prompt
 }
 
 export interface StyleBrief {
@@ -36,6 +38,8 @@ export interface BrandResult {
 }
 
 export type LogoType = 'wordmark' | 'symbol-text' | 'emblem'
+
+export type IterationModifier = 'bolder' | 'minimal' | 'geometric' | 'organic' | 'playful'
 
 export type MockupCategory = 'print' | 'digital' | 'social' | 'merch'
 

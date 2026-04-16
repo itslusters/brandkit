@@ -1,12 +1,13 @@
-import { genai, buildLogoPrompt } from '@/lib/gemini'
+import { genai, buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
 import { logoLimiter, getIp } from '@/lib/ratelimit'
-import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
+import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
 interface RequestBody {
   brandInput: BrandInput
   brandResult: BrandResult
   selectedName: string
   logoType: LogoType
+  iterationModifier?: IterationModifier
 }
 
 function sse(data: object): Uint8Array {
@@ -23,13 +24,14 @@ export async function POST(req: Request) {
     )
   }
 
-  const { brandInput, brandResult, selectedName, logoType }: RequestBody = await req.json()
+  const { brandInput, brandResult, selectedName, logoType, iterationModifier }: RequestBody = await req.json()
+  const validModifier = iterationModifier && iterationModifier in ITERATION_MODIFIERS ? iterationModifier : undefined
 
   const body = new ReadableStream({
     async start(controller) {
       const tasks = [0, 1, 2].map(async (i) => {
         try {
-          const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i)
+          const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, validModifier)
           const response = await genai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt,

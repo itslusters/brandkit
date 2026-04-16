@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ToneSelector } from './ToneSelector'
 import { INDUSTRIES } from '@/lib/constants'
 import { setSession } from '@/lib/session'
@@ -18,6 +19,8 @@ const EMPTY: BrandInput = {
 export function BrandForm() {
   const router = useRouter()
   const [form, setForm] = useState<BrandInput>(EMPTY)
+  const [hasBrandName, setHasBrandName] = useState(false)
+  const [customTone, setCustomTone] = useState('')
 
   const isValid =
     form.companyName.trim().length > 0 &&
@@ -32,24 +35,57 @@ export function BrandForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!isValid) return
-    setSession('brandInput', form)
+    const payload: BrandInput = {
+      ...form,
+      ...(hasBrandName ? { existingName: form.companyName.trim() } : {}),
+      ...(customTone.trim() ? { customTone: customTone.trim() } : {}),
+    }
+    setSession('brandInput', payload)
     router.push('/brand/processing')
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Skip-naming toggle (sleek pill) */}
+      <button
+        type="button"
+        onClick={() => setHasBrandName(v => !v)}
+        className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs transition-all ${
+          hasBrandName
+            ? 'border-white bg-white text-zinc-950'
+            : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200'
+        }`}
+        aria-pressed={hasBrandName}
+      >
+        <span className={`inline-block w-1.5 h-1.5 rounded-full ${hasBrandName ? 'bg-zinc-950' : 'bg-zinc-600'}`} />
+        I already have a brand name
+      </button>
+
       <div>
         <label htmlFor="companyName" className="block text-sm font-medium text-zinc-400 mb-1">
-          Company name
+          {hasBrandName ? 'Brand name' : 'Company name'}
         </label>
         <input
           id="companyName"
           required
           value={form.companyName}
           onChange={e => set('companyName', e.target.value)}
-          placeholder="e.g. Acme Corp"
+          placeholder={hasBrandName ? 'e.g. Granum' : 'e.g. Acme Corp'}
           className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
         />
+        <AnimatePresence>
+          {hasBrandName && (
+            <motion.p
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-xs text-zinc-500 mt-2 overflow-hidden"
+            >
+              We&apos;ll skip the naming step and build everything around this name.
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
       <div>
@@ -91,10 +127,19 @@ export function BrandForm() {
         />
       </div>
 
-      <ToneSelector
-        selected={form.tones}
-        onChange={tones => set('tones', tones)}
-      />
+      <div className="space-y-2">
+        <ToneSelector
+          selected={form.tones}
+          onChange={tones => set('tones', tones)}
+        />
+        <input
+          id="customTone"
+          value={customTone}
+          onChange={e => setCustomTone(e.target.value)}
+          placeholder="Or describe your own — 'Y2K nostalgia', 'scandinavian minimalism'..."
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors text-sm"
+        />
+      </div>
 
       <div>
         <label htmlFor="competitor" className="block text-sm font-medium text-zinc-400 mb-1">
