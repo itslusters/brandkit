@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { LogoResultCard } from '@/components/brand/LogoResultCard'
-import { getSession } from '@/lib/session'
+import { getSession, setSession } from '@/lib/session'
+
+const RETRY_CAP = 2
 import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
 
 type CardState = 'skeleton' | 'result'
@@ -104,6 +106,7 @@ export default function LogoStudioPage() {
   }, [retryCount])
 
   function retry() {
+    if (retryCount >= RETRY_CAP) return
     setHasError(false)
     setErrorMessage('')
     setIsDone(false)
@@ -112,15 +115,10 @@ export default function LogoStudioPage() {
     setRetryCount(c => c + 1)
   }
 
-  function downloadLogo() {
+  function continueToMockups() {
     if (selected === null || !cards[selected]?.dataUrl) return
-    const selectedName = getSession<string>('selectedName') ?? 'logo'
-    const a = document.createElement('a')
-    a.href = cards[selected].dataUrl!
-    a.download = `${selectedName}-logo.png`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    setSession('selectedLogoDataUrl', cards[selected].dataUrl!)
+    router.push('/brand/mockup')
   }
 
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined
@@ -159,24 +157,28 @@ export default function LogoStudioPage() {
           {errorMessage && (
             <p className="text-zinc-600 text-xs mb-4 font-mono break-all px-4">{errorMessage}</p>
           )}
-          <button
-            type="button"
-            onClick={retry}
-            className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
-          >
-            Try again
-          </button>
+          {retryCount < RETRY_CAP ? (
+            <button
+              type="button"
+              onClick={retry}
+              className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
+            >
+              Try again
+            </button>
+          ) : (
+            <p className="text-xs text-zinc-600">Session limit reached. Refresh to start over.</p>
+          )}
         </div>
       )}
 
       {!hasError && (
         <button
           type="button"
-          onClick={downloadLogo}
+          onClick={continueToMockups}
           disabled={selected === null || !selectedDataUrl}
           className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Download PNG
+          Continue to mockups →
         </button>
       )}
     </div>

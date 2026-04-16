@@ -22,7 +22,7 @@ Output exactly 5 lines. Each line format: Name|One-sentence rationale in English
 
 [BRIEF_START]
 Output valid JSON only — no markdown fences, no explanation. Use this exact schema:
-{"recommendedStyle":string,"colorPalette":[3 hex strings],"typography":[2 strings],"avoidList":[3 English strings],"moodImages":[3 strings chosen only from: minimal-tech-1, minimal-tech-2, minimal-tech-3, bold-modern-1, bold-modern-2, bold-modern-3, warm-organic-1, warm-organic-2, warm-organic-3, premium-dark-1, premium-dark-2, premium-dark-3, playful-bright-1, playful-bright-2, playful-bright-3]}`
+{"recommendedStyle":string,"colorPalette":[3 hex strings],"typography":[2 strings],"avoidList":[3 English strings],"moodImages":[3 strings chosen only from: minimal-tech-1, minimal-tech-2, minimal-tech-3, bold-modern-1, bold-modern-2, bold-modern-3, warm-organic-1, warm-organic-2, warm-organic-3, premium-dark-1, premium-dark-2, premium-dark-3, playful-bright-1, playful-bright-2, playful-bright-3],"recommendedMockups":[3 strings chosen only from: business-card, app-icon, social-post, envelope-small, envelope-large, letterhead, tshirt, mug, pen — pick based on industry and audience]}`
 }
 
 export function parseNamingCandidates(raw: string): NamingCandidate[] {
@@ -38,13 +38,17 @@ export function parseNamingCandidates(raw: string): NamingCandidate[] {
     })
 }
 
+const VALID_MOCKUP_IDS = ['business-card', 'app-icon', 'social-post', 'envelope-small', 'envelope-large', 'letterhead', 'tshirt', 'mug', 'pen']
+
 export function parseStyleBrief(raw: string): StyleBrief {
   const parsed = JSON.parse(raw.trim())
   const required: (keyof StyleBrief)[] = [
-    'recommendedStyle', 'colorPalette', 'typography', 'avoidList', 'moodImages'
+    'recommendedStyle', 'colorPalette', 'typography', 'avoidList', 'moodImages', 'recommendedMockups'
   ]
   for (const key of required) {
     if (parsed[key] === undefined) throw new Error(`StyleBrief missing field: ${key}`)
   }
+  const filtered = (parsed.recommendedMockups as string[]).filter((id) => VALID_MOCKUP_IDS.includes(id))
+  parsed.recommendedMockups = filtered.length >= 3 ? filtered.slice(0, 3) : ['business-card', 'app-icon', 'social-post']
   return parsed as StyleBrief
 }

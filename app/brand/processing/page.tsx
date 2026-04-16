@@ -6,6 +6,8 @@ import { INITIAL_STREAM_TASKS } from '@/lib/constants'
 import { getSession, setSession } from '@/lib/session'
 import type { StreamTask, BrandInput, BrandResult } from '@/lib/types'
 
+const RETRY_CAP = 1
+
 type SSEEvent =
   | { type: 'token'; section: string; text: string }
   | { type: 'section_done'; section: string }
@@ -104,6 +106,7 @@ export default function ProcessingPage() {
   }, [retryCount]) // retryCount acts as a manual trigger; incrementing it re-runs the stream
 
   function retry() {
+    if (retryCount >= RETRY_CAP) return
     setHasError(false)
     setErrorMessage('')
     setIsDone(false)
@@ -137,12 +140,16 @@ export default function ProcessingPage() {
           {errorMessage && (
             <p className="text-zinc-600 text-xs mb-4 font-mono">{errorMessage}</p>
           )}
-          <button
-            onClick={retry}
-            className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
-          >
-            Try again
-          </button>
+          {retryCount < RETRY_CAP ? (
+            <button
+              onClick={retry}
+              className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
+            >
+              Try again
+            </button>
+          ) : (
+            <p className="text-xs text-zinc-600">Session limit reached. Refresh to start over.</p>
+          )}
         </div>
       )}
     </div>

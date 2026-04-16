@@ -38,6 +38,7 @@ const mockBrandResult: BrandResult = {
     typography: ['Inter', 'Playfair'],
     avoidList: ['그라디언트'],
     moodImages: ['minimal-tech-1'],
+    recommendedMockups: ['business-card', 'app-icon', 'social-post'],
   },
 }
 

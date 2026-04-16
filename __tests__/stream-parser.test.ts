@@ -68,6 +68,7 @@ describe('parseStyleBrief', () => {
     typography: ['Inter — primary', 'Playfair Display — accent'],
     avoidList: ['그라디언트 남용', '네온 컬러', '둥근 캐릭터 일러스트'],
     moodImages: ['minimal-tech-1', 'minimal-tech-2', 'minimal-tech-3'],
+    recommendedMockups: ['business-card', 'app-icon', 'social-post'],
   }
 
   it('parses valid JSON string', () => {
