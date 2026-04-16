@@ -3,6 +3,7 @@ import sharp from 'sharp'
 import { buildBrandGuidePDF } from '@/lib/pdf'
 import { pngToSvg } from '@/lib/vector'
 import { composeMockupById } from '@/lib/mockups-compose'
+import { requireTier } from '@/lib/tier'
 import type { BrandResult } from '@/lib/types'
 
 interface RequestBody {
@@ -19,6 +20,10 @@ function dataUrlToBuffer(dataUrl: string): Buffer {
 
 export async function POST(req: Request) {
   try {
+    const gate = await requireTier('essentials')
+    if (!gate.ok) {
+      return Response.json({ error: 'tier_required', message: 'Upgrade to Essentials or Pro to download the asset pack.' }, { status: 403 })
+    }
     const body: RequestBody = await req.json()
     if (!body.selectedLogoDataUrl?.startsWith('data:image/')) {
       return Response.json({ error: 'invalid_logo' }, { status: 400 })
