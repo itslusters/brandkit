@@ -1,11 +1,12 @@
 'use client'
 import { motion } from 'framer-motion'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Copy } from 'lucide-react'
 import type { SavedBrand } from '@/lib/brands'
 
 interface Props {
   brand: SavedBrand
   onDelete: () => void
+  onDuplicate: () => void
 }
 
 function timeAgo(ms: number): string {
@@ -21,7 +22,7 @@ function timeAgo(ms: number): string {
   return `${months}mo ago`
 }
 
-export function BrandLibraryCard({ brand, onDelete }: Props) {
+export function BrandLibraryCard({ brand, onDelete, onDuplicate }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -65,6 +66,16 @@ export function BrandLibraryCard({ brand, onDelete }: Props) {
           </div>
         </div>
       </a>
+
+      {/* Duplicate (appears on hover, mobile = always faintly visible) */}
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDuplicate() }}
+        aria-label="Duplicate brand"
+        className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-zinc-400 flex items-center justify-center opacity-50 sm:opacity-0 group-hover:opacity-100 hover:text-blue-400 hover:bg-black/80 transition-all"
+      >
+        <Copy size={14} />
+      </button>
 
       {/* Delete (appears on hover, mobile = always faintly visible) */}
       <button

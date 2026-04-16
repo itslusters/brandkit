@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FolderOpen } from 'lucide-react'
 import { BrandLibraryCard } from './BrandLibraryCard'
@@ -11,9 +12,11 @@ interface Props {
 }
 
 export function BrandsList({ initialBrands }: Props) {
+  const router = useRouter()
   const [brands, setBrands] = useState(initialBrands)
   const [pendingDelete, setPendingDelete] = useState<SavedBrand | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [duplicating, setDuplicating] = useState<string | null>(null)
 
   async function confirmDelete() {
     if (!pendingDelete) return
@@ -27,6 +30,22 @@ export function BrandsList({ initialBrands }: Props) {
     } finally {
       setDeleting(false)
       setPendingDelete(null)
+    }
+  }
+
+  async function duplicate(brandId: string) {
+    if (duplicating) return
+    setDuplicating(brandId)
+    try {
+      const res = await fetch(`/api/brands/${brandId}/duplicate`, { method: 'POST' })
+      if (res.ok) {
+        const { brand } = await res.json() as { brand: { id: string } }
+        router.push(`/brand/saved/${brand.id}`)
+        return
+      }
+      // On error, just silently revert — the library page will reload state on next navigation
+    } finally {
+      setDuplicating(null)
     }
   }
 
@@ -60,7 +79,11 @@ export function BrandsList({ initialBrands }: Props) {
               layout
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.2 } }}
             >
-              <BrandLibraryCard brand={brand} onDelete={() => setPendingDelete(brand)} />
+              <BrandLibraryCard
+                brand={brand}
+                onDelete={() => setPendingDelete(brand)}
+                onDuplicate={() => duplicate(brand.id)}
+              />
             </motion.div>
           ))}
         </AnimatePresence>

@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Download, FileText, Package } from 'lucide-react'
+import { Download, FileText, Package, Copy } from 'lucide-react'
 import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
 import { ShareToggle } from './ShareToggle'
 import type { SavedBrand } from '@/lib/brands'
@@ -22,8 +23,11 @@ interface Props {
 }
 
 export function SavedBrandView({ brand }: Props) {
+  const router = useRouter()
   const [busy, setBusy] = useState<'pdf' | 'zip' | null>(null)
   const [error, setError] = useState('')
+  const [duplicating, setDuplicating] = useState(false)
+  const [duplicateError, setDuplicateError] = useState('')
 
   async function downloadAsset(kind: 'pdf' | 'zip') {
     setBusy(kind)
@@ -66,6 +70,25 @@ export function SavedBrandView({ brand }: Props) {
       setError(err instanceof Error ? err.message : 'Failed')
     } finally {
       setBusy(null)
+    }
+  }
+
+  async function duplicate() {
+    setDuplicating(true)
+    setDuplicateError('')
+    try {
+      const res = await fetch(`/api/brands/${brand.id}/duplicate`, { method: 'POST' })
+      if (res.ok) {
+        const { brand: cloned } = await res.json() as { brand: { id: string } }
+        router.push(`/brand/saved/${cloned.id}`)
+        return
+      }
+      const j = await res.json().catch(() => ({})) as { message?: string }
+      setDuplicateError(j.message ?? 'Could not duplicate.')
+    } catch {
+      setDuplicateError('Network error.')
+    } finally {
+      setDuplicating(false)
     }
   }
 
@@ -141,6 +164,16 @@ export function SavedBrandView({ brand }: Props) {
           <Download size={16} />
           Logo PNG
         </a>
+        <button
+          type="button"
+          onClick={duplicate}
+          disabled={duplicating}
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors disabled:opacity-40"
+        >
+          <Copy size={16} />
+          {duplicating ? 'Duplicating…' : 'Duplicate brand'}
+        </button>
+        {duplicateError && <p className="text-xs text-red-400">{duplicateError}</p>}
         {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
     </div>
