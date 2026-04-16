@@ -2,14 +2,17 @@ import Hero from '@/components/landing/Hero'
 
 const steps = [
   {
+    image: '/landing/step-input.png',
     title: '1. Tell us your brand',
     body: '30-second form — industry, audience, tone.',
   },
   {
+    image: '/landing/step-generate.png',
     title: '2. AI generates everything',
     body: 'Naming options, brand brief, 3 logos, 9 mockups.',
   },
   {
+    image: '/landing/step-download.png',
     title: '3. Download your kit',
     body: 'PNG / SVG / PDF / ZIP — yours to use.',
   },
@@ -58,9 +61,19 @@ export default function Home() {
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8">How it works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {steps.map((s) => (
-            <div key={s.title} className="rounded-lg border border-zinc-800 p-5 bg-zinc-900/40">
-              <h3 className="text-base font-semibold text-white">{s.title}</h3>
-              <p className="mt-2 text-sm text-zinc-400">{s.body}</p>
+            <div key={s.title} className="rounded-lg border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+              <div className="aspect-square bg-black border-b border-zinc-800 overflow-hidden">
+                <img
+                  src={s.image}
+                  alt=""
+                  aria-hidden
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="text-base font-semibold text-white">{s.title}</h3>
+                <p className="mt-2 text-sm text-zinc-400">{s.body}</p>
+              </div>
             </div>
           ))}
         </div>
