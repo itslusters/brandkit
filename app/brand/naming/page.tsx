@@ -36,9 +36,9 @@ export default function NamingPage() {
   return (
     <div className="pt-4 pb-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">이름을 선택해요</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Choose a name</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          AI가 제안한 이름 중 하나를 고르거나 직접 입력하세요.
+          Pick one of the AI suggestions or type your own.
         </p>
       </div>
 
@@ -63,14 +63,14 @@ export default function NamingPage() {
             useCustom ? 'border-white bg-zinc-900' : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
           }`}
         >
-          <p className="text-sm font-medium text-zinc-400">직接 입력</p>
+          <p className="text-sm font-medium text-zinc-400">Type your own</p>
           {useCustom && (
             <input
               autoFocus
               value={customName}
               onChange={e => setCustomName(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') confirm() }}
-              placeholder="브랜드 이름 입력"
+              placeholder="Enter brand name"
               className="mt-2 w-full bg-transparent text-white text-base outline-none placeholder:text-zinc-700"
             />
           )}
@@ -83,7 +83,7 @@ export default function NamingPage() {
         disabled={!activeName}
         className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        이 이름으로 계속 →
+        Continue with this name →
       </button>
     </div>
   )

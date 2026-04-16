@@ -23,7 +23,7 @@ export default function BriefPage() {
   return (
     <div className="pt-4 pb-12">
       <div className="mb-8">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">선택한 이름</p>
+        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Selected Name</p>
         <h1 className="text-3xl font-bold tracking-tight text-white">{selectedName}</h1>
       </div>
 
@@ -34,7 +34,7 @@ export default function BriefPage() {
         onClick={() => router.push('/brand/logo/type')}
         className="mt-10 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
       >
-        로고 만들기 →
+        Create logo →
       </button>
     </div>
   )

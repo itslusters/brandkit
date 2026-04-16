@@ -122,9 +122,9 @@ export default function LogoStudioPage() {
   return (
     <div className="pt-4 pb-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">로고 선택</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Pick your logo</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          {isDone ? '마음에 드는 로고를 선택하세요.' : 'AI가 로고를 생성하고 있어요...'}
+          {isDone ? 'Select the logo you like best.' : 'AI is generating your logos...'}
         </p>
       </div>
 
@@ -148,13 +148,13 @@ export default function LogoStudioPage() {
 
       {hasError && (
         <div className="mt-8 text-center">
-          <p className="text-zinc-500 text-sm mb-4">문제가 발생했어요.</p>
+          <p className="text-zinc-500 text-sm mb-4">Something went wrong.</p>
           <button
             type="button"
             onClick={retry}
             className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
           >
-            다시 시도
+            Try again
           </button>
         </div>
       )}
@@ -166,7 +166,7 @@ export default function LogoStudioPage() {
           disabled={selected === null || !selectedDataUrl}
           className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          PNG 다운로드
+          Download PNG
         </button>
       )}
     </div>

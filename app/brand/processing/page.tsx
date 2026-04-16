@@ -20,6 +20,7 @@ export default function ProcessingPage() {
   const [elapsed, setElapsed] = useState(0)
   const [isDone, setIsDone] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [retryCount, setRetryCount] = useState(0)
   const ESTIMATED = 20
 
@@ -52,8 +53,8 @@ export default function ProcessingPage() {
           signal: controller.signal,
         })
 
-        if (!res.ok) { setHasError(true); return }
-        if (!res.body) { setHasError(true); return }
+        if (!res.ok) { setErrorMessage(`Server error: ${res.status}`); setHasError(true); return }
+        if (!res.body) { setErrorMessage('No response body'); setHasError(true); return }
 
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
@@ -70,8 +71,11 @@ export default function ProcessingPage() {
             handle(JSON.parse(msg.slice(6)) as SSEEvent)
           }
         }
-      } catch {
-        if (!aborted) setHasError(true)
+      } catch (err) {
+        if (!aborted) {
+          setErrorMessage(err instanceof Error ? err.message : 'Connection failed')
+          setHasError(true)
+        }
       }
     }
 
@@ -90,6 +94,7 @@ export default function ProcessingPage() {
         setSession('brandResult', event.result)
         setIsDone(true)
       } else if (event.type === 'error') {
+        setErrorMessage(event.message)
         setHasError(true)
       }
     }
@@ -100,6 +105,7 @@ export default function ProcessingPage() {
 
   function retry() {
     setHasError(false)
+    setErrorMessage('')
     setIsDone(false)
     setElapsed(0)
     setTasks(INITIAL_STREAM_TASKS.map(t => ({ ...t })))
@@ -122,17 +128,20 @@ export default function ProcessingPage() {
           onClick={() => router.push('/brand/naming')}
           className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
         >
-          이름 선택하기 →
+          Choose a name →
         </button>
       )}
       {hasError && (
         <div className="mt-8 text-center">
-          <p className="text-zinc-500 text-sm mb-4">문제가 발생했어요.</p>
+          <p className="text-zinc-500 text-sm mb-2">Something went wrong.</p>
+          {errorMessage && (
+            <p className="text-zinc-600 text-xs mb-4 font-mono">{errorMessage}</p>
+          )}
           <button
             onClick={retry}
             className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
           >
-            다시 시도
+            Try again
           </button>
         </div>
       )}

@@ -18,11 +18,11 @@ Competitor reference: ${input.competitor || 'none'}
 Write 1-2 sentences: the industry archetype and the aesthetic expectations startup founders in this space should meet.
 
 [NAMING_START]
-Output exactly 5 lines. Each line format: Name|One-sentence rationale in Korean. No numbering. No blank lines between entries.
+Output exactly 5 lines. Each line format: Name|One-sentence rationale in English. No numbering. No blank lines between entries.
 
 [BRIEF_START]
 Output valid JSON only — no markdown fences, no explanation. Use this exact schema:
-{"recommendedStyle":string,"colorPalette":[3 hex strings],"typography":[2 strings],"avoidList":[3 Korean strings],"moodImages":[3 strings chosen only from: minimal-tech-1, minimal-tech-2, minimal-tech-3, bold-modern-1, bold-modern-2, bold-modern-3, warm-organic-1, warm-organic-2, warm-organic-3, premium-dark-1, premium-dark-2, premium-dark-3, playful-bright-1, playful-bright-2, playful-bright-3]}`
+{"recommendedStyle":string,"colorPalette":[3 hex strings],"typography":[2 strings],"avoidList":[3 English strings],"moodImages":[3 strings chosen only from: minimal-tech-1, minimal-tech-2, minimal-tech-3, bold-modern-1, bold-modern-2, bold-modern-3, warm-organic-1, warm-organic-2, warm-organic-3, premium-dark-1, premium-dark-2, premium-dark-3, playful-bright-1, playful-bright-2, playful-bright-3]}`
 }
 
 export function parseNamingCandidates(raw: string): NamingCandidate[] {
