@@ -8,6 +8,7 @@ import {
   SignUpButton,
   UserButton,
 } from '@clerk/nextjs'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8">
             {children}
           </main>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
