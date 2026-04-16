@@ -146,6 +146,7 @@ export default function LogoStudioPage() {
               state={card.state}
               dataUrl={card.dataUrl}
               selected={selected === i}
+              dimmed={selected !== null && selected !== i}
               onSelect={() => setSelected(i)}
             />
           </motion.div>

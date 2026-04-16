@@ -44,11 +44,16 @@ describe('buildLogoPrompt', () => {
     expect(prompt).toContain('emblem')
   })
 
-  it('includes all 3 palette hex values', () => {
+  it('does not leak raw hex codes (Imagen renders them as text)', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('#18181b')
-    expect(prompt).toContain('#ffffff')
-    expect(prompt).toContain('#f59e0b')
+    expect(prompt).not.toContain('#')
+  })
+
+  it('translates palette to descriptive color names', () => {
+    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
+    // #18181b → dark gray, #ffffff → off-white, #f59e0b → orange
+    expect(prompt.toLowerCase()).toMatch(/orange/)
+    expect(prompt.toLowerCase()).toMatch(/off-white/)
   })
 
   it('includes avoid list items', () => {
