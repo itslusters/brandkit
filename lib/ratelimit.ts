@@ -24,6 +24,13 @@ export const emailLimiter = new Ratelimit({
   analytics: false,
 })
 
+export const waitlistLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.fixedWindow(5, '24 h'),
+  prefix: 'rl:waitlist',
+  analytics: false,
+})
+
 export function getIp(req: Request): string {
   const fwd = req.headers.get('x-forwarded-for')
   if (fwd) return fwd.split(',')[0].trim()
