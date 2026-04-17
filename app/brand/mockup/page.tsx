@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useUser } from '@clerk/nextjs'
@@ -78,6 +78,10 @@ export default function MockupPage() {
       .then(async (res) => {
         if (res.ok) {
           setSaveState('saved')
+          // Confetti celebration on first brand save
+          import('canvas-confetti').then(({ default: confetti }) => {
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 }, colors: ['#ffffff', '#a1a1aa', '#3b82f6'] })
+          })
           return
         }
         if (res.status === 402) {

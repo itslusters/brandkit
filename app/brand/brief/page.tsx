@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
+import { StaggerChildren, StaggerItem } from '@/components/ui/StaggerChildren'
 import { getSession } from '@/lib/session'
 import type { BrandResult } from '@/lib/types'
 
@@ -21,21 +22,27 @@ export default function BriefPage() {
   if (!result) return null
 
   return (
-    <div className="pt-4 pb-12">
-      <div className="mb-8">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Selected Name</p>
-        <h1 className="text-3xl font-bold tracking-tight text-white">{selectedName}</h1>
-      </div>
+    <StaggerChildren className="pt-4 pb-12">
+      <StaggerItem>
+        <div className="mb-8">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Selected Name</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white">{selectedName}</h1>
+        </div>
+      </StaggerItem>
 
-      <StyleBriefDisplay brief={result.styleBrief} />
+      <StaggerItem>
+        <StyleBriefDisplay brief={result.styleBrief} />
+      </StaggerItem>
 
-      <button
-        type="button"
-        onClick={() => router.push('/brand/logo/type')}
-        className="mt-10 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
-      >
-        Create logo →
-      </button>
-    </div>
+      <StaggerItem>
+        <button
+          type="button"
+          onClick={() => router.push('/brand/logo/type')}
+          className="mt-10 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm active:scale-[0.97] transition-transform"
+        >
+          Create logo →
+        </button>
+      </StaggerItem>
+    </StaggerChildren>
   )
 }

@@ -41,3 +41,12 @@ html, body {
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
+
+/* Haptic tap feedback on all primary CTA buttons */
+button, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+button:active:not(:disabled), [role="button"]:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
