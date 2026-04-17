@@ -120,9 +120,9 @@ main > * {
   }
 }
 
-/* Dot grid pattern for INSIDE cards (skeleton, naming, brief) */
+/* Dot grid pattern for INSIDE cards (skeleton, naming, brief).
+   Does NOT set position — parent must already be positioned (absolute or relative). */
 .dot-grid-card {
-  position: relative;
   overflow: hidden;
 }
 .dot-grid-card::before {
