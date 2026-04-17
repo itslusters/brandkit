@@ -1,7 +1,60 @@
+'use client'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { StyleBrief } from '@/lib/types'
 
 interface Props {
   brief: StyleBrief
+}
+
+function ColorSwatch({ hex }: { hex: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(hex)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch { /* noop */ }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="flex flex-col items-center gap-1.5 group cursor-pointer"
+    >
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="w-12 h-12 rounded-full border border-zinc-800 transition-shadow group-hover:shadow-lg group-hover:shadow-white/5"
+        style={{ backgroundColor: hex }}
+      />
+      <AnimatePresence mode="wait">
+        {copied ? (
+          <motion.span
+            key="copied"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="text-[10px] text-emerald-400 font-medium"
+          >
+            Copied
+          </motion.span>
+        ) : (
+          <motion.span
+            key="hex"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-xs text-zinc-500 tabular-nums group-hover:text-zinc-300 transition-colors"
+          >
+            {hex}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
+  )
 }
 
 export function StyleBriefDisplay({ brief }: Props) {
@@ -16,13 +69,7 @@ export function StyleBriefDisplay({ brief }: Props) {
         <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Color Palette</p>
         <div className="flex gap-4">
           {brief.colorPalette.map((hex, idx) => (
-            <div key={`${hex}-${idx}`} className="flex flex-col items-center gap-1.5">
-              <div
-                className="w-12 h-12 rounded-full border border-zinc-800"
-                style={{ backgroundColor: hex }}
-              />
-              <span className="text-xs text-zinc-500 tabular-nums">{hex}</span>
-            </div>
+            <ColorSwatch key={`${hex}-${idx}`} hex={hex} />
           ))}
         </div>
       </section>

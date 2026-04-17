@@ -1,4 +1,5 @@
 import Hero from '@/components/landing/Hero'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 const steps = [
   {
@@ -57,6 +58,7 @@ export default function Home() {
     <div className="space-y-20 md:space-y-28 pb-16">
       <Hero />
 
+      <ScrollReveal>
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8">How it works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -76,7 +78,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8">What you get</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -88,7 +92,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8">Pricing</h2>
         <div className="grid grid-cols-3 gap-3">
@@ -105,7 +111,9 @@ export default function Home() {
           </a>
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8">FAQ</h2>
         <div className="space-y-3">
@@ -120,6 +128,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       <footer className="pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500">
         <div className="flex gap-4">
