@@ -150,3 +150,80 @@ export async function renderBrandCard(args: CardArgs): Promise<Buffer> {
 }
 
 export const BRAND_CARD_VARIANTS: CardArgs['variant'][] = ['dark-hero', 'color-block', 'editorial-grid']
+
+// DNA Card — single 1:1 trading-card style for social sharing
+export async function renderDNACard(args: {
+  brandName: string
+  primaryColor: string
+  secondaryColor: string
+  accentColor: string
+  style: string
+  typography: string[]
+}): Promise<Buffer> {
+  const { brandName, primaryColor: p, secondaryColor: s, accentColor: a, style, typography } = args
+
+  const jsx = {
+    type: 'div',
+    props: {
+      style: {
+        width: '100%', height: '100%', display: 'flex',
+        flexDirection: 'column', justifyContent: 'space-between',
+        backgroundColor: '#0a0a0b', padding: '64px',
+      },
+      children: [
+        // Top: brand name large
+        { type: 'div', key: 'top', props: {
+          style: { display: 'flex', flexDirection: 'column' },
+          children: [
+            { type: 'div', key: 'name', props: {
+              style: { display: 'flex', fontSize: 64, fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 },
+              children: brandName,
+            }},
+            { type: 'div', key: 'style', props: {
+              style: { display: 'flex', fontSize: 16, color: '#71717a', marginTop: '16px', lineHeight: 1.4 },
+              children: style,
+            }},
+          ],
+        }},
+        // Bottom: palette + typography + brandkit watermark
+        { type: 'div', key: 'bottom', props: {
+          style: { display: 'flex', flexDirection: 'column', gap: '20px' },
+          children: [
+            // Palette
+            { type: 'div', key: 'palette', props: {
+              style: { display: 'flex', gap: '8px' },
+              children: [
+                { type: 'div', key: 'c1', props: { style: { display: 'flex', width: 40, height: 40, borderRadius: 8, backgroundColor: p } } },
+                { type: 'div', key: 'c2', props: { style: { display: 'flex', width: 40, height: 40, borderRadius: 8, backgroundColor: s } } },
+                { type: 'div', key: 'c3', props: { style: { display: 'flex', width: 40, height: 40, borderRadius: 8, backgroundColor: a } } },
+              ],
+            }},
+            // Typography
+            { type: 'div', key: 'typo', props: {
+              style: { display: 'flex', flexDirection: 'column', gap: '4px' },
+              children: typography.map((t, i) => (
+                { type: 'div', key: `t${i}`, props: { style: { display: 'flex', fontSize: 13, color: '#a1a1aa' }, children: t } }
+              )),
+            }},
+            // Watermark
+            { type: 'div', key: 'wm', props: {
+              style: { display: 'flex', fontSize: 11, color: '#3f3f46' },
+              children: 'brandkit.com',
+            }},
+          ],
+        }},
+      ],
+    },
+  } as unknown as React.ReactElement
+
+  const satori = (await import('satori')).default
+  const sharp = (await import('sharp')).default
+
+  const svg = await satori(jsx, {
+    width: 1080,
+    height: 1080,
+    fonts: [{ name: 'Inter', data: getInterFont(), weight: 800, style: 'normal' as const }],
+  })
+
+  return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer()
+}

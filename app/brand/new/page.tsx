@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { BrandForm } from '@/components/onboarding/BrandForm'
 
 export default function NewBrandPage() {
@@ -9,7 +10,9 @@ export default function NewBrandPage() {
           AI will handle the rest — naming, style, logo, mockups.
         </p>
       </div>
-      <BrandForm />
+      <Suspense>
+        <BrandForm />
+      </Suspense>
     </div>
   )
 }

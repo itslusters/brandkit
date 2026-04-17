@@ -1,6 +1,6 @@
 'use client'
-import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, ChevronDown, ImagePlus, X, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ToneSelector } from './ToneSelector'
@@ -46,6 +46,7 @@ const EMPTY: BrandInput = {
 
 export function BrandForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [form, setForm] = useState<BrandInput>(EMPTY)
   const [hasBrandName, setHasBrandName] = useState(false)
   const [selectedPack, setSelectedPack] = useState<string | null>(null)
@@ -54,6 +55,16 @@ export function BrandForm() {
   const [moodImageError, setMoodImageError] = useState('')
   const [showMore, setShowMore] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Pre-fill from remix query params (from /share/[id] "Remix" button)
+  useEffect(() => {
+    const industry = searchParams.get('industry')
+    const tones = searchParams.get('tones')
+    const stylePack = searchParams.get('stylePack')
+    if (industry) set('industry', industry)
+    if (tones) set('tones', tones.split(',').slice(0, 3))
+    if (stylePack) setSelectedPack(stylePack)
+  }, [searchParams])
 
   async function handleImagePick(file: File | undefined) {
     setMoodImageError('')

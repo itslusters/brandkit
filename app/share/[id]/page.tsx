@@ -52,13 +52,19 @@ export default async function SharedBrandPage({ params }: Params) {
         </section>
       )}
 
-      <div className="mt-10 pt-6 border-t border-zinc-800 text-center">
-        <p className="text-sm text-zinc-400 mb-3">Want your own?</p>
+      <div className="mt-10 pt-6 border-t border-zinc-800 space-y-3">
+        {/* Remix — fork this brand's settings into a new generation */}
         <a
-          href="/"
-          className="inline-flex items-center justify-center bg-white text-zinc-950 px-5 py-2.5 rounded-md font-medium hover:bg-zinc-200"
+          href={`/brand/new?remix=${brand.id}&industry=${encodeURIComponent(brand.industry)}&tones=${encodeURIComponent(brand.brandInput.tones.join(','))}&stylePack=${brand.brandInput.stylePack ?? ''}`}
+          className="w-full inline-flex items-center justify-center gap-2 bg-white text-zinc-950 px-5 py-3 rounded-full font-semibold hover:bg-zinc-200 transition-colors"
         >
-          Create your brand with BrandKit →
+          ✨ Remix this brand
+        </a>
+        <a
+          href="/brand/new"
+          className="w-full inline-flex items-center justify-center gap-2 border border-zinc-700 text-zinc-300 px-5 py-3 rounded-full font-medium hover:border-zinc-500 transition-colors"
+        >
+          Start from scratch
         </a>
       </div>
     </div>

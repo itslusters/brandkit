@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Download, FileText, Package, Copy } from 'lucide-react'
+import { Download, FileText, Package, Copy, Sparkles } from 'lucide-react'
 import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
 import { ShareToggle } from './ShareToggle'
 import type { SavedBrand } from '@/lib/brands'
@@ -172,6 +172,30 @@ export function SavedBrandView({ brand }: Props) {
         >
           <Copy size={16} />
           {duplicating ? 'Duplicating…' : 'Duplicate brand'}
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const res = await fetch('/api/brand/dna-card', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ brandName: brand.name, brandResult: brand.brandResult }),
+            })
+            if (!res.ok) return
+            const blob = await res.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${brand.name}-dna-card.png`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+          }}
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+        >
+          <Sparkles size={16} />
+          Download DNA Card (1080×1080)
         </button>
         {duplicateError && <p className="text-xs text-red-400">{duplicateError}</p>}
         {error && <p className="text-xs text-red-400">{error}</p>}
