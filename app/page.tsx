@@ -1,5 +1,7 @@
 import Hero from '@/components/landing/Hero'
+import { CommunityGallery } from '@/components/landing/CommunityGallery'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { listPublicBrands } from '@/lib/brands'
 
 const steps = [
   {
@@ -53,10 +55,15 @@ const faqs = [
   },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const publicBrands = await listPublicBrands(30)
+
   return (
     <div className="space-y-20 md:space-y-28 pb-16">
       <Hero />
+
+      {/* Community gallery — Savee-style masonry of public brands, visual-first */}
+      <CommunityGallery brands={publicBrands} />
 
       <ScrollReveal>
       <section>

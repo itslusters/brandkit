@@ -73,13 +73,22 @@ export async function setPublicBrand(userId: string, brandId: string, isPublic: 
   if (!brand) return null
   const updated: SavedBrand = { ...brand, public: isPublic, updatedAt: Date.now() }
   await redis.set(brandKey(userId, brandId), updated)
-  // Secondary index for fast public lookup
+  // Secondary indexes for fast public lookup + gallery listing
   if (isPublic) {
     await redis.set(`public:${brandId}`, userId)
+    await redis.zadd('public:all', { score: Date.now(), member: brandId })
   } else {
     await redis.del(`public:${brandId}`)
+    await redis.zrem('public:all', brandId)
   }
   return updated
+}
+
+export async function listPublicBrands(limit = 20): Promise<SavedBrand[]> {
+  const ids = await redis.zrange<string[]>('public:all', 0, limit - 1, { rev: true })
+  if (!ids.length) return []
+  const brands = await Promise.all(ids.map((id) => getPublicBrand(id)))
+  return brands.filter((b): b is SavedBrand => b !== null)
 }
 
 export async function getPublicBrand(brandId: string): Promise<SavedBrand | null> {
