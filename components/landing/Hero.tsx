@@ -14,7 +14,11 @@ export default function Hero() {
           aria-hidden
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Vignette + bottom darken so text reads over any dither variance */}
+        {/* Ambient aurora glows — Flighty-style depth */}
+        <div className="aurora-glow w-[500px] h-[500px] bg-blue-500/20 top-[10%] -left-[10%]" style={{ animationDelay: '0s' }} />
+        <div className="aurora-glow w-[400px] h-[400px] bg-violet-500/15 top-[30%] right-[-5%]" style={{ animationDelay: '3s' }} />
+        <div className="aurora-glow w-[300px] h-[300px] bg-emerald-500/10 bottom-[20%] left-[20%]" style={{ animationDelay: '5s' }} />
+        {/* Vignette + bottom darken */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/85" />
 
         <div className="absolute inset-0 flex items-end">
@@ -23,7 +27,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.05]"
+              className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] gradient-text"
             >
               From company info<br />to a complete brand kit<br />in minutes.
             </motion.h1>
@@ -43,13 +47,13 @@ export default function Hero() {
             >
               <a
                 href="/brand/new"
-                className="inline-flex items-center justify-center bg-white text-zinc-950 px-5 py-3 rounded-md font-medium hover:bg-zinc-200 transition-colors"
+                className="inline-flex items-center justify-center bg-white text-zinc-950 px-6 py-3 rounded-full font-semibold hover:bg-zinc-200 transition-colors shadow-lg shadow-white/10"
               >
                 Try free →
               </a>
               <a
                 href="/pricing"
-                className="inline-flex items-center justify-center border border-zinc-500 bg-black/40 backdrop-blur-sm text-white px-5 py-3 rounded-md font-medium hover:border-zinc-300 transition-colors"
+                className="inline-flex items-center justify-center border border-zinc-500/50 bg-white/5 backdrop-blur-md text-white px-6 py-3 rounded-full font-medium hover:bg-white/10 hover:border-zinc-400 transition-all"
               >
                 See pricing
               </a>

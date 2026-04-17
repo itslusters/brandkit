@@ -59,3 +59,47 @@ button:active:not(:disabled), [role="button"]:active:not(:disabled) {
 main > * {
   animation: page-enter 0.3s ease-out;
 }
+
+/* Flighty-style ambient aurora — used on hero and key sections */
+@keyframes aurora {
+  0%, 100% { opacity: 0.3; transform: translateY(0) scale(1); }
+  50% { opacity: 0.5; transform: translateY(-20px) scale(1.05); }
+}
+
+.aurora-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: aurora 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Flighty-style gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Live pulse indicator */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* Card depth — Flighty-style elevation */
+.card-elevated {
+  box-shadow:
+    0 0 0 1px rgba(255 255 255 / 0.03),
+    0 1px 2px rgba(0 0 0 / 0.3),
+    0 4px 16px rgba(0 0 0 / 0.2);
+}

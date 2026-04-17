@@ -124,7 +124,10 @@ export default function ProcessingPage() {
     <div className="pt-4 pb-12">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">Building your brand</h1>
-        <p className="text-zinc-500 text-sm mt-1">AI is analyzing your inputs.</p>
+        <p className="text-zinc-500 text-sm mt-1 inline-flex items-center gap-2">
+          {!isDone && !hasError && <span className="live-dot" />}
+          {isDone ? 'Complete.' : hasError ? 'Error encountered.' : 'AI is analyzing your inputs.'}
+        </p>
       </div>
       <StreamingDashboard
         tasks={tasks}
