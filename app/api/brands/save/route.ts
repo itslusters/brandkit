@@ -3,8 +3,9 @@ import { uploadDataUrl } from '@/lib/blob'
 import { put } from '@vercel/blob'
 import { saveBrand, countBrands, FREE_TIER_BRAND_LIMIT } from '@/lib/brands'
 import { getUserTier } from '@/lib/tier'
+import { composeMockupById } from '@/lib/mockups-compose'
 import { renderMoodImage, MOOD_VARIANTS } from '@/lib/mood-image'
-import type { BrandInput, BrandResult, LogoType, MockupResult } from '@/lib/types'
+import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
 
 interface RequestBody {
   name: string
@@ -12,7 +13,7 @@ interface RequestBody {
   brandResult: BrandResult
   selectedLogoDataUrl: string
   selectedLogoType: LogoType
-  mockupResults: MockupResult[]
+  mockupTemplateIds: string[]  // only IDs, not full data URLs (payload size)
 }
 
 export async function POST(req: Request) {
@@ -22,7 +23,6 @@ export async function POST(req: Request) {
 
     const body: RequestBody = await req.json()
 
-    // Tier limit check
     const tier = await getUserTier()
     if (tier === 'free') {
       const count = await countBrands(userId)
@@ -39,20 +39,25 @@ export async function POST(req: Request) {
     }
 
     // Upload logo
+    const logoBase64 = body.selectedLogoDataUrl.split(',')[1] ?? ''
+    const logoBuffer = Buffer.from(logoBase64, 'base64')
     const selectedLogoUrl = await uploadDataUrl(body.selectedLogoDataUrl, `brands/${userId}/logo.png`)
 
-    // Upload mockups in parallel; skip ones with empty dataUrl (failed earlier)
+    // Regenerate + upload mockups server-side (client sends only template IDs to avoid 4.5MB cap)
     const mockupOutcomes = await Promise.allSettled(
-      (body.mockupResults ?? [])
-        .filter((m) => m.dataUrl)
-        .map(async (m) => {
-          const url = await uploadDataUrl(m.dataUrl, `brands/${userId}/mockup-${m.templateId}.png`)
-          return { templateId: m.templateId, url }
+      (body.mockupTemplateIds ?? []).map(async (id) => {
+        const composed = await composeMockupById(id, logoBuffer)
+        const { url } = await put(`brands/${userId}/mockup-${id}.png`, composed, {
+          access: 'public',
+          contentType: 'image/png',
+          addRandomSuffix: true,
         })
+        return { templateId: id, url }
+      })
     )
     const mockupUrls = mockupOutcomes
-      .filter((o): o is PromiseFulfilledResult<{ templateId: string; url: string }> => o.status === 'fulfilled')
-      .map((o) => o.value)
+      .filter((o) => o.status === 'fulfilled')
+      .map((o) => (o as PromiseFulfilledResult<{ templateId: string; url: string }>).value)
 
     // Generate brand mood images (satori, instant, free)
     const { colorPalette } = body.brandResult.styleBrief

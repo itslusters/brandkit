@@ -63,6 +63,9 @@ export default function MockupPage() {
     if (!brandResult || !brandName || !selectedLogoDataUrl || !logoType) return
 
     setSaveState('saving')
+    // Send only template IDs (not full data URLs) to stay under Vercel's 4.5MB body limit.
+    // Server will regenerate mockups from the logo + template IDs.
+    const mockupTemplateIds = successful.map((r) => r.templateId)
     fetch('/api/brands/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -72,7 +75,7 @@ export default function MockupPage() {
         brandResult,
         selectedLogoDataUrl,
         selectedLogoType: logoType,
-        mockupResults: successful,
+        mockupTemplateIds,
       }),
     })
       .then(async (res) => {

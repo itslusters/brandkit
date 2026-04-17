@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
-import { X, Heart, RotateCcw } from 'lucide-react'
+import { X, Heart, RotateCcw, Layers, List } from 'lucide-react'
 import { getSession, setSession } from '@/lib/session'
 import type { BrandResult, NamingCandidate } from '@/lib/types'
 
@@ -16,6 +16,7 @@ export default function NamingPage() {
   const [pickedName, setPickedName] = useState('')
   const [useCustom, setUseCustom] = useState(false)
   const [customName, setCustomName] = useState('')
+  const [viewMode, setViewMode] = useState<'swipe' | 'list'>('swipe')
 
   useEffect(() => {
     const r = getSession<BrandResult>('brandResult')
@@ -76,16 +77,48 @@ export default function NamingPage() {
 
   return (
     <div className="pt-4 pb-12">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Choose a name</h1>
-        <p className="text-zinc-500 text-sm mt-1">
-          {done
-            ? 'Pick one of your favorites — or type your own.'
-            : 'Swipe right to keep, left to skip. Or use the buttons / arrow keys.'}
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Choose a name</h1>
+          <p className="text-zinc-500 text-sm mt-1">
+            {done
+              ? 'Pick one of your favorites — or type your own.'
+              : viewMode === 'swipe'
+                ? 'Swipe right to keep, left to skip.'
+                : 'Tap to select a name.'}
+          </p>
+        </div>
+        {!done && (
+          <div className="flex gap-1 shrink-0 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
+            <button type="button" onClick={() => setViewMode('swipe')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'swipe' ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`} aria-label="Card view">
+              <Layers size={14} />
+            </button>
+            <button type="button" onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`} aria-label="List view">
+              <List size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
-      {!done && (
+      {/* LIST VIEW */}
+      {!done && viewMode === 'list' && (
+        <div className="space-y-2 mb-6">
+          {candidates.map((c) => (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => { setPickedName(c.name); setUseCustom(false); setIndex(candidates.length); setOutcomes(candidates.map(() => 'liked')) }}
+              className="w-full text-left rounded-xl border border-zinc-800 bg-zinc-950 hover:border-zinc-600 p-4 transition-colors"
+            >
+              <p className="text-base font-semibold text-white">{c.name}</p>
+              <p className="text-xs text-zinc-500 mt-1">{c.rationale}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* SWIPE VIEW */}
+      {!done && viewMode === 'swipe' && (
         <>
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs text-zinc-500 tabular-nums">
