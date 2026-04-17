@@ -13,9 +13,9 @@ const LOGO_TYPE_DESCRIPTIONS: Record<LogoType, string> = {
 }
 
 const VARIATION_HINTS = [
-  'centered balanced layout',
-  'compact horizontal arrangement',
-  'stacked vertical composition',
+  'bold asymmetric composition, type pushed to one edge with dramatic negative space',
+  'compact monogram or lettermark, single defining element, ultra-minimal',
+  'experimental layout, overlapping forms, unconventional spacing, editorial edge',
 ]
 
 // BrandKit house aesthetic — injected silently into every logo prompt.

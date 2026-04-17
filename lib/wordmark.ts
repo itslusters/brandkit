@@ -3,7 +3,7 @@ import satori from 'satori'
 import sharp from 'sharp'
 import { type FontEntry, loadFontBuffer } from './fonts'
 
-export type WordmarkLayout = 'hero-dark' | 'hero-color' | 'editorial-white'
+export type WordmarkLayout = 'hero-dark' | 'hero-color' | 'monogram-bold'
 
 interface RenderArgs {
   brandName: string
@@ -67,9 +67,9 @@ function buildJsx(args: RenderArgs): React.ReactElement {
     } as unknown as React.ReactElement
   }
 
+  const isDarkBg = isColorDark(primary)
+
   if (layout === 'hero-color') {
-    // Vivid color background, white or dark type — editorial brand card
-    const isDarkBg = isColorDark(primary)
     const textColor = isDarkBg ? '#ffffff' : '#0a0a0b'
 
     return {
@@ -98,37 +98,43 @@ function buildJsx(args: RenderArgs): React.ReactElement {
     } as unknown as React.ReactElement
   }
 
-  // editorial-white — clean white, type offset to bottom-left, palette strip at top
+  // monogram-bold — oversized first letter + small brand name, high contrast
+  const initial = brandName[0]?.toUpperCase() ?? 'B'
   return {
     type: 'div',
     props: {
       style: {
         width: '100%', height: '100%', display: 'flex',
-        flexDirection: 'column', justifyContent: 'space-between',
-        backgroundColor: '#ffffff', padding: '60px',
+        alignItems: 'center', justifyContent: 'center',
+        backgroundColor: primary, position: 'relative',
+        overflow: 'hidden',
       },
       children: [
-        // Palette strip at top
+        // Giant letter
         {
           type: 'div',
-          key: 'palette',
+          key: 'mono',
           props: {
-            style: { display: 'flex', gap: '8px' },
-            children: [
-              { type: 'div', key: 'c1', props: { style: { display: 'flex', width: 32, height: 32, borderRadius: 16, backgroundColor: primary } } },
-              { type: 'div', key: 'c2', props: { style: { display: 'flex', width: 32, height: 32, borderRadius: 16, backgroundColor: secondary } } },
-            ],
+            style: {
+              display: 'flex', fontSize: 600,
+              fontWeight: args.font.weight,
+              color: 'rgba(255,255,255,0.08)', lineHeight: 0.8,
+              position: 'absolute',
+            },
+            children: initial,
           },
         },
-        // Brand name at bottom
+        // Brand name centered
         {
           type: 'div',
           key: 'name',
           props: {
             style: {
-              display: 'flex', color: primary, fontSize: 88,
+              display: 'flex', fontSize: 36,
               fontWeight: args.font.weight,
-              letterSpacing: '-0.02em', lineHeight: 1,
+              color: isDarkBg ? '#ffffff' : '#0a0a0b',
+              letterSpacing: '0.15em', textTransform: 'uppercase' as const,
+              position: 'relative',
             },
             children: brandName,
           },
@@ -163,4 +169,4 @@ export async function renderWordmark(args: RenderArgs): Promise<Buffer> {
   return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer()
 }
 
-export const WORDMARK_LAYOUTS: WordmarkLayout[] = ['hero-dark', 'hero-color', 'editorial-white']
+export const WORDMARK_LAYOUTS: WordmarkLayout[] = ['hero-dark', 'hero-color', 'monogram-bold']

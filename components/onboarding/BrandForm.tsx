@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ToneSelector } from './ToneSelector'
 import { StylePackSelector } from './StylePackSelector'
 import { INDUSTRIES } from '@/lib/constants'
-import { setSession } from '@/lib/session'
+import { setSession, clearBrandSession } from '@/lib/session'
 import type { BrandInput } from '@/lib/types'
 import type { StylePack } from '@/lib/style-packs'
 
@@ -95,6 +95,7 @@ export function BrandForm() {
       ...(selectedPack ? { stylePack: selectedPack } : {}),
       ...(moodImageDataUrl ? { moodImageDataUrl } : {}),
     }
+    clearBrandSession()
     setSession('brandInput', payload)
     router.push('/brand/processing')
   }
