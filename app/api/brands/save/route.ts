@@ -1,7 +1,9 @@
 import { auth } from '@clerk/nextjs/server'
 import { uploadDataUrl } from '@/lib/blob'
+import { put } from '@vercel/blob'
 import { saveBrand, countBrands, FREE_TIER_BRAND_LIMIT } from '@/lib/brands'
 import { getUserTier } from '@/lib/tier'
+import { renderMoodImage, MOOD_VARIANTS } from '@/lib/mood-image'
 import type { BrandInput, BrandResult, LogoType, MockupResult } from '@/lib/types'
 
 interface RequestBody {
@@ -52,6 +54,29 @@ export async function POST(req: Request) {
       .filter((o): o is PromiseFulfilledResult<{ templateId: string; url: string }> => o.status === 'fulfilled')
       .map((o) => o.value)
 
+    // Generate brand mood images (satori, instant, free)
+    const { colorPalette } = body.brandResult.styleBrief
+    const moodOutcomes = await Promise.allSettled(
+      MOOD_VARIANTS.map(async (variant) => {
+        const png = await renderMoodImage({
+          brandName: body.name,
+          primaryColor: colorPalette[0] ?? '#18181b',
+          secondaryColor: colorPalette[1] ?? '#ffffff',
+          accentColor: colorPalette[2] ?? '#3b82f6',
+          variant,
+        })
+        const { url } = await put(`brands/${userId}/mood-${variant}.png`, png, {
+          access: 'public',
+          contentType: 'image/png',
+          addRandomSuffix: true,
+        })
+        return url
+      })
+    )
+    const moodImageUrls = moodOutcomes
+      .filter((o) => o.status === 'fulfilled')
+      .map((o) => (o as PromiseFulfilledResult<string>).value)
+
     const saved = await saveBrand({
       userId,
       name: body.name,
@@ -61,6 +86,7 @@ export async function POST(req: Request) {
       selectedLogoUrl,
       selectedLogoType: body.selectedLogoType,
       mockupUrls,
+      moodImageUrls,
     })
 
     return Response.json({ brand: saved })

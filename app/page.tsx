@@ -20,6 +20,10 @@ export default async function Home() {
     for (const m of brand.mockupUrls.slice(0, 2)) {
       feedItems.push({ id: `${brand.id}-${m.templateId}`, imageUrl: m.url, brandName: brand.name, brandId: brand.id })
     }
+    // Mood images (abstract brand visuals)
+    ;(brand.moodImageUrls ?? []).forEach((url, i) => {
+      feedItems.push({ id: `${brand.id}-mood-${i}`, imageUrl: url, brandName: brand.name, brandId: brand.id })
+    })
   }
 
   const hasContent = feedItems.length > 0
