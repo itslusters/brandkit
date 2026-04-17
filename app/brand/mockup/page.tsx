@@ -267,6 +267,44 @@ export default function MockupPage() {
         onDownloadZip={downloadZip}
       />
 
+      {/* Share & DNA Card — visible after save success */}
+      {saveState === 'saved' && (
+        <div className="mt-6 space-y-3">
+          <button
+            type="button"
+            onClick={async () => {
+              const brandResult = getSession<BrandResult>('brandResult')
+              const brandName = getSession<string>('selectedName') ?? 'brand'
+              if (!brandResult) return
+              const res = await fetch('/api/brand/dna-card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ brandName, brandResult }),
+              })
+              if (!res.ok) return
+              const blob = await res.blob()
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `${brandName}-dna-card.png`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              URL.revokeObjectURL(url)
+            }}
+            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full border border-zinc-700 text-zinc-200 font-medium text-sm hover:border-zinc-500 transition-colors"
+          >
+            ✨ Download DNA Card (1080×1080)
+          </button>
+          <a
+            href="/account/brands"
+            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+          >
+            View in library → (share from there)
+          </a>
+        </div>
+      )}
+
       <UpgradeModal
         open={upgradeOpen}
         reason="Free tier includes watermarked previews. Upgrade to remove watermarks and unlock vector SVG, PDF guide, and asset pack ZIP."

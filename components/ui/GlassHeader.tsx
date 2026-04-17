@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import {
   SignedIn,
   SignedOut,
@@ -10,6 +11,7 @@ import {
 
 export function GlassHeader() {
   const [scrolled, setScrolled] = useState(false)
+  const { isLoaded } = useAuth()
 
   useEffect(() => {
     function onScroll() {
@@ -40,24 +42,33 @@ export function GlassHeader() {
         <a href="/pricing" className="text-sm text-zinc-400 hover:text-white transition-colors">
           Pricing
         </a>
-        <SignedOut>
-          <SignInButton mode="modal">
-            <button className="text-sm text-zinc-400 hover:text-white transition-colors">
-              Sign in
-            </button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <button className="text-sm bg-white text-zinc-950 px-3.5 py-1.5 rounded-full font-medium hover:bg-zinc-200 transition-colors">
-              Sign up
-            </button>
-          </SignUpButton>
-        </SignedOut>
-        <SignedIn>
-          <a href="/account" className="text-sm text-zinc-400 hover:text-white transition-colors">
-            Account
-          </a>
-          <UserButton afterSignOutUrl="/" />
-        </SignedIn>
+
+        {/* Auth buttons — only render after Clerk hydrates to prevent flicker */}
+        {isLoaded ? (
+          <>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="text-sm text-zinc-400 hover:text-white transition-colors">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="text-sm bg-white text-zinc-950 px-3.5 py-1.5 rounded-full font-medium hover:bg-zinc-200 transition-colors">
+                  Sign up
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <a href="/account" className="text-sm text-zinc-400 hover:text-white transition-colors">
+                Account
+              </a>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+          </>
+        ) : (
+          /* Skeleton placeholder — same width as auth buttons to prevent layout shift */
+          <div className="w-16 h-6" />
+        )}
       </div>
     </header>
   )
