@@ -26,34 +26,39 @@ export default async function Home() {
     })
   }
 
-  const hasContent = feedItems.length > 0
+  // Curated showcase images (always visible, mixed with user brands)
+  const showcaseItems = [
+    '/landing/hero.png',
+    '/landing/step-input.png',
+    '/landing/step-generate.png',
+    '/landing/step-download.png',
+    '/mood/minimal-tech-1.jpg',
+    '/mood/minimal-tech-2.jpg',
+    '/mood/bold-modern-1.jpg',
+    '/mood/bold-modern-2.jpg',
+    '/mood/warm-organic-1.jpg',
+    '/mood/premium-dark-1.jpg',
+    '/mood/premium-dark-2.jpg',
+    '/mood/playful-bright-1.jpg',
+  ].map((url, i) => ({
+    id: `showcase-${i}`,
+    imageUrl: url,
+    brandName: 'BrandKit',
+    brandId: '',
+  }))
+
+  // Interleave user brands with showcase images
+  const allItems = [...feedItems, ...showcaseItems]
+  // Shuffle for variety
+  for (let i = allItems.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[allItems[i], allItems[j]] = [allItems[j], allItems[i]]
+  }
 
   return (
     <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
-      {hasContent ? (
-        <>
-          <FeedGallery items={feedItems} />
-          <FeedGate totalCount={totalCount} />
-        </>
-      ) : (
-        // Empty state — minimal intro until brands are created + shared
-        <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
-          <h1 className="text-4xl md:text-6xl font-bold gradient-text tracking-tight mb-4">
-            BrandKit
-          </h1>
-          <p className="text-zinc-400 text-base max-w-md mb-8">
-            AI-generated brand identities. Create yours in minutes.
-          </p>
-          <div className="flex gap-3">
-            <a href="/brand/new" className="bg-white text-zinc-950 px-6 py-3 rounded-full font-semibold hover:bg-zinc-200 transition-colors">
-              Create a brand →
-            </a>
-            <a href="/pricing" className="border border-zinc-700 text-zinc-200 px-6 py-3 rounded-full font-medium hover:border-zinc-500 transition-colors">
-              Pricing
-            </a>
-          </div>
-        </div>
-      )}
+      <FeedGallery items={allItems.slice(0, 30)} />
+      <FeedGate totalCount={totalCount} />
     </div>
   )
 }

@@ -1,3 +1,5 @@
+export const maxDuration = 30
+
 import { auth } from '@clerk/nextjs/server'
 import { uploadDataUrl } from '@/lib/blob'
 import { put } from '@vercel/blob'
@@ -43,9 +45,9 @@ export async function POST(req: Request) {
     const logoBuffer = Buffer.from(logoBase64, 'base64')
     const selectedLogoUrl = await uploadDataUrl(body.selectedLogoDataUrl, `brands/${userId}/logo.png`)
 
-    // Regenerate + upload mockups server-side (client sends only template IDs to avoid 4.5MB cap)
+    // Regenerate + upload max 3 mockups (more would exceed Vercel timeout)
     const mockupOutcomes = await Promise.allSettled(
-      (body.mockupTemplateIds ?? []).map(async (id) => {
+      (body.mockupTemplateIds ?? []).slice(0, 3).map(async (id) => {
         const composed = await composeMockupById(id, logoBuffer)
         const { url } = await put(`brands/${userId}/mockup-${id}.png`, composed, {
           access: 'public',
@@ -59,28 +61,33 @@ export async function POST(req: Request) {
       .filter((o) => o.status === 'fulfilled')
       .map((o) => (o as PromiseFulfilledResult<{ templateId: string; url: string }>).value)
 
-    // Generate brand mood images (satori, instant, free)
-    const { colorPalette } = body.brandResult.styleBrief
-    const moodOutcomes = await Promise.allSettled(
-      MOOD_VARIANTS.map(async (variant) => {
-        const png = await renderMoodImage({
-          brandName: body.name,
-          primaryColor: colorPalette[0] ?? '#18181b',
-          secondaryColor: colorPalette[1] ?? '#ffffff',
-          accentColor: colorPalette[2] ?? '#3b82f6',
-          variant,
+    // Generate mood images — best-effort, don't block save on failure
+    let moodImageUrls: string[] = []
+    try {
+      const { colorPalette } = body.brandResult.styleBrief
+      const moodOutcomes = await Promise.allSettled(
+        MOOD_VARIANTS.slice(0, 2).map(async (variant) => {
+          const png = await renderMoodImage({
+            brandName: body.name,
+            primaryColor: colorPalette[0] ?? '#18181b',
+            secondaryColor: colorPalette[1] ?? '#ffffff',
+            accentColor: colorPalette[2] ?? '#3b82f6',
+            variant,
+          })
+          const { url } = await put(`brands/${userId}/mood-${variant}.png`, png, {
+            access: 'public',
+            contentType: 'image/png',
+            addRandomSuffix: true,
+          })
+          return url
         })
-        const { url } = await put(`brands/${userId}/mood-${variant}.png`, png, {
-          access: 'public',
-          contentType: 'image/png',
-          addRandomSuffix: true,
-        })
-        return url
-      })
-    )
-    const moodImageUrls = moodOutcomes
-      .filter((o) => o.status === 'fulfilled')
-      .map((o) => (o as PromiseFulfilledResult<string>).value)
+      )
+      moodImageUrls = moodOutcomes
+        .filter((o) => o.status === 'fulfilled')
+        .map((o) => (o as PromiseFulfilledResult<string>).value)
+    } catch (err) {
+      console.error('[brands/save] mood gen failed (non-blocking):', err)
+    }
 
     const saved = await saveBrand({
       userId,

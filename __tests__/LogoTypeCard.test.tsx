@@ -45,8 +45,8 @@ describe('LogoTypeCard', () => {
     expect(onSelect).toHaveBeenCalledOnce()
   })
 
-  it('shows selected state with border-white class', () => {
-    const { container } = render(
+  it('shows checkmark when selected', () => {
+    render(
       <LogoTypeCard
         type="wordmark"
         label="Wordmark"
@@ -55,7 +55,8 @@ describe('LogoTypeCard', () => {
         onSelect={vi.fn()}
       />
     )
-    expect(container.querySelector('.border-white')).toBeInTheDocument()
+    // Checkmark appears when selected
+    expect(document.querySelector('svg')).toBeInTheDocument()
   })
 
   it('does not show border-white when not selected', () => {

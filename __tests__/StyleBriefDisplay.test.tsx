@@ -30,12 +30,7 @@ describe('StyleBriefDisplay', () => {
     expect(screen.getByText('Playfair Display — accent')).toBeInTheDocument()
   })
 
-  it('renders all 3 avoid list items', () => {
-    render(<StyleBriefDisplay brief={brief} />)
-    expect(screen.getByText('그라디언트 남용')).toBeInTheDocument()
-    expect(screen.getByText('네온 컬러')).toBeInTheDocument()
-    expect(screen.getByText('둥근 캐릭터 일러스트')).toBeInTheDocument()
-  })
+  // Avoid section removed from UI (moved to PDF guide only)
 
   it('renders 3 mood images', () => {
     render(<StyleBriefDisplay brief={brief} />)

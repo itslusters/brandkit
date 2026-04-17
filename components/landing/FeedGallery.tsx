@@ -21,7 +21,7 @@ export function FeedGallery({ items }: Props) {
         {items.map((item, i) => (
           <motion.a
             key={item.id}
-            href={`/share/${item.brandId}`}
+            href={item.brandId ? `/share/${item.brandId}` : '/brand/new'}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: '-20px' }}
