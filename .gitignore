@@ -37,3 +37,8 @@ next-env.d.ts
 
 # Brainstorm session files
 .superpowers/
+
+# Serwist generated service worker
+/public/sw.js
+/public/sw.js.map
+/public/swe-worker-*.js
