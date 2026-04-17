@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { GlassHeader } from '@/components/ui/GlassHeader'
+import { InstallPrompt } from '@/components/InstallPrompt'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8">
             {children}
           </main>
+          <InstallPrompt />
           <Analytics />
         </body>
       </html>
