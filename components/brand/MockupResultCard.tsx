@@ -15,9 +15,7 @@ export function MockupResultCard({ state, dataUrl, templateName, onDownload }: P
         {state === 'skeleton' && (
           <motion.div
             key="skeleton"
-            className="absolute inset-0 bg-zinc-800"
-            animate={{ opacity: [0.3, 0.7, 0.3] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute inset-0 skeleton-shimmer"
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
           />
         )}

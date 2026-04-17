@@ -24,9 +24,7 @@ export function LogoResultCard({ state, dataUrl, selected, dimmed = false, onSel
         {state === 'skeleton' ? (
           <motion.div
             key="skeleton"
-            className="absolute inset-0 bg-zinc-800 rounded-xl"
-            animate={{ opacity: [0.3, 0.7, 0.3] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute inset-0 skeleton-shimmer rounded-xl"
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
           />
         ) : (
