@@ -1,4 +1,5 @@
-import { genai, buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
+import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
+import { generateRecraftImage } from '@/lib/recraft'
 import { logoLimiter, getIp } from '@/lib/ratelimit'
 import { pickFontsForTones } from '@/lib/fonts'
 import { renderWordmark, WORDMARK_LAYOUTS } from '@/lib/wordmark'
@@ -47,8 +48,11 @@ async function generateWordmarks(
   await Promise.allSettled(tasks)
 }
 
-// Imagen-based generation for symbol-text and emblem types
-async function generateWithImagen(
+// Recraft V3-based generation for symbol-text and emblem types.
+// vector_illustration style produces crisp, brand-grade vector logos — markedly
+// better than Imagen for logo/identity work (superior text rendering, less
+// "AI-generated" feel, designed for vector/brand output).
+async function generateWithRecraft(
   controller: ReadableStreamDefaultController,
   brandInput: BrandInput,
   brandResult: BrandResult,
@@ -59,14 +63,8 @@ async function generateWithImagen(
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
-      const response = await genai.models.generateImages({
-        model: 'imagen-4.0-generate-001',
-        prompt,
-        config: { numberOfImages: 1, outputMimeType: 'image/png' },
-      })
-      const rawBase64 = response.generatedImages?.[0]?.image?.imageBytes ?? ''
-      // Post-process: flatten bg, auto-trim, re-center, sharpen
-      const processed = await postprocessLogo(Buffer.from(rawBase64, 'base64'))
+      const raw = await generateRecraftImage(prompt, { style: 'vector_illustration' })
+      const processed = await postprocessLogo(raw)
       controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl: `data:image/png;base64,${processed.toString('base64')}` }))
     } catch (err) {
       controller.enqueue(sse({
@@ -97,12 +95,12 @@ export async function POST(req: Request) {
     async start(controller) {
       if (logoType === 'wordmark' && !validModifier) {
         // Typography-first: satori renders wordmarks with curated Google Fonts.
-        // No Imagen call = instant, consistent, free, always typographically refined.
-        // If user is iterating (validModifier set), fall back to Imagen for variety.
+        // No AI call = instant, consistent, free, always typographically refined.
+        // If user is iterating (validModifier set), fall back to Recraft for variety.
         await generateWordmarks(controller, brandInput, brandResult, selectedName)
       } else {
-        // Symbol+text, emblem, or wordmark-with-modifier → Imagen
-        await generateWithImagen(controller, brandInput, brandResult, selectedName, logoType, validModifier)
+        // Symbol+text, emblem, or wordmark-with-modifier → Recraft V3
+        await generateWithRecraft(controller, brandInput, brandResult, selectedName, logoType, validModifier)
       }
 
       controller.enqueue(sse({ type: 'done' }))
