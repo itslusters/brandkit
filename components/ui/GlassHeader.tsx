@@ -31,6 +31,9 @@ export function GlassHeader() {
         BrandKit
       </a>
       <div className="flex gap-3 items-center">
+        <a href="/company" className="text-sm text-zinc-400 hover:text-white transition-colors">
+          About
+        </a>
         <a href="/pricing" className="text-sm text-zinc-400 hover:text-white transition-colors">
           Pricing
         </a>

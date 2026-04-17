@@ -11,9 +11,9 @@ export function FeedGate({ totalCount }: Props) {
       {/* Gradient fade from feed into gate */}
       <div className="absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-transparent to-zinc-950 pointer-events-none" />
 
-      <div className="relative bg-zinc-950 overflow-hidden">
+      <div className="relative bg-zinc-950">
         {/* Animated aurora gradient background */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="aurora-glow w-[600px] h-[400px] bg-blue-600/20 top-[20%] left-[10%]" style={{ animationDelay: '0s' }} />
           <div className="aurora-glow w-[500px] h-[400px] bg-violet-600/15 top-[30%] right-[5%]" style={{ animationDelay: '2s' }} />
           <div className="aurora-glow w-[400px] h-[300px] bg-indigo-500/10 bottom-[10%] left-[30%]" style={{ animationDelay: '4s' }} />
@@ -21,10 +21,28 @@ export function FeedGate({ totalCount }: Props) {
 
         <div className="relative py-24 px-6">
           <div className="text-center max-w-md mx-auto">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold text-white mb-3"
+            >
+              Upgrade and keep scrolling
+            </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              transition={{ delay: 0.05 }}
+              className="text-sm text-zinc-400 mb-10"
+            >
+              Unlimited brand inspiration and downloads await.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.08 }}
               className="text-xs uppercase tracking-widest text-zinc-500 mb-4"
             >
               What&apos;s included

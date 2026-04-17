@@ -26,20 +26,29 @@ export default async function Home() {
     })
   }
 
-  // High-quality showcase images (Imagen-generated, always present)
-  const showcaseItems = [
-    '/showcase/typo-1.png',
-    '/showcase/gradient-1.png',
-    '/showcase/product-1.png',
-    '/showcase/brand-1.png',
-    '/showcase/editorial-1.png',
-    '/showcase/dark-1.png',
-    '/showcase/color-1.png',
-    '/showcase/organic-1.png',
-  ].map((url, i) => ({
+  // All available images as feed content (user will replace with curated picks later)
+  const showcaseImages = [
+    // Showcase
+    '/showcase/typo-1.png', '/showcase/gradient-1.png', '/showcase/product-1.png',
+    '/showcase/brand-1.png', '/showcase/editorial-1.png', '/showcase/dark-1.png',
+    '/showcase/color-1.png', '/showcase/organic-1.png',
+    // Mood references (15)
+    '/mood/minimal-tech-1.jpg', '/mood/minimal-tech-2.jpg', '/mood/minimal-tech-3.jpg',
+    '/mood/bold-modern-1.jpg', '/mood/bold-modern-2.jpg', '/mood/bold-modern-3.jpg',
+    '/mood/warm-organic-1.jpg', '/mood/warm-organic-2.jpg', '/mood/warm-organic-3.jpg',
+    '/mood/premium-dark-1.jpg', '/mood/premium-dark-2.jpg', '/mood/premium-dark-3.jpg',
+    '/mood/playful-bright-1.jpg', '/mood/playful-bright-2.jpg', '/mood/playful-bright-3.jpg',
+    // Mockup templates (9)
+    '/mockups/business-card.png', '/mockups/app-icon.png', '/mockups/social-post.png',
+    '/mockups/envelope-small.png', '/mockups/envelope-large.png', '/mockups/letterhead.png',
+    '/mockups/tshirt.png', '/mockups/mug.png', '/mockups/pen.png',
+    // Landing
+    '/landing/hero.png', '/landing/step-input.png', '/landing/step-generate.png', '/landing/step-download.png',
+  ]
+  const showcaseItems = showcaseImages.map((url, i) => ({
     id: `showcase-${i}`,
     imageUrl: url,
-    brandName: 'BrandKit',
+    brandName: '',
     brandId: '',
   }))
 
@@ -53,7 +62,7 @@ export default async function Home() {
 
   return (
     <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
-      <FeedGallery items={allItems.slice(0, 30)} />
+      <FeedGallery items={allItems} />
       <FeedGate totalCount={totalCount} />
     </div>
   )
