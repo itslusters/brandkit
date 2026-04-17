@@ -296,7 +296,7 @@ function SwipeCard({ candidate, isTop, stackPos, onSwipe }: SwipeCardProps) {
       animate={stackedStyle}
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
       style={isTop ? { x, rotate, zIndex: 10 - stackPos } : { zIndex: 10 - stackPos }}
-      className="absolute inset-0 rounded-2xl bg-zinc-900 border border-zinc-800 p-8 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      className="absolute inset-0 rounded-2xl bg-zinc-900 border border-zinc-800 p-8 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none dot-grid-card"
     >
       <p className="text-3xl md:text-4xl font-bold text-white tracking-tight text-center">
         {candidate.name}

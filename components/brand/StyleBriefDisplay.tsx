@@ -30,7 +30,7 @@ function ColorDot({ hex }: { hex: string }) {
 // Reference: seed phrase card style — structured, clean, all-in-one.
 export function StyleBriefDisplay({ brief }: Props) {
   return (
-    <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden card-elevated">
+    <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden card-elevated dot-grid-card">
       {/* Mood strip at top */}
       <div className="flex h-24">
         {brief.moodImages.map((id) => (

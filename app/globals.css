@@ -119,3 +119,20 @@ main > * {
     transform: translate(10px, 10px) scale(1.02);
   }
 }
+
+/* Dot grid pattern for INSIDE cards (skeleton, naming, brief) */
+.dot-grid-card {
+  position: relative;
+  overflow: hidden;
+}
+.dot-grid-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 16px 16px;
+  mask-image: radial-gradient(ellipse 70% 50% at 60% 40%, black 0%, transparent 80%);
+  animation: dot-drift 10s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}

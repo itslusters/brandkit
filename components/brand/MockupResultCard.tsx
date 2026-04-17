@@ -15,7 +15,7 @@ export function MockupResultCard({ state, dataUrl, templateName, onDownload }: P
         {state === 'skeleton' && (
           <motion.div
             key="skeleton"
-            className="absolute inset-0 skeleton-shimmer"
+            className="absolute inset-0 bg-zinc-900 dot-grid-card"
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
           />
         )}

@@ -1,7 +1,6 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import { FlowStepper } from '@/components/brand/FlowStepper'
-import { DotGrid } from '@/components/ui/DotGrid'
 
 const PATH_TO_STEP: Record<string, string> = {
   '/brand/new': 'new',
@@ -19,9 +18,8 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <DotGrid />
       {step && <FlowStepper currentStep={step} />}
-      <div className="relative z-10">{children}</div>
+      {children}
     </>
   )
 }
