@@ -43,8 +43,6 @@ export default function MockupPage() {
     setRecommendedIds(valid)
     setSelectedIds(valid)
 
-    const cached = getSession<MockupResult[]>('mockupResults')
-    if (cached) setResults(cached)
     setReady(true)
   }, [router])
 
@@ -122,7 +120,7 @@ export default function MockupPage() {
       }
       const data = await res.json() as { results: MockupResult[] }
       setResults(data.results)
-      setSession('mockupResults', data.results)
+      // Don't store in sessionStorage — base64 data URLs exceed 5MB quota
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed')
       setHasError(true)
