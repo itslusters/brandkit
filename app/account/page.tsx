@@ -2,6 +2,7 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import { getUserTier } from '@/lib/tier'
 import { getWaitlistFor } from '@/lib/waitlist'
 import { redirect } from 'next/navigation'
+import { StaggerChildren, StaggerItem } from '@/components/ui/StaggerChildren'
 
 export default async function AccountPage() {
   const { userId } = await auth()
@@ -13,45 +14,55 @@ export default async function AccountPage() {
   const waitlists = email ? await getWaitlistFor(email) : []
 
   return (
-    <div className="pt-4 pb-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Account</h1>
-      </div>
+    <StaggerChildren className="pt-4 pb-12">
+      <StaggerItem>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-white">Account</h1>
+        </div>
+      </StaggerItem>
 
-      <section className="mb-6">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Logged in as</p>
-        <p className="text-base text-white">{email}</p>
-      </section>
+      <StaggerItem>
+        <section className="mb-6">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Logged in as</p>
+          <p className="text-base text-white">{email}</p>
+        </section>
+      </StaggerItem>
 
-      <section className="mb-6">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Current plan</p>
-        <p className="text-base text-white capitalize">{tier}</p>
-      </section>
+      <StaggerItem>
+        <section className="mb-6">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Current plan</p>
+          <p className="text-base text-white capitalize">{tier}</p>
+        </section>
+      </StaggerItem>
 
-      <section className="mb-6">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Library</p>
-        <a
-          href="/account/brands"
-          className="inline-block text-sm text-zinc-300 hover:text-white underline"
-        >
-          Your saved brands →
-        </a>
-      </section>
+      <StaggerItem>
+        <section className="mb-6">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Library</p>
+          <a
+            href="/account/brands"
+            className="inline-block text-sm text-zinc-300 hover:text-white underline"
+          >
+            Your saved brands →
+          </a>
+        </section>
+      </StaggerItem>
 
-      <section className="mb-6">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Waitlist signups</p>
-        {waitlists.length === 0 ? (
-          <p className="text-sm text-zinc-500">
-            You haven&apos;t joined any waitlists. <a href="/pricing" className="underline text-zinc-300">Visit pricing</a> to learn more.
-          </p>
-        ) : (
-          <ul className="space-y-1">
-            {waitlists.map((p) => (
-              <li key={p} className="text-sm text-zinc-300 capitalize">{p} — joined</li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
+      <StaggerItem>
+        <section className="mb-6">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Waitlist signups</p>
+          {waitlists.length === 0 ? (
+            <p className="text-sm text-zinc-500">
+              You haven&apos;t joined any waitlists. <a href="/pricing" className="underline text-zinc-300">Visit pricing</a> to learn more.
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {waitlists.map((p) => (
+                <li key={p} className="text-sm text-zinc-300 capitalize">{p} — joined</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </StaggerItem>
+    </StaggerChildren>
   )
 }

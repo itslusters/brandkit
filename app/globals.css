@@ -50,3 +50,12 @@ button:active:not(:disabled), [role="button"]:active:not(:disabled) {
   transform: scale(0.97);
   transition: transform 0.1s ease;
 }
+
+/* Subtle page entrance — triggers on every route mount without React overhead */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main > * {
+  animation: page-enter 0.3s ease-out;
+}

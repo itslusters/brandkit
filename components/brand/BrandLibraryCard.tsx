@@ -1,6 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import { Trash2, Copy } from 'lucide-react'
+import { Tooltip } from '@/components/ui/Tooltip'
 import type { SavedBrand } from '@/lib/brands'
 
 interface Props {
@@ -67,25 +68,29 @@ export function BrandLibraryCard({ brand, onDelete, onDuplicate }: Props) {
         </div>
       </a>
 
-      {/* Duplicate (appears on hover, mobile = always faintly visible) */}
-      <button
-        type="button"
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDuplicate() }}
-        aria-label="Duplicate brand"
-        className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-zinc-400 flex items-center justify-center opacity-50 sm:opacity-0 group-hover:opacity-100 hover:text-blue-400 hover:bg-black/80 transition-all"
-      >
-        <Copy size={14} />
-      </button>
-
-      {/* Delete (appears on hover, mobile = always faintly visible) */}
-      <button
-        type="button"
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete() }}
-        aria-label="Delete brand"
-        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-zinc-400 flex items-center justify-center opacity-50 sm:opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-black/80 transition-all"
-      >
-        <Trash2 size={14} />
-      </button>
+      {/* Action buttons — hover to reveal on desktop */}
+      <div className="absolute top-2 right-2 flex gap-1.5 opacity-50 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+        <Tooltip text="Duplicate">
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDuplicate() }}
+            aria-label="Duplicate brand"
+            className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-zinc-400 flex items-center justify-center hover:text-blue-400 hover:bg-black/80 transition-colors"
+          >
+            <Copy size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip text="Delete">
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete() }}
+            aria-label="Delete brand"
+            className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-zinc-400 flex items-center justify-center hover:text-red-400 hover:bg-black/80 transition-colors"
+          >
+            <Trash2 size={14} />
+          </button>
+        </Tooltip>
+      </div>
     </motion.div>
   )
 }

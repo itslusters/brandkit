@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { PricingCard } from '@/components/PricingCard'
 import { WaitlistModal } from '@/components/WaitlistModal'
+import { StaggerChildren, StaggerItem } from '@/components/ui/StaggerChildren'
 
 export default function PricingPage() {
   const router = useRouter()
@@ -13,12 +14,15 @@ export default function PricingPage() {
   const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)
 
   return (
-    <div className="pt-4 pb-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Pricing</h1>
-        <p className="text-zinc-500 text-sm mt-1">Pay once. Get a complete brand kit.</p>
-      </div>
+    <StaggerChildren className="pt-4 pb-12">
+      <StaggerItem>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-white">Pricing</h1>
+          <p className="text-zinc-500 text-sm mt-1">Pay once. Get a complete brand kit.</p>
+        </div>
+      </StaggerItem>
 
+      <StaggerItem>
       <div className="grid gap-4 md:grid-cols-3">
         <PricingCard
           name="Free"
@@ -48,6 +52,7 @@ export default function PricingPage() {
           highlighted={false}
         />
       </div>
+      </StaggerItem>
 
       <WaitlistModal
         open={waitlistPlan !== null}
@@ -55,6 +60,6 @@ export default function PricingPage() {
         prefilledEmail={email}
         onClose={() => setWaitlistPlan(null)}
       />
-    </div>
+    </StaggerChildren>
   )
 }
