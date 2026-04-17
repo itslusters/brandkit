@@ -11,6 +11,20 @@ export const metadata: Metadata = {
   title: { default: 'BrandKit — AI Brand Kit Generator', template: '%s · BrandKit' },
   description: 'Get a complete brand identity in minutes — naming, logos, mockups, and brand guide PDF. AI-powered, designer-polished tier available.',
   keywords: ['AI logo generator', 'brand kit', 'AI branding', 'startup branding', 'brand identity'],
+  applicationName: 'BrandKit',
+  appleWebApp: {
+    capable: true,
+    title: 'BrandKit',
+    statusBarStyle: 'black-translucent',
+  },
+  formatDetection: { telephone: false },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   openGraph: {
     title: 'BrandKit — AI Brand Kit Generator',
     description: 'Get a complete brand identity in minutes — naming, logos, mockups, brand guide.',
@@ -26,6 +40,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#09090b',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
