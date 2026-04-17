@@ -24,10 +24,10 @@ const VARIATION_HINTS = [
 // read as "AI-generated": rainbow gradients, generic tech swoosh, chromatic
 // aberration, 3D renders, over-ornamented scripts, busy compositions.
 const HOUSE_AESTHETIC =
-  'Editorial-grade brand design, studio-level polish, confident simplicity, purposeful negative space, refined restraint. Think Pentagram, Collins, Apple, Linear, Stripe — not stock logo maker output. Modern, timeless, enduring.'
+  'World-class brand identity, Behance/Dribbble Featured level. Bold confident typography, purposeful negative space, strong color commitment (not timid pastels). Think: A24 title cards, Pentagram case studies, Collins identity systems, Apple keynote graphics. Every element is intentional. Composition reads as editorial, not templated. Type is the hero — large, decisive, expressive.'
 
 const HOUSE_AVOID =
-  'rainbow gradients, generic tech swooshes, abstract globes, cliche lightbulbs, chromatic aberration, 3D bevels, lens flares, metallic gloss, drop shadows, over-ornamented scripts, busy arrangements, clip-art styling, stock logo marketplace look'
+  'rainbow gradients, generic tech swooshes, abstract globes, cliche lightbulbs, chromatic aberration, 3D bevels, lens flares, metallic gloss, drop shadows, over-ornamented scripts, busy arrangements, clip-art styling, stock logo marketplace look, generic startup logo feel, safe boring layouts, centered-everything syndrome, thin wimpy type, watermark-ish transparency'
 
 function tonePrefix(l: number, s: number): string {
   let lightness = ''

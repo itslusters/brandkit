@@ -3,99 +3,147 @@ import satori from 'satori'
 import sharp from 'sharp'
 import { type FontEntry, loadFontBuffer } from './fonts'
 
-export type WordmarkLayout = 'centered' | 'tracked' | 'stacked'
+export type WordmarkLayout = 'hero-dark' | 'hero-color' | 'editorial-white'
 
 interface RenderArgs {
   brandName: string
   font: FontEntry
-  primaryColor: string     // hex
+  primaryColor: string
+  secondaryColor: string
   layout: WordmarkLayout
 }
 
-const WIDTH = 1024
-const HEIGHT = 1024
+const WIDTH = 1080
+const HEIGHT = 1080
 
-// Map hex to valid CSS color (satori needs explicit # prefix)
 function cssColor(hex: string): string {
   return hex.startsWith('#') ? hex : `#${hex}`
 }
 
 function buildJsx(args: RenderArgs): React.ReactElement {
-  const { brandName, primaryColor, layout } = args
-  const color = cssColor(primaryColor)
+  const { brandName, primaryColor, secondaryColor, layout } = args
+  const primary = cssColor(primaryColor)
+  const secondary = cssColor(secondaryColor)
 
-  if (layout === 'tracked') {
-    // TRACKED CAPS — wide letterspacing, uppercase
+  if (layout === 'hero-dark') {
+    // Dark background, large centered type — A24 / bold poster style
     return {
       type: 'div',
       props: {
         style: {
           width: '100%', height: '100%', display: 'flex',
           alignItems: 'center', justifyContent: 'center',
-          backgroundColor: 'white', padding: '100px',
-        },
-        children: {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex', color, fontSize: 56,
-              fontWeight: args.font.weight,
-              letterSpacing: '0.35em', textTransform: 'uppercase' as const,
-            },
-            children: brandName,
-          },
-        },
-      },
-    } as unknown as React.ReactElement
-  }
-
-  if (layout === 'stacked') {
-    // STACKED — split name at a reasonable boundary, two lines
-    const mid = Math.ceil(brandName.length / 2)
-    const spaceIdx = brandName.indexOf(' ')
-    const splitAt = spaceIdx > 0 && spaceIdx < brandName.length * 0.7 ? spaceIdx : mid
-    const line1 = brandName.slice(0, splitAt).trim()
-    const line2 = brandName.slice(splitAt).trim()
-
-    return {
-      type: 'div',
-      props: {
-        style: {
-          width: '100%', height: '100%', display: 'flex',
-          alignItems: 'center', justifyContent: 'center',
-          backgroundColor: 'white', padding: '80px',
+          backgroundColor: '#0a0a0b', padding: '120px',
           flexDirection: 'column',
         },
         children: [
-          { type: 'div', key: '1', props: { style: { display: 'flex', color, fontSize: 80, fontWeight: args.font.weight, lineHeight: 1.1 }, children: line1 } },
-          { type: 'div', key: '2', props: { style: { display: 'flex', color, fontSize: 80, fontWeight: args.font.weight, lineHeight: 1.1 }, children: line2 } },
+          {
+            type: 'div',
+            key: 'name',
+            props: {
+              style: {
+                display: 'flex', color: '#ffffff', fontSize: 108,
+                fontWeight: args.font.weight,
+                letterSpacing: '-0.03em', lineHeight: 1,
+                textAlign: 'center',
+              },
+              children: brandName,
+            },
+          },
+          {
+            type: 'div',
+            key: 'accent',
+            props: {
+              style: {
+                display: 'flex', width: 60, height: 4,
+                backgroundColor: primary, borderRadius: 2,
+                marginTop: 40,
+              },
+              children: '',
+            },
+          },
         ],
       },
     } as unknown as React.ReactElement
   }
 
-  // CENTERED — default
+  if (layout === 'hero-color') {
+    // Vivid color background, white or dark type — editorial brand card
+    const isDarkBg = isColorDark(primary)
+    const textColor = isDarkBg ? '#ffffff' : '#0a0a0b'
+
+    return {
+      type: 'div',
+      props: {
+        style: {
+          width: '100%', height: '100%', display: 'flex',
+          alignItems: 'flex-end', justifyContent: 'flex-start',
+          backgroundColor: primary, padding: '80px',
+        },
+        children: [
+          {
+            type: 'div',
+            key: 'name',
+            props: {
+              style: {
+                display: 'flex', color: textColor, fontSize: 96,
+                fontWeight: args.font.weight,
+                letterSpacing: '-0.02em', lineHeight: 1.05,
+              },
+              children: brandName,
+            },
+          },
+        ],
+      },
+    } as unknown as React.ReactElement
+  }
+
+  // editorial-white — clean white, type offset to bottom-left, palette strip at top
   return {
     type: 'div',
     props: {
       style: {
         width: '100%', height: '100%', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        backgroundColor: 'white', padding: '80px',
+        flexDirection: 'column', justifyContent: 'space-between',
+        backgroundColor: '#ffffff', padding: '60px',
       },
-      children: {
-        type: 'div',
-        props: {
-          style: {
-            display: 'flex', color, fontSize: 96,
-            fontWeight: args.font.weight,
-            letterSpacing: '-0.02em',
+      children: [
+        // Palette strip at top
+        {
+          type: 'div',
+          key: 'palette',
+          props: {
+            style: { display: 'flex', gap: '8px' },
+            children: [
+              { type: 'div', key: 'c1', props: { style: { display: 'flex', width: 32, height: 32, borderRadius: 16, backgroundColor: primary } } },
+              { type: 'div', key: 'c2', props: { style: { display: 'flex', width: 32, height: 32, borderRadius: 16, backgroundColor: secondary } } },
+            ],
           },
-          children: brandName,
         },
-      },
+        // Brand name at bottom
+        {
+          type: 'div',
+          key: 'name',
+          props: {
+            style: {
+              display: 'flex', color: primary, fontSize: 88,
+              fontWeight: args.font.weight,
+              letterSpacing: '-0.02em', lineHeight: 1,
+            },
+            children: brandName,
+          },
+        },
+      ],
     },
   } as unknown as React.ReactElement
+}
+
+function isColorDark(hex: string): boolean {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return (r * 299 + g * 587 + b * 114) / 1000 < 128
 }
 
 export async function renderWordmark(args: RenderArgs): Promise<Buffer> {
@@ -115,4 +163,4 @@ export async function renderWordmark(args: RenderArgs): Promise<Buffer> {
   return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer()
 }
 
-export const WORDMARK_LAYOUTS: WordmarkLayout[] = ['centered', 'tracked', 'stacked']
+export const WORDMARK_LAYOUTS: WordmarkLayout[] = ['hero-dark', 'hero-color', 'editorial-white']

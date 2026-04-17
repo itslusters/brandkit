@@ -27,11 +27,12 @@ async function generateWordmarks(
 ) {
   const fonts = pickFontsForTones(brandInput.tones, brandInput.customTone, brandInput.stylePack)
   const primaryColor = brandResult.styleBrief.colorPalette[0] ?? '#18181b'
+  const secondaryColor = brandResult.styleBrief.colorPalette[1] ?? '#ffffff'
 
   const tasks = fonts.map(async (font, i) => {
     try {
       const layout = WORDMARK_LAYOUTS[i % WORDMARK_LAYOUTS.length]
-      const png = await renderWordmark({ brandName: selectedName, font, primaryColor, layout })
+      const png = await renderWordmark({ brandName: selectedName, font, primaryColor, secondaryColor, layout })
       const dataUrl = `data:image/png;base64,${png.toString('base64')}`
       controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl }))
     } catch (err) {
