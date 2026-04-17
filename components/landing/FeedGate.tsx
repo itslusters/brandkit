@@ -11,7 +11,7 @@ export function FeedGate({ totalCount }: Props) {
       {/* Gradient fade from feed into gate */}
       <div className="absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-transparent to-zinc-950 pointer-events-none" />
 
-      <div className="relative bg-zinc-950 min-h-[80vh] flex flex-col justify-center">
+      <div className="relative bg-zinc-950">
         {/* Animated aurora gradient background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="aurora-glow w-[600px] h-[400px] bg-blue-600/20 top-[20%] left-[10%]" style={{ animationDelay: '0s' }} />
@@ -88,6 +88,18 @@ export function FeedGate({ totalCount }: Props) {
                 {totalCount.toLocaleString()} brands created
               </p>
             )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="relative border-t border-zinc-800/40 py-6 px-6">
+          <div className="max-w-md mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-600">
+            <div className="flex gap-4">
+              <a href="/company" className="hover:text-zinc-300 transition-colors">About</a>
+              <a href="/pricing" className="hover:text-zinc-300 transition-colors">Pricing</a>
+              <a href="mailto:we.lusters@gmail.com" className="hover:text-zinc-300 transition-colors">Contact</a>
+            </div>
+            <span>© 2026 BrandKit</span>
           </div>
         </div>
       </div>
