@@ -2,6 +2,7 @@ import JSZip from 'jszip'
 import sharp from 'sharp'
 import { buildBrandGuidePDF } from '@/lib/pdf'
 import { pngToSvg } from '@/lib/vector'
+import { vectorizeRecraftImage } from '@/lib/recraft'
 import { composeMockupById } from '@/lib/mockups-compose'
 import { requireTier } from '@/lib/tier'
 import type { BrandResult } from '@/lib/types'
@@ -42,12 +43,18 @@ export async function POST(req: Request) {
   zip.file('logo/logo-512.png', logo512)
   zip.file('logo/logo-256.png', logo256)
 
-  // Vector SVG
+  // Vector SVG — prefer Recraft's true multi-color vectorizer (preserves color/curves),
+  // fall back to potrace monochrome silhouette if Recraft is unavailable.
   try {
-    const svg = await pngToSvg(logo1024)
+    const svg = await vectorizeRecraftImage(logo1024)
     zip.file('logo/logo.svg', svg)
   } catch {
-    // SVG conversion can fail on complex images; ZIP still ships without it
+    try {
+      const svg = await pngToSvg(logo1024)
+      zip.file('logo/logo.svg', svg)
+    } catch {
+      // SVG conversion can fail on complex images; ZIP still ships without it
+    }
   }
 
   // Re-compose all selected mockups server-side (client sends only IDs)
