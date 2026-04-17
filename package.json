@@ -16,6 +16,7 @@
     "@google/genai": "^1.50.1",
     "@remotion/player": "^4.0.448",
     "@remotion/renderer": "^4.0.448",
+    "@sentry/nextjs": "^10.49.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
     "@vercel/analytics": "^2.0.1",

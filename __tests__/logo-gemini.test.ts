@@ -62,18 +62,18 @@ describe('buildLogoPrompt', () => {
     expect(prompt).toContain('그라디언트 남용')
   })
 
-  it('includes variation hint — variation 0 is centered', () => {
+  it('includes variation hint — variation 0 is asymmetric', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt.toLowerCase()).toContain('centered')
+    expect(prompt.toLowerCase()).toContain('asymmetric')
   })
 
-  it('includes variation hint — variation 1 is horizontal', () => {
+  it('includes variation hint — variation 1 is monogram', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 1)
-    expect(prompt.toLowerCase()).toContain('horizontal')
+    expect(prompt.toLowerCase()).toContain('monogram')
   })
 
-  it('includes variation hint — variation 2 is stacked', () => {
+  it('includes variation hint — variation 2 is experimental', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 2)
-    expect(prompt.toLowerCase()).toContain('stacked')
+    expect(prompt.toLowerCase()).toContain('experimental')
   })
 })
