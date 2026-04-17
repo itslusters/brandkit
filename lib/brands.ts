@@ -42,7 +42,12 @@ export async function saveBrand(args: CreateArgs): Promise<SavedBrand> {
   const record: SavedBrand = { id, ...args, createdAt: now, updatedAt: now }
   await redis.set(brandKey(args.userId, id), record)
   await redis.zadd(userIndexKey(args.userId), { score: now, member: id })
+  await redis.incr('stats:total-brands')
   return record
+}
+
+export async function getTotalBrandsCount(): Promise<number> {
+  return (await redis.get<number>('stats:total-brands')) ?? 0
 }
 
 export async function listBrands(userId: string): Promise<SavedBrand[]> {

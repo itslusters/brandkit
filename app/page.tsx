@@ -1,7 +1,8 @@
 import Hero from '@/components/landing/Hero'
 import { CommunityGallery } from '@/components/landing/CommunityGallery'
+import { SocialProof } from '@/components/landing/SocialProof'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { listPublicBrands } from '@/lib/brands'
+import { listPublicBrands, getTotalBrandsCount } from '@/lib/brands'
 
 const steps = [
   {
@@ -56,11 +57,17 @@ const faqs = [
 ]
 
 export default async function Home() {
-  const publicBrands = await listPublicBrands(30)
+  const [publicBrands, totalCount] = await Promise.all([
+    listPublicBrands(30),
+    getTotalBrandsCount(),
+  ])
 
   return (
     <div className="space-y-20 md:space-y-28 pb-16">
       <Hero />
+
+      {/* Social proof counter */}
+      <SocialProof count={totalCount} />
 
       {/* Community gallery — Savee-style masonry of public brands, visual-first */}
       <CommunityGallery brands={publicBrands} />

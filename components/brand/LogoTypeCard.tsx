@@ -11,40 +11,100 @@ interface Props {
   onSelect: () => void
 }
 
-function WordmarkIcon() {
+// Animated SVG previews — each visually demonstrates its logo type.
+function WordmarkPreview({ active }: { active: boolean }) {
   return (
-    <svg viewBox="0 0 80 32" width="80" height="32" fill="none" aria-hidden="true">
-      <rect x="1" y="1" width="78" height="30" rx="5" stroke="currentColor" strokeWidth="1.5" />
-      <text x="40" y="21" textAnchor="middle" fontSize="14" fontWeight="600" fill="currentColor" fontFamily="sans-serif">Aa</text>
+    <svg viewBox="0 0 120 40" width="120" height="40" fill="none" aria-hidden="true">
+      {/* Letter-by-letter reveal animation */}
+      {'BRAND'.split('').map((char, i) => (
+        <motion.text
+          key={i}
+          x={12 + i * 22}
+          y="30"
+          fontSize="28"
+          fontWeight="800"
+          fill="currentColor"
+          fontFamily="sans-serif"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: active ? 1 : 0.5, y: 0 }}
+          transition={{ delay: i * 0.08, duration: 0.3 }}
+        >
+          {char}
+        </motion.text>
+      ))}
     </svg>
   )
 }
 
-function SymbolTextIcon() {
+function SymbolTextPreview({ active }: { active: boolean }) {
   return (
-    <svg viewBox="0 0 88 32" width="88" height="32" fill="none" aria-hidden="true">
-      <circle cx="16" cy="16" r="13" stroke="currentColor" strokeWidth="1.5" />
-      <text x="55" y="21" textAnchor="middle" fontSize="14" fontWeight="600" fill="currentColor" fontFamily="sans-serif">Aa</text>
+    <svg viewBox="0 0 140 40" width="140" height="40" fill="none" aria-hidden="true">
+      {/* Rotating geometric symbol */}
+      <motion.g
+        animate={active ? { rotate: [0, 90, 180, 270, 360] } : { rotate: 0 }}
+        transition={active ? { duration: 8, repeat: Infinity, ease: 'linear' } : {}}
+        style={{ transformOrigin: '20px 20px' }}
+      >
+        <rect x="8" y="8" width="24" height="24" rx="4" stroke="currentColor" strokeWidth="2" />
+        <circle cx="20" cy="20" r="6" fill="currentColor" opacity={0.3} />
+      </motion.g>
+      {/* Text beside */}
+      <motion.text
+        x="52"
+        y="26"
+        fontSize="18"
+        fontWeight="700"
+        fill="currentColor"
+        fontFamily="sans-serif"
+        initial={{ opacity: 0, x: -8 }}
+        animate={{ opacity: active ? 1 : 0.5, x: 0 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        Brand
+      </motion.text>
     </svg>
   )
 }
 
-function EmblemIcon() {
+function EmblemPreview({ active }: { active: boolean }) {
   return (
-    <svg viewBox="0 0 40 44" width="40" height="44" fill="none" aria-hidden="true">
-      <path d="M20 2L37 10V22C37 31 29.5 39.5 20 42C10.5 39.5 3 31 3 22V10L20 2Z" stroke="currentColor" strokeWidth="1.5" />
-      <text x="20" y="26" textAnchor="middle" fontSize="9" fontWeight="600" fill="currentColor" fontFamily="sans-serif">Aa</text>
+    <svg viewBox="0 0 60 64" width="50" height="54" fill="none" aria-hidden="true">
+      {/* Shield path — draws itself */}
+      <motion.path
+        d="M30 4L54 14V30C54 44 43 55 30 58C17 55 6 44 6 30V14L30 4Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: active ? 1 : 0.6 }}
+        transition={{ duration: 1.2, ease: 'easeInOut' }}
+      />
+      <motion.text
+        x="30"
+        y="38"
+        textAnchor="middle"
+        fontSize="16"
+        fontWeight="700"
+        fill="currentColor"
+        fontFamily="sans-serif"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: active ? 1 : 0.4 }}
+        transition={{ delay: 0.6, duration: 0.3 }}
+      >
+        B
+      </motion.text>
     </svg>
   )
 }
 
-const ICONS: Record<LogoType, React.ReactNode> = {
-  'wordmark': <WordmarkIcon />,
-  'symbol-text': <SymbolTextIcon />,
-  'emblem': <EmblemIcon />,
+const PREVIEWS: Record<LogoType, (props: { active: boolean }) => React.ReactElement> = {
+  'wordmark': WordmarkPreview,
+  'symbol-text': SymbolTextPreview,
+  'emblem': EmblemPreview,
 }
 
 export function LogoTypeCard({ type, label, description, selected, onSelect }: Props) {
+  const Preview = PREVIEWS[type]
+
   return (
     <motion.button
       type="button"
@@ -62,7 +122,7 @@ export function LogoTypeCard({ type, label, description, selected, onSelect }: P
           <p className="text-base font-semibold text-white">{label}</p>
           <p className="text-xs text-zinc-500 mt-0.5">{description}</p>
           <div className={`mt-3 ${selected ? 'text-white' : 'text-zinc-600'}`}>
-            {ICONS[type]}
+            <Preview active={selected} />
           </div>
         </div>
         {selected && (
