@@ -114,6 +114,23 @@ export default function NamingPage() {
             </AnimatePresence>
           </div>
 
+          {/* Swipe hint animation — visible on first card only */}
+          {index === 0 && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ delay: 3, duration: 0.5 }}
+              className="flex items-center justify-center gap-2 mb-4 text-xs text-zinc-500"
+            >
+              <motion.span
+                animate={{ x: [-8, 8, -8] }}
+                transition={{ duration: 1.5, repeat: 2, ease: 'easeInOut' }}
+              >
+                ← swipe →
+              </motion.span>
+            </motion.div>
+          )}
+
           <div className="flex items-center justify-center gap-4">
             <motion.button
               whileTap={{ scale: 0.92 }}

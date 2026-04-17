@@ -45,6 +45,7 @@ export default function LogoStudioPage() {
   const [retryCount, setRetryCount] = useState(0)
   const [iterationsUsed, setIterationsUsed] = useState(0)
   const [modifier, setModifier] = useState<IterationModifier | null>(null)
+  const [enlargedDataUrl, setEnlargedDataUrl] = useState<string | null>(null)
 
   // Session guard
   useEffect(() => {
@@ -184,13 +185,19 @@ export default function LogoStudioPage() {
               dataUrl={card.dataUrl}
               selected={selected === i}
               dimmed={selected !== null && selected !== i}
-              onSelect={() => setSelected(i)}
+              onSelect={() => {
+                if (selected === i && card.dataUrl) {
+                  setEnlargedDataUrl(card.dataUrl)
+                } else {
+                  setSelected(i)
+                }
+              }}
             />
           </motion.div>
         ))}
       </div>
 
-      {/* Iterate chip row */}
+      {/* Refine section — prominent, action-oriented */}
       <AnimatePresence>
         {canIterate && (
           <motion.div
@@ -198,23 +205,25 @@ export default function LogoStudioPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="mt-8"
+            className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5"
           >
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs uppercase tracking-widest text-zinc-500 inline-flex items-center gap-1.5">
-                <Sparkles size={12} /> Refine
-              </p>
-              <p className="text-xs text-zinc-500 tabular-nums">
-                <span className="text-zinc-300 font-medium">{iterationsLeft}</span> left
-              </p>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm font-semibold text-white inline-flex items-center gap-2">
+                <Sparkles size={14} /> Refine your logo
+              </h3>
+              <span className="text-[11px] text-zinc-500 tabular-nums">
+                {iterationsLeft} of {ITERATIONS_MAX} left
+              </span>
             </div>
+            <p className="text-xs text-zinc-500 mb-4">Not quite right? Try a different direction.</p>
             <div className="flex flex-wrap gap-2">
               {ITERATION_CHIPS.map(chip => (
                 <motion.button
                   key={chip.id}
+                  whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => iterate(chip.id)}
-                  className="px-3 py-1.5 rounded-full border border-zinc-700 text-xs text-zinc-300 hover:border-white hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-950 text-sm text-zinc-200 hover:border-white hover:text-white hover:bg-zinc-900 transition-all"
                 >
                   {chip.label}
                 </motion.button>
@@ -228,8 +237,32 @@ export default function LogoStudioPage() {
             animate={{ opacity: 1 }}
             className="mt-6 text-xs text-zinc-600 text-center"
           >
-            You&apos;ve used all 3 refinements this session.
+            You&apos;ve used all {ITERATIONS_MAX} refinements this session.
           </motion.p>
+        )}
+      </AnimatePresence>
+
+      {/* Logo fullscreen preview */}
+      <AnimatePresence>
+        {enlargedDataUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setEnlargedDataUrl(null)}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6 cursor-zoom-out"
+          >
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              src={enlargedDataUrl}
+              alt="Logo preview"
+              className="max-w-[90vw] max-h-[80vh] object-contain rounded-2xl bg-white p-8"
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
