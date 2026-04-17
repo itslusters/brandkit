@@ -26,20 +26,16 @@ export default async function Home() {
     })
   }
 
-  // Curated showcase images (always visible, mixed with user brands)
+  // High-quality showcase images (Imagen-generated, always present)
   const showcaseItems = [
-    '/landing/hero.png',
-    '/landing/step-input.png',
-    '/landing/step-generate.png',
-    '/landing/step-download.png',
-    '/mood/minimal-tech-1.jpg',
-    '/mood/minimal-tech-2.jpg',
-    '/mood/bold-modern-1.jpg',
-    '/mood/bold-modern-2.jpg',
-    '/mood/warm-organic-1.jpg',
-    '/mood/premium-dark-1.jpg',
-    '/mood/premium-dark-2.jpg',
-    '/mood/playful-bright-1.jpg',
+    '/showcase/typo-1.png',
+    '/showcase/gradient-1.png',
+    '/showcase/product-1.png',
+    '/showcase/brand-1.png',
+    '/showcase/editorial-1.png',
+    '/showcase/dark-1.png',
+    '/showcase/color-1.png',
+    '/showcase/organic-1.png',
   ].map((url, i) => ({
     id: `showcase-${i}`,
     imageUrl: url,

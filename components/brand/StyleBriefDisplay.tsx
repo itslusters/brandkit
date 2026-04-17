@@ -7,75 +7,61 @@ interface Props {
   brief: StyleBrief
 }
 
-function ColorSwatch({ hex }: { hex: string }) {
+function ColorDot({ hex }: { hex: string }) {
   const [copied, setCopied] = useState(false)
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(hex)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch { /* noop */ }
+    try { await navigator.clipboard.writeText(hex); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch {}
   }
   return (
-    <button type="button" onClick={copy} className="flex flex-col items-center gap-1.5 group cursor-pointer">
-      <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        className="w-14 h-14 rounded-2xl transition-shadow group-hover:shadow-lg group-hover:shadow-white/5 card-elevated"
-        style={{ backgroundColor: hex }}
-      />
+    <button type="button" onClick={copy} className="group flex items-center gap-2">
+      <div className="w-5 h-5 rounded-full shrink-0 ring-1 ring-white/10" style={{ backgroundColor: hex }} />
       <AnimatePresence mode="wait">
-        {copied ? (
-          <motion.span key="c" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[10px] text-emerald-400 font-medium">Copied</motion.span>
-        ) : (
-          <motion.span key="h" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[10px] text-zinc-500 tabular-nums group-hover:text-zinc-300 transition-colors">{hex}</motion.span>
-        )}
+        <motion.span key={copied ? 'c' : 'h'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className={`text-xs tabular-nums ${copied ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}
+        >
+          {copied ? 'Copied' : hex}
+        </motion.span>
       </AnimatePresence>
     </button>
   )
 }
 
-// Clean card-based brief display. No "Avoid" section (that goes to PDF guide).
+// Single unified card — all brand brief info in one glanceable view.
+// Reference: seed phrase card style — structured, clean, all-in-one.
 export function StyleBriefDisplay({ brief }: Props) {
   return (
-    <div className="space-y-4">
-      {/* Style card */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 card-elevated">
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Style</p>
-        <p className="text-lg font-semibold text-white">{brief.recommendedStyle}</p>
+    <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden card-elevated">
+      {/* Mood strip at top */}
+      <div className="flex h-24">
+        {brief.moodImages.map((id) => (
+          <div key={id} className="flex-1 overflow-hidden">
+            <img src={`/mood/${id}.jpg`} alt="" className="w-full h-full object-cover" />
+          </div>
+        ))}
       </div>
 
-      {/* Palette card */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 card-elevated">
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3">Palette</p>
-        <div className="flex gap-4">
-          {brief.colorPalette.map((hex, idx) => (
-            <ColorSwatch key={`${hex}-${idx}`} hex={hex} />
-          ))}
+      <div className="p-5 space-y-5">
+        {/* Style */}
+        <div>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Style</p>
+          <p className="text-base font-semibold text-white leading-snug">{brief.recommendedStyle}</p>
         </div>
-      </div>
 
-      {/* Typography card */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 card-elevated">
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Typography</p>
-        <div className="space-y-1">
-          {brief.typography.map((t, idx) => (
-            <p key={`${t}-${idx}`} className="text-sm text-zinc-200">{t}</p>
-          ))}
+        {/* Palette — horizontal row */}
+        <div>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Palette</p>
+          <div className="flex flex-col gap-1.5">
+            {brief.colorPalette.map((hex, i) => (
+              <ColorDot key={`${hex}-${i}`} hex={hex} />
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Mood reference */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 card-elevated">
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3">Mood</p>
-        <div className="grid grid-cols-3 gap-2">
-          {brief.moodImages.map((id, idx) => (
-            <img
-              key={id}
-              src={`/mood/${id}.jpg`}
-              alt={`Mood ${idx + 1}`}
-              className="rounded-xl aspect-video object-cover"
-            />
+        {/* Typography */}
+        <div>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Typography</p>
+          {brief.typography.map((t, i) => (
+            <p key={`${t}-${i}`} className="text-sm text-zinc-300">{t}</p>
           ))}
         </div>
       </div>
