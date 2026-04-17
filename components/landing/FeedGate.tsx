@@ -11,7 +11,7 @@ export function FeedGate({ totalCount }: Props) {
       {/* Gradient fade from feed into gate */}
       <div className="absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-transparent to-zinc-950 pointer-events-none" />
 
-      <div className="relative bg-zinc-950">
+      <div className="relative bg-zinc-950 min-h-[80vh] flex flex-col justify-center">
         {/* Animated aurora gradient background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="aurora-glow w-[600px] h-[400px] bg-blue-600/20 top-[20%] left-[10%]" style={{ animationDelay: '0s' }} />
