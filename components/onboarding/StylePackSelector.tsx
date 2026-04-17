@@ -31,13 +31,8 @@ export function StylePackSelector({ selected, onSelect }: Props) {
                   : 'border-zinc-800 bg-zinc-950 hover:border-zinc-600'
               }`}
             >
-              {/* Color accent block */}
-              <div
-                className="w-full aspect-[4/3] rounded-lg mb-2"
-                style={{ background: `linear-gradient(135deg, ${pack.accentColor}30, ${pack.accentColor}08)` }}
-              />
-              <p className="text-xs font-semibold text-white truncate">{pack.name}</p>
-              <p className="text-[10px] text-zinc-500 leading-tight mt-0.5 line-clamp-2">{pack.description}</p>
+              <p className="text-sm font-semibold text-white">{pack.name}</p>
+              <p className="text-[10px] text-zinc-500 leading-tight mt-1">{pack.description}</p>
 
               {isSelected && (
                 <motion.div
