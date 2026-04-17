@@ -2,6 +2,7 @@ import { genai, buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
 import { logoLimiter, getIp } from '@/lib/ratelimit'
 import { pickFontsForTones } from '@/lib/fonts'
 import { renderWordmark, WORDMARK_LAYOUTS } from '@/lib/wordmark'
+import { postprocessLogo } from '@/lib/logo-postprocess'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
 interface RequestBody {
@@ -62,8 +63,10 @@ async function generateWithImagen(
         prompt,
         config: { numberOfImages: 1, outputMimeType: 'image/png' },
       })
-      const base64 = response.generatedImages?.[0]?.image?.imageBytes ?? ''
-      controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl: `data:image/png;base64,${base64}` }))
+      const rawBase64 = response.generatedImages?.[0]?.image?.imageBytes ?? ''
+      // Post-process: flatten bg, auto-trim, re-center, sharpen
+      const processed = await postprocessLogo(Buffer.from(rawBase64, 'base64'))
+      controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl: `data:image/png;base64,${processed.toString('base64')}` }))
     } catch (err) {
       controller.enqueue(sse({
         type: 'image_error',
