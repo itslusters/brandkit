@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import { ArrowRight, ChevronDown, ImagePlus, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ToneSelector } from './ToneSelector'
+import { StylePackSelector } from './StylePackSelector'
+import type { StylePack } from '@/lib/style-packs'
 import { INDUSTRIES } from '@/lib/constants'
 import { setSession } from '@/lib/session'
 import type { BrandInput } from '@/lib/types'
@@ -48,6 +50,7 @@ export function BrandForm() {
   const router = useRouter()
   const [form, setForm] = useState<BrandInput>(EMPTY)
   const [hasBrandName, setHasBrandName] = useState(false)
+  const [selectedPack, setSelectedPack] = useState<string | null>(null)
   const [customTone, setCustomTone] = useState('')
   const [moodImageDataUrl, setMoodImageDataUrl] = useState<string>('')
   const [moodImageError, setMoodImageError] = useState('')
@@ -95,6 +98,7 @@ export function BrandForm() {
       ...form,
       ...(hasBrandName ? { existingName: form.companyName.trim() } : {}),
       ...(customTone.trim() ? { customTone: customTone.trim() } : {}),
+      ...(selectedPack ? { stylePack: selectedPack } : {}),
       ...(moodImageDataUrl ? { moodImageDataUrl } : {}),
     }
     setSession('brandInput', payload)
@@ -144,6 +148,17 @@ export function BrandForm() {
           )}
         </AnimatePresence>
       </div>
+
+      <StylePackSelector
+        selected={selectedPack}
+        onSelect={(pack: StylePack) => {
+          setSelectedPack(prev => prev === pack.id ? null : pack.id)
+          // Auto-fill tones from pack (user can override later)
+          if (selectedPack !== pack.id) {
+            set('tones', [...pack.tones])
+          }
+        }}
+      />
 
       <div>
         <label htmlFor="industry" className="block text-sm font-medium text-zinc-400 mb-1">

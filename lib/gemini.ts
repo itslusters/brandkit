@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from './types'
+import { getStylePack } from './style-packs'
 
 export const genai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -97,10 +98,11 @@ export function buildLogoPrompt(
   const { colorPalette, avoidList, recommendedStyle } = result.styleBrief
   const colors = colorPalette.map(hexToColorName)
   const modifier = iterationModifier ? `\nRefinement direction: ${ITERATION_MODIFIERS[iterationModifier]}` : ''
+  const packDirective = input.stylePack ? getStylePack(input.stylePack)?.promptDirective ?? '' : ''
   return `A logo for the brand "${selectedName}".
 Logo type: ${LOGO_TYPE_DESCRIPTIONS[logoType]}.
 House aesthetic: ${HOUSE_AESTHETIC}
-Brand aesthetic direction: ${recommendedStyle}.
+Brand aesthetic direction: ${recommendedStyle}.${packDirective ? `\nStyle pack: ${packDirective}` : ''}
 Color palette: primarily ${colors[0]}, with ${colors[1]} as secondary and ${colors[2]} as accent. Use only these colors.
 Layout: ${VARIATION_HINTS[variationIndex]}.
 Avoid: ${[...avoidList, HOUSE_AVOID].join(', ')}.${modifier}

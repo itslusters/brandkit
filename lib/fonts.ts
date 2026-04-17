@@ -1,6 +1,7 @@
 import 'server-only'
 import { readFileSync } from 'fs'
 import path from 'path'
+import { getStylePack } from './style-packs'
 
 export interface FontEntry {
   family: string
@@ -49,8 +50,10 @@ export function loadFontBuffer(entry: FontEntry): ArrayBuffer {
 
 // Score each font against the brand's tones and pick the top 3 from different categories.
 // Ensures visual diversity: e.g., one sans + one serif + one display.
-export function pickFontsForTones(tones: string[], customTone?: string): FontEntry[] {
-  const allTones = [...tones, ...(customTone?.toLowerCase().split(/[\s,]+/) ?? [])].map(t => t.toLowerCase())
+export function pickFontsForTones(tones: string[], customTone?: string, stylePack?: string): FontEntry[] {
+  // Style pack tones get extra weight so the pack's aesthetic comes through
+  const packTones = stylePack ? (getStylePack(stylePack)?.tones ?? []) : []
+  const allTones = [...tones, ...packTones, ...(customTone?.toLowerCase().split(/[\s,]+/) ?? [])].map(t => t.toLowerCase())
 
   const scored = FONT_CATALOG.map(entry => {
     const score = entry.tags.reduce((sum, tag) => {

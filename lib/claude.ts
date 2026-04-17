@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { BrandInput, NamingCandidate, StyleBrief } from './types'
+import { getStylePack } from './style-packs'
 
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -19,6 +20,10 @@ Output exactly 5 lines. Each line format: Name|One-sentence rationale in English
     ? `Brand name (already chosen): ${input.existingName!.trim()}`
     : `Company: ${input.companyName}`
 
+  const stylePackDirective = input.stylePack
+    ? `\nStyle pack selected: ${getStylePack(input.stylePack)?.promptDirective ?? ''}`
+    : ''
+
   const moodImageNote = hasMoodImage
     ? '\nA reference image is attached — use it as primary visual inspiration for the color palette, typography mood, and recommendedStyle. Match the energy and aesthetic of the image.'
     : ''
@@ -29,7 +34,7 @@ ${nameLine}
 Industry: ${input.industry}
 Target customer: ${input.targetCustomer}
 Brand tone: ${tones}
-Competitor reference: ${input.competitor || 'none'}${moodImageNote}
+Competitor reference: ${input.competitor || 'none'}${stylePackDirective}${moodImageNote}
 
 [INDUSTRY_START]
 Write 1-2 sentences: the industry archetype and the aesthetic expectations startup founders in this space should meet.

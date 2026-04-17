@@ -25,7 +25,7 @@ async function generateWordmarks(
   brandResult: BrandResult,
   selectedName: string,
 ) {
-  const fonts = pickFontsForTones(brandInput.tones, brandInput.customTone)
+  const fonts = pickFontsForTones(brandInput.tones, brandInput.customTone, brandInput.stylePack)
   const primaryColor = brandResult.styleBrief.colorPalette[0] ?? '#18181b'
 
   const tasks = fonts.map(async (font, i) => {
