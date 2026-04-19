@@ -267,6 +267,7 @@ export default function MockupPage() {
                   dataUrl={r.dataUrl || undefined}
                   templateName={tpl?.name ?? r.templateId}
                   onDownload={() => downloadSingleMockup(r)}
+                  watermarked={isFreeTier}
                 />
               )
             })}

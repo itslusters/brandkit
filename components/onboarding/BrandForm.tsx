@@ -26,8 +26,16 @@ export function BrandForm() {
   const [hasBrandName, setHasBrandName] = useState(false)
   const [selectedPack, setSelectedPack] = useState<string | null>(null)
   const [customTone, setCustomTone] = useState('')
+  // Desktop defaults open (vertical room, users otherwise skip nuance);
+  // mobile defaults closed (short first paint matters more). This runs once;
+  // if the user manually toggles later we respect their choice.
   const [showMore, setShowMore] = useState(false)
   const [referencePhoto, setReferencePhoto] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.matchMedia('(min-width: 768px)').matches) setShowMore(true)
+  }, [])
 
   // Pre-fill from remix query params (from /share/[id] "Remix" button)
   useEffect(() => {
