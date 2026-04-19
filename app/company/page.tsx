@@ -20,22 +20,25 @@ const steps = [
   },
 ]
 
+// Pillar copy is grounded in researched market pain — see
+// /docs/research/korean-market.md for the specific sources behind each
+// claim. Any marketing text that can't trace back to that doc is drift.
 const pillars = [
   {
+    title: 'Vector SVG + commercial rights',
+    body: 'Cheap logo gigs often ship only JPG/PNG and leave licensing vague. Paid Atriium plans give you the vector SVG and explicit commercial use on day one — no rework, no rights ambiguity.',
+  },
+  {
+    title: 'One brand, every channel',
+    body: 'Smart-store thumbnails, Instagram posts, app icons, business cards — different platforms, different specs. Atriium stretches a single brand across all of them so you stop manually resizing forever.',
+  },
+  {
     title: 'Brand memory',
-    body: 'Your DNA — colors, type, trained style — is saved. The next request starts where the last one ended. ChatGPT forgets; Atriium remembers.',
+    body: 'Colors, type, trained style, past brand versions — all saved to your workspace. Next month\'s request starts where last month\'s ended, which means your brand can evolve without accidentally becoming a different brand.',
   },
   {
-    title: 'A full system',
-    body: 'Logo, palette, typography, 9 mockups, PDF brand guide, vector SVG, asset pack ZIP. Not one PNG — a kit.',
-  },
-  {
-    title: 'Designer handoff path',
-    body: 'When the stakes matter, route your AI draft to a real designer on Pro or Studio. Polished in 2–3 days, not 2 weeks.',
-  },
-  {
-    title: 'Brand evolution',
-    body: 'Seasonal marks, sub-brands, campaign variants — all generated from the same root so they feel related instead of cousin-brands.',
+    title: 'Designer handoff when it matters',
+    body: 'AI is great for drafts and iteration. For the launch mark, the investor deck, the store sign — Pro and Studio tiers route your draft to a real designer who refines and returns a polished file in 2–3 business days.',
   },
 ]
 
@@ -72,11 +75,12 @@ export default function CompanyPage() {
       {/* Masthead */}
       <div>
         <p className="eyebrow mb-4">About Atriium</p>
-        <h1 className="display-2 text-white mb-5">Your brand&apos;s home.</h1>
-        <p className="text-zinc-400 text-base md:text-lg max-w-2xl leading-relaxed">
-          Atriium is a brand workspace — not another logo generator. Ship a full
-          identity in ten minutes, then come back tomorrow, next season, next
-          launch, and evolve it from the same DNA.
+        <h1 className="display-2 text-white mb-5">One brand, every channel.</h1>
+        <p className="text-zinc-400 text-sm md:text-base max-w-2xl leading-relaxed">
+          Atriium is a brand workspace built for the work after the logo —
+          thumbnails, app icons, post templates, launch marks, season variants.
+          A single identity stretched across every surface you ship, with
+          vector SVG and commercial rights in the box.
         </p>
       </div>
 

@@ -60,7 +60,7 @@ export function FeedGate({ totalCount }: Props) {
               transition={{ delay: 0.05 }}
               className="display-2 text-white mb-5"
             >
-              Give your brand<br />a home.
+              One brand. Every channel.
             </motion.h2>
 
             <motion.p
@@ -68,10 +68,11 @@ export function FeedGate({ totalCount }: Props) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed mb-10"
+              className="text-sm md:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed mb-10"
             >
-              Ten minutes to the first draft. Saved forever. Evolving with every
-              launch, every campaign, every season.
+              Atriium builds your brand once and stretches it across every
+              surface you need — app icons, thumbnails, mockups, social posts.
+              Vector SVG + full commercial rights included.
             </motion.p>
 
             <motion.div

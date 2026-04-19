@@ -67,8 +67,8 @@ function PricingPageInner() {
       <StaggerItem>
         <div className="mb-8">
           <h1 className="text-xl font-bold text-white">Pricing</h1>
-          <p className="text-zinc-500 text-sm mt-2 max-w-xl">
-            Free is real. Clean logo PNG, mockups, and save-to-library are all yours. Upgrade when you need vector, brand guide, designer polish, or unlimited brands.
+          <p className="text-zinc-500 text-sm mt-2 max-w-xl leading-relaxed">
+            Free gets you the brief, logo variants, and a clean PNG. Paid unlocks what creators actually need long-term: vector SVG, multi-channel mockups, brand guide, unlimited brands, and full commercial rights.
           </p>
         </div>
       </StaggerItem>
