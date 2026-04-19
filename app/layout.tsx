@@ -64,8 +64,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </head>
         <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-clip`}>
           <ToastProvider>
+            <a href="#main-content" className="skip-link">Skip to content</a>
             <GlassHeader />
-            <main className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8">
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8 focus:outline-none"
+            >
               {children}
             </main>
             <InstallPrompt />

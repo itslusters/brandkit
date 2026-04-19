@@ -6,6 +6,7 @@ import { FolderOpen, Search, ArrowDownUp } from 'lucide-react'
 import { BrandLibraryCard } from './BrandLibraryCard'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
 import { RenameBrandModal } from './RenameBrandModal'
+import { BrandCardSkeleton } from '@/components/ui/Skeleton'
 import type { SavedBrand } from '@/lib/brands'
 
 type SortMode = 'recent' | 'oldest' | 'name'
@@ -29,22 +30,33 @@ export function BrandsList({ initialBrands }: Props) {
   const [pendingRename, setPendingRename] = useState<SavedBrand | null>(null)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
+  const [industry, setIndustry] = useState<string>('all')
+
+  // Pull the unique industries the user actually has brands in — don't show
+  // categories that would filter to zero results.
+  const industries = useMemo(() => {
+    const set = new Set<string>()
+    for (const b of brands) if (b.industry) set.add(b.industry)
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [brands])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const list = q
-      ? brands.filter(
-          (b) =>
-            b.name.toLowerCase().includes(q) ||
-            b.industry.toLowerCase().includes(q)
-        )
-      : brands
+    let list = brands
+    if (q) {
+      list = list.filter(
+        (b) => b.name.toLowerCase().includes(q) || b.industry.toLowerCase().includes(q),
+      )
+    }
+    if (industry !== 'all') {
+      list = list.filter((b) => b.industry === industry)
+    }
     const sorted = [...list]
     if (sort === 'recent') sorted.sort((a, b) => b.createdAt - a.createdAt)
     else if (sort === 'oldest') sorted.sort((a, b) => a.createdAt - b.createdAt)
     else if (sort === 'name') sorted.sort((a, b) => a.name.localeCompare(b.name))
     return sorted
-  }, [brands, query, sort])
+  }, [brands, query, sort, industry])
 
   async function confirmDelete() {
     if (!pendingDelete) return
@@ -102,13 +114,14 @@ export function BrandsList({ initialBrands }: Props) {
   return (
     <>
       {/* Toolbar: search + sort */}
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex items-center gap-2 mb-4">
         <div className="relative flex-1">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name or industry"
+            aria-label="Search brands"
             className="w-full pl-9 pr-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
           />
         </div>
@@ -127,10 +140,61 @@ export function BrandsList({ initialBrands }: Props) {
         </div>
       </div>
 
+      {/* Industry chips — only render when the user has brands in >= 2 industries */}
+      {industries.length >= 2 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none -mx-1 px-1">
+          <button
+            type="button"
+            onClick={() => setIndustry('all')}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              industry === 'all'
+                ? 'bg-white text-zinc-950'
+                : 'bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white hover:border-zinc-600'
+            }`}
+          >
+            All
+            <span className="ml-1.5 text-[10px] opacity-60 tabular-nums">{brands.length}</span>
+          </button>
+          {industries.map((ind) => {
+            const count = brands.filter((b) => b.industry === ind).length
+            return (
+              <button
+                key={ind}
+                type="button"
+                onClick={() => setIndustry(ind)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  industry === ind
+                    ? 'bg-white text-zinc-950'
+                    : 'bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white hover:border-zinc-600'
+                }`}
+              >
+                {ind}
+                <span className="ml-1.5 text-[10px] opacity-60 tabular-nums">{count}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {filtered.length === 0 ? (
-        <p className="text-sm text-zinc-500 text-center py-12">
-          No brands match &ldquo;{query}&rdquo;.
-        </p>
+        <div className="text-sm text-zinc-500 text-center py-12">
+          <p>
+            No brands match{' '}
+            {query && <>&ldquo;{query}&rdquo;</>}
+            {query && industry !== 'all' && ' in '}
+            {industry !== 'all' && <span className="text-zinc-300">{industry}</span>}
+            .
+          </p>
+          {(query || industry !== 'all') && (
+            <button
+              type="button"
+              onClick={() => { setQuery(''); setIndustry('all') }}
+              className="mt-3 text-xs text-zinc-300 underline hover:text-white"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <AnimatePresence mode="popLayout">
