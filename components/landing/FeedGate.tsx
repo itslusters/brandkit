@@ -43,7 +43,7 @@ export function FeedGate({ totalCount }: Props) {
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-5"
+              className="eyebrow mb-5"
             >
               Brand workspace
             </motion.p>
@@ -53,7 +53,7 @@ export function FeedGate({ totalCount }: Props) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.05 }}
-              className="text-4xl md:text-6xl font-bold tracking-tight text-white leading-[1.02] mb-5"
+              className="display-2 text-white mb-5"
             >
               Give your brand<br />a home.
             </motion.h2>
@@ -76,10 +76,7 @@ export function FeedGate({ totalCount }: Props) {
               transition={{ delay: 0.15 }}
               className="mb-10"
             >
-              <a
-                href="/brand/new"
-                className="inline-flex items-center justify-center bg-white text-zinc-950 px-10 py-4 rounded-full font-semibold text-base hover:bg-zinc-200 transition-colors shadow-xl shadow-white/10"
-              >
+              <a href="/brand/new" className="btn btn-primary btn-lg">
                 Start building — free
               </a>
               {totalCount > 0 && (

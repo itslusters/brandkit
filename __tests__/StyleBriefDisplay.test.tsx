@@ -18,9 +18,10 @@ describe('StyleBriefDisplay', () => {
 
   it('renders all 3 hex color values as text', () => {
     render(<StyleBriefDisplay brief={brief} />)
-    expect(screen.getByText('#18181b')).toBeInTheDocument()
-    expect(screen.getByText('#ffffff')).toBeInTheDocument()
-    expect(screen.getByText('#f59e0b')).toBeInTheDocument()
+    // Swatches display hex values uppercased for readability.
+    expect(screen.getByText('#18181B')).toBeInTheDocument()
+    expect(screen.getByText('#FFFFFF')).toBeInTheDocument()
+    expect(screen.getByText('#F59E0B')).toBeInTheDocument()
   })
 
   it('renders both typography entries', () => {

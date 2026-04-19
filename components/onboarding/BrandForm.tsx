@@ -221,7 +221,7 @@ export function BrandForm() {
       <button
         type="submit"
         disabled={!isValid}
-        className="w-full flex items-center justify-center gap-2 bg-white text-black font-semibold rounded-full py-3.5 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+        className="btn btn-primary btn-full btn-lg"
       >
         Build my brand <ArrowRight size={16} />
       </button>

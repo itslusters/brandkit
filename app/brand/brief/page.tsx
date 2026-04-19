@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
-import { StaggerChildren, StaggerItem } from '@/components/ui/StaggerChildren'
 import { getSession } from '@/lib/session'
 import type { BrandResult } from '@/lib/types'
 
@@ -22,27 +23,39 @@ export default function BriefPage() {
   if (!result) return null
 
   return (
-    <StaggerChildren className="pt-4 pb-12">
-      <StaggerItem>
-        <div className="mb-8">
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Selected Name</p>
-          <h1 className="text-3xl font-bold tracking-tight text-white">{selectedName}</h1>
-        </div>
-      </StaggerItem>
+    <div className="pt-4 pb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="mb-10"
+      >
+        <p className="eyebrow mb-3">Your brand is</p>
+        <h1 className="display-1 text-white">{selectedName}</h1>
+      </motion.div>
 
-      <StaggerItem>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+      >
         <StyleBriefDisplay brief={result.styleBrief} />
-      </StaggerItem>
+      </motion.div>
 
-      <StaggerItem>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.35 }}
+        className="mt-12"
+      >
         <button
           type="button"
           onClick={() => router.push('/brand/logo/type')}
-          className="mt-10 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm active:scale-[0.97] transition-transform"
+          className="btn btn-primary btn-full btn-lg"
         >
-          Create logo →
+          Create logo <ArrowRight size={16} />
         </button>
-      </StaggerItem>
-    </StaggerChildren>
+      </motion.div>
+    </div>
   )
 }

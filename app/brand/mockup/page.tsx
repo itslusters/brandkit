@@ -231,7 +231,7 @@ export default function MockupPage() {
         type="button"
         onClick={generateMockups}
         disabled={selectedIds.length === 0 || generating}
-        className="mt-6 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40"
+        className="btn btn-primary btn-full btn-lg mt-6"
       >
         {generating ? 'Generating…' : `Generate mockups (${selectedIds.length})`}
       </button>

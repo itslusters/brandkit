@@ -155,7 +155,7 @@ export default function ProcessingPage() {
         return (
           <button
             onClick={() => router.push(skipNaming ? '/brand/brief' : '/brand/naming')}
-            className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
+            className="btn btn-primary btn-full btn-lg mt-10"
           >
             {skipNaming ? 'View brand brief →' : 'Choose a name →'}
           </button>
