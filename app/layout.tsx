@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { ClerkProvider } from '@clerk/nextjs'
 import { GlassHeader } from '@/components/ui/GlassHeader'
 import { InstallPrompt } from '@/components/InstallPrompt'
+import { ToastProvider } from '@/components/ui/Toast'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -54,11 +55,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en" className="dark">
         <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-clip`}>
-          <GlassHeader />
-          <main className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8">
-            {children}
-          </main>
-          <InstallPrompt />
+          <ToastProvider>
+            <GlassHeader />
+            <main className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8">
+              {children}
+            </main>
+            <InstallPrompt />
+          </ToastProvider>
           <Analytics />
         </body>
       </html>
