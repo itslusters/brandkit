@@ -77,15 +77,18 @@ export default function NamingPage() {
 
   return (
     <div className="pt-4 pb-12">
-      <div className="mb-6 flex items-start justify-between gap-3">
+      <div className="mb-8 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Choose a name</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          <p className="eyebrow mb-3">Naming</p>
+          <h1 className="display-2 text-white">
+            {done ? 'Pick a favorite.' : 'Swipe through names.'}
+          </h1>
+          <p className="text-zinc-500 text-sm mt-3 max-w-md">
             {done
-              ? 'Pick one of your favorites — or type your own.'
+              ? 'Choose one of the ones you kept — or type your own.'
               : viewMode === 'swipe'
-                ? 'Swipe right to keep, left to skip.'
-                : 'Tap to select a name.'}
+                ? 'Right to keep, left to skip. Up arrow or the Undo button rewinds.'
+                : 'Tap a name to select it.'}
           </p>
         </div>
         {!done && (
@@ -193,33 +196,32 @@ export default function NamingPage() {
         >
           {liked.length > 0 ? (
             <>
-              <p className="text-xs uppercase tracking-widest text-zinc-500 mb-3">
-                You liked {liked.length}
-              </p>
-              <div className="space-y-2 mb-4">
+              <p className="eyebrow mb-4">You liked {liked.length}</p>
+              <div className="space-y-2 mb-5">
                 {liked.map(c => (
                   <button
                     key={c.name}
                     type="button"
                     onClick={() => { setUseCustom(false); setPickedName(c.name) }}
-                    className={`w-full text-left rounded-xl border p-4 transition-colors ${
+                    className={`w-full text-left rounded-2xl border p-5 transition-all ${
                       !useCustom && pickedName === c.name
-                        ? 'border-white bg-zinc-900'
-                        : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
+                        ? 'border-white/30 bg-zinc-900 shadow-lg shadow-black/30'
+                        : 'border-zinc-800/70 bg-zinc-900/40 hover:border-zinc-600 hover:bg-zinc-900/70'
                     }`}
                   >
-                    <p className="text-base font-semibold text-white">{c.name}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{c.rationale}</p>
+                    <p className="text-xl md:text-2xl font-bold tracking-tight text-white leading-tight">{c.name}</p>
+                    <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{c.rationale}</p>
                   </button>
                 ))}
               </div>
             </>
           ) : (
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 mb-4 text-center">
-              <p className="text-sm text-zinc-500">Nothing caught your eye?</p>
+            <div className="rounded-2xl border border-zinc-800/70 bg-zinc-900/40 p-6 mb-5 text-center">
+              <p className="text-sm text-zinc-300 font-medium">Nothing caught your eye?</p>
+              <p className="text-xs text-zinc-500 mt-1 mb-4">No problem — swipe again, or write your own below.</p>
               <button
                 onClick={reset}
-                className="mt-2 text-xs text-zinc-300 underline hover:text-white inline-flex items-center gap-1"
+                className="text-xs text-zinc-300 underline hover:text-white inline-flex items-center gap-1.5"
               >
                 <RotateCcw size={12} /> Swipe again
               </button>
@@ -231,20 +233,23 @@ export default function NamingPage() {
             tabIndex={0}
             onClick={() => setUseCustom(true)}
             onKeyDown={e => { if (e.key === 'Enter') setUseCustom(true) }}
-            className={`w-full text-left rounded-xl border p-4 transition-colors cursor-pointer ${
-              useCustom ? 'border-white bg-zinc-900' : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
+            className={`w-full text-left rounded-2xl border p-5 transition-all cursor-text ${
+              useCustom ? 'border-white/30 bg-zinc-900 shadow-lg shadow-black/30' : 'border-zinc-800/70 bg-zinc-900/40 hover:border-zinc-600'
             }`}
           >
-            <p className="text-sm font-medium text-zinc-400">Type your own</p>
-            {useCustom && (
+            <p className="eyebrow mb-2">Or write your own</p>
+            {useCustom ? (
               <input
                 autoFocus
                 value={customName}
                 onChange={e => setCustomName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') confirm() }}
                 placeholder="Enter brand name"
-                className="mt-2 w-full bg-transparent text-white text-base outline-none placeholder:text-zinc-700"
+                className="w-full bg-transparent text-white text-xl md:text-2xl font-bold tracking-tight outline-none placeholder:text-zinc-700 border-0 p-0"
+                style={{ letterSpacing: '-0.02em' }}
               />
+            ) : (
+              <p className="text-sm text-zinc-500">Click to type a custom name</p>
             )}
           </div>
 
@@ -298,10 +303,10 @@ function SwipeCard({ candidate, isTop, stackPos, onSwipe }: SwipeCardProps) {
       style={isTop ? { x, rotate, zIndex: 10 - stackPos } : { zIndex: 10 - stackPos }}
       className="absolute inset-0 rounded-2xl bg-zinc-900 border border-zinc-800 p-8 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none dot-grid-card"
     >
-      <p className="text-3xl md:text-4xl font-bold text-white tracking-tight text-center">
+      <p className="text-4xl md:text-5xl font-bold text-white tracking-tight text-center leading-none" style={{ letterSpacing: '-0.03em' }}>
         {candidate.name}
       </p>
-      <p className="mt-3 text-sm text-zinc-400 text-center max-w-xs">
+      <p className="mt-4 text-sm text-zinc-400 text-center max-w-xs leading-relaxed">
         {candidate.rationale}
       </p>
 

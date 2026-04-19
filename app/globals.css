@@ -255,6 +255,42 @@ main > * {
 .btn-full { width: 100%; }
 .btn-lg { padding: 1rem 2rem; font-size: 1rem; }
 
+/* Form input system — consistent focus ring and fluid transitions across
+   every <input>, <select>, <textarea>. The `.input` class is the opt-in
+   variant for deliberately styled controls; the global rule ensures even
+   plain form elements get the upgraded focus state for free. */
+.input,
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  transition: border-color 0.15s ease, box-shadow 0.2s ease, background-color 0.15s ease;
+}
+.input:focus,
+.input:focus-visible,
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+.input {
+  width: 100%;
+  background: rgba(24, 24, 27, 1);
+  border: 1px solid rgba(63, 63, 70, 0.6);
+  border-radius: var(--radius-md);
+  color: #fafafa;
+  font-size: 0.9375rem;
+  padding: 0.75rem 1rem;
+}
+.input::placeholder {
+  color: #52525b;
+}
+.input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* Dot grid drift — subtle wave motion for the background dot pattern */
 @keyframes dot-drift {
   0%, 100% {

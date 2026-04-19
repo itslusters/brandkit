@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { ArrowRight } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 
 interface Props {
@@ -28,7 +29,7 @@ export function EmailGateModal({ open, onSubmit, onClose }: Props) {
       await onSubmit(normalized)
     } catch (err) {
       if (err instanceof Error && err.message === 'daily_limit') {
-        setError("You've already generated a brand with this email today. Please try again tomorrow.")
+        setError("You've already generated a brand with this email today. Try again tomorrow.")
       } else {
         setError('Something went wrong. Please try again.')
       }
@@ -39,9 +40,12 @@ export function EmailGateModal({ open, onSubmit, onClose }: Props) {
 
   return (
     <BottomSheet open={open} onClose={onClose}>
-      <h2 className="text-lg font-semibold text-white mb-1">One quick step</h2>
-      <p className="text-sm text-zinc-400 mb-5">
-        Enter your email to generate your logos. We&apos;ll never spam you.
+      <p className="eyebrow mb-3">One quick step</p>
+      <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+        Where should we send it?
+      </h2>
+      <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+        Drop your email so we can save your brand for you. No spam — just a copy of what you generate.
       </p>
       <form onSubmit={handleSubmit} noValidate>
         <input
@@ -52,17 +56,15 @@ export function EmailGateModal({ open, onSubmit, onClose }: Props) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={loading}
-          className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder:text-zinc-600 outline-none focus:border-zinc-600"
+          className="input"
         />
-        {error && (
-          <p className="text-xs text-red-400 mt-2">{error}</p>
-        )}
+        {error && <p className="text-xs text-red-400 mt-3">{error}</p>}
         <button
           type="submit"
           disabled={loading || !email}
-          className="mt-4 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40"
+          className="btn btn-primary btn-full btn-lg mt-4"
         >
-          {loading ? 'Submitting…' : 'Continue →'}
+          {loading ? 'Submitting…' : <>Continue <ArrowRight size={15} /></>}
         </button>
       </form>
     </BottomSheet>

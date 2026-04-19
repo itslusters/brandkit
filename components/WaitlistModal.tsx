@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Check, ArrowRight } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 
 interface Props {
@@ -17,6 +18,8 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+
+  const planLabel = plan === 'pro' ? 'Pro' : 'Essentials'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -54,45 +57,59 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
     <BottomSheet open={open} onClose={onClose}>
       {done ? (
         <>
-          <h2 className="text-lg font-semibold text-white mb-2">You&apos;re on the list ✓</h2>
-          <p className="text-sm text-zinc-400 mb-5">We&apos;ll email you when {plan} launches.</p>
-          <button onClick={onClose} className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm">Done</button>
+          <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-4">
+            <Check size={22} className="text-emerald-400" strokeWidth={3} />
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+            You&apos;re on the list.
+          </h2>
+          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+            We&apos;ll email you the moment {planLabel} unlocks on iOS. Until then, the free tier stays yours.
+          </p>
+          <button onClick={onClose} className="btn btn-primary btn-full">
+            Got it
+          </button>
         </>
       ) : (
         <>
-          <h2 className="text-lg font-semibold text-white mb-1">
-            Join the {plan === 'pro' ? 'Pro' : 'Essentials'} waitlist
+          <p className="eyebrow mb-3">{planLabel} waitlist</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+            Be first when it drops.
           </h2>
-          <p className="text-sm text-zinc-400 mb-5">
-            We&apos;re launching paid plans soon. Drop your email and we&apos;ll notify you first.
+          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+            Paid plans ship inside the iOS app. Drop your email and we&apos;ll notify you before public launch.
           </p>
-          <form onSubmit={handleSubmit} noValidate>
-            <label className="block text-xs text-zinc-500 mb-1">Email</label>
-            <input
-              type="email"
-              role="textbox"
-              aria-label="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading || !!prefilledEmail}
-              placeholder="you@example.com"
-              className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder:text-zinc-600 outline-none focus:border-zinc-600 disabled:opacity-60"
-            />
-            <label className="block text-xs text-zinc-500 mt-3 mb-1">What features matter most? (optional)</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              disabled={loading}
-              placeholder="e.g., faster turnaround, more mockups, custom palette..."
-              className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder:text-zinc-600 outline-none focus:border-zinc-600 resize-none h-20 text-sm"
-            />
-            {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+          <form onSubmit={handleSubmit} noValidate className="space-y-3">
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1.5">Email</label>
+              <input
+                type="email"
+                role="textbox"
+                aria-label="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading || !!prefilledEmail}
+                placeholder="you@example.com"
+                className="input"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1.5">What features matter most? <span className="text-zinc-700">(optional)</span></label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                disabled={loading}
+                placeholder="e.g., faster turnaround, more mockups, custom palette…"
+                className="input resize-none h-20 text-sm"
+              />
+            </div>
+            {error && <p className="text-xs text-red-400">{error}</p>}
             <button
               type="submit"
               disabled={loading}
-              className="mt-4 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40"
+              className="btn btn-primary btn-full btn-lg"
             >
-              {loading ? 'Submitting…' : 'Join waitlist →'}
+              {loading ? 'Submitting…' : <>Join waitlist <ArrowRight size={15} /></>}
             </button>
           </form>
         </>

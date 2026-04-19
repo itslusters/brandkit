@@ -76,20 +76,23 @@ export function BrandsList({ initialBrands }: Props) {
 
   if (brands.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center">
-        <div className="w-14 h-14 mx-auto rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-          <FolderOpen size={24} className="text-zinc-600" />
+      <div className="relative rounded-3xl border border-zinc-800/70 bg-zinc-900/30 overflow-hidden p-10 md:p-14 text-center">
+        <div className="aurora-glow w-[400px] h-[260px] bg-blue-600/15 top-[-60px] left-[-60px]" style={{ animationDelay: '0s' }} />
+        <div className="aurora-glow w-[360px] h-[240px] bg-violet-600/10 bottom-[-60px] right-[-60px]" style={{ animationDelay: '2s' }} />
+        <div className="relative">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-5">
+            <FolderOpen size={22} className="text-zinc-500" />
+          </div>
+          <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-2">
+            Your shelf is empty.
+          </h3>
+          <p className="text-sm text-zinc-400 mt-1 mb-6 max-w-sm mx-auto leading-relaxed">
+            Every brand you make — name, logo, palette, mockups — lives here. Generate one in ten minutes and it&apos;ll be waiting for you the next time you open Kiln.
+          </p>
+          <a href="/brand/new" className="btn btn-primary">
+            Start your first brand →
+          </a>
         </div>
-        <p className="text-base text-white font-medium">No brands yet</p>
-        <p className="text-sm text-zinc-500 mt-1 mb-5 max-w-xs mx-auto">
-          Generate a brand and reach the mockup step — we&apos;ll save it here automatically.
-        </p>
-        <a
-          href="/brand/new"
-          className="inline-flex items-center justify-center bg-white text-zinc-950 px-5 py-2.5 rounded-md font-medium hover:bg-zinc-200 transition-colors"
-        >
-          Create your first brand →
-        </a>
       </div>
     )
   }
