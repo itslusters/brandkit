@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
-import { generateRecraftImage, resolveStyleIdDetailed } from '@/lib/recraft'
+import { generateRecraftImage } from '@/lib/recraft'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { getUserTier } from '@/lib/tier'
 import { postprocessLogo } from '@/lib/logo-postprocess'
@@ -18,12 +18,14 @@ function sse(data: object): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`)
 }
 
-// Recraft V3 drives every logo type. We used to render wordmarks via satori
-// for typography-purity, but the user prefers Recraft's overall quality —
-// especially with a custom-trained style_id applied — across all types. The
-// structural contracts in LOGO_TYPE_DESCRIPTIONS (see lib/gemini.ts) are what
-// keep wordmark / symbol-text / emblem visually distinguishable even when a
-// trained style is pulling hard on the aesthetic.
+// Recraft V3 with the named `vector_illustration` style drives every logo.
+// We intentionally DO NOT apply a trained style_id: five reference images
+// per trained style can't cover the aesthetic range of an arbitrary brand,
+// and empirically the trained style was flattening the structural
+// differences between wordmark / symbol-text / emblem. Prompt-driven named
+// style gives Recraft room to respond to per-brand cues (palette,
+// recommended style, style pack) + the structural contracts in
+// LOGO_TYPE_DESCRIPTIONS (lib/gemini.ts).
 async function generateWithRecraft(
   controller: ReadableStreamDefaultController,
   brandInput: BrandInput,
@@ -32,35 +34,11 @@ async function generateWithRecraft(
   logoType: LogoType,
   modifier?: IterationModifier,
 ) {
-  // Variation 0-1 use the trained style for aesthetic consistency with the
-  // brand's reference look. Variation 2 deliberately skips the trained style
-  // and runs on the named `vector_illustration` style — this guarantees at
-  // least one result that respects the structural prompt (wordmark /
-  // symbol-text / emblem), which trained styles tend to steamroll. Users
-  // see two brand-flavored takes plus one "textbook correct" take per
-  // generation, widening the taste-space from a 5-image training set.
-  const STRUCTURAL_ESCAPE_INDEX = 2
-
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
-
-      const useTrained = i !== STRUCTURAL_ESCAPE_INDEX
-      const resolved = useTrained
-        ? resolveStyleIdDetailed(i, undefined, logoType, brandInput.stylePack)
-        : undefined
-
-      console.log('[logo/generate]', {
-        type: logoType,
-        variation: i,
-        stylePack: brandInput.stylePack ?? null,
-        styleId: resolved?.styleId ?? null,
-        source: resolved?.source ?? 'named:vector_illustration',
-      })
-
       const raw = await generateRecraftImage(prompt, {
         style: 'vector_illustration',
-        styleId: resolved?.styleId,
         variationIndex: i,
       })
       const processed = await postprocessLogo(raw)

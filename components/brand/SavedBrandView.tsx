@@ -33,7 +33,7 @@ export function SavedBrandView({ brand }: Props) {
     setError('')
     try {
       const selectedLogoDataUrl = await urlToDataUrl(brand.selectedLogoUrl)
-      const mockupTemplateIds = brand.mockupUrls.map((m) => m.templateId)
+      const mockupUrls = brand.mockupUrls
       const apiPath = kind === 'pdf' ? '/api/brand/guide/generate' : '/api/brand/assets/generate'
       const filename = kind === 'pdf' ? `${brand.name}-brand-guide.pdf` : `${brand.name}-brand-kit.zip`
 
@@ -44,7 +44,7 @@ export function SavedBrandView({ brand }: Props) {
           brandName: brand.name,
           brandResult: brand.brandResult,
           selectedLogoDataUrl,
-          mockupTemplateIds,
+          mockupUrls,
         }),
       })
       if (!res.ok) {

@@ -1,5 +1,4 @@
 import { buildBrandGuidePDF } from '@/lib/pdf'
-import { composeMockupById } from '@/lib/mockups-compose'
 import { requireTier } from '@/lib/tier'
 import type { BrandResult } from '@/lib/types'
 
@@ -7,12 +6,24 @@ interface RequestBody {
   brandName: string
   brandResult: BrandResult
   selectedLogoDataUrl: string
-  mockupTemplateIds?: string[]
+  /** Persistent Blob URLs from the Recraft mockup generation step. */
+  mockupUrls?: { templateId: string; url: string }[]
 }
 
 function dataUrlToBuffer(dataUrl: string): Buffer {
   const b64 = dataUrl.split(',')[1] ?? ''
   return Buffer.from(b64, 'base64')
+}
+
+async function fetchAsBuffer(url: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const arr = new Uint8Array(await res.arrayBuffer())
+    return Buffer.from(arr)
+  } catch {
+    return null
+  }
 }
 
 export async function POST(req: Request) {
@@ -28,12 +39,12 @@ export async function POST(req: Request) {
 
     const logoBuffer = dataUrlToBuffer(body.selectedLogoDataUrl)
 
-    // Re-compose up to 3 mockups server-side (client sends only IDs to stay under the 4.5MB body cap)
-    const ids = (body.mockupTemplateIds ?? []).slice(0, 3)
-    const mockupOutcomes = await Promise.allSettled(ids.map((id) => composeMockupById(id, logoBuffer)))
-    const mockupPngs = mockupOutcomes
-      .filter((o): o is PromiseFulfilledResult<Buffer> => o.status === 'fulfilled')
-      .map((o) => o.value)
+    // Fetch up to 3 previously-generated mockups from Blob. The mockups
+    // were rendered by Recraft + uploaded during /api/brand/mockup/generate,
+    // so we skip regeneration (expensive) and rehydrate from their URLs.
+    const urls = (body.mockupUrls ?? []).slice(0, 3).map((m) => m.url)
+    const fetched = await Promise.all(urls.map((u) => fetchAsBuffer(u)))
+    const mockupPngs = fetched.filter((b): b is Buffer => b !== null)
 
     const pdf = await buildBrandGuidePDF({
       brandName: body.brandName,

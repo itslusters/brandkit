@@ -12,7 +12,10 @@ interface RequestBody {
   brandResult: BrandResult
   selectedLogoDataUrl: string
   selectedLogoType: LogoType
-  mockupTemplateIds: string[]
+  /** @deprecated legacy clients — preserved in the type for compatibility. */
+  mockupTemplateIds?: string[]
+  /** Recraft-generated mockups already uploaded to Blob. Persists as-is. */
+  mockupUrls?: { templateId: string; url: string }[]
 }
 
 export async function POST(req: Request) {
@@ -50,6 +53,10 @@ export async function POST(req: Request) {
     // Strip transient base64 from the persisted input — the URL replaces it.
     const { referencePhotoDataUrl: _ref, ...persistedInput } = body.brandInput
 
+    const mockupUrls = Array.isArray(body.mockupUrls)
+      ? body.mockupUrls.filter((m) => typeof m.templateId === 'string' && typeof m.url === 'string')
+      : []
+
     const saved = await saveBrand({
       userId,
       name: body.name,
@@ -58,7 +65,7 @@ export async function POST(req: Request) {
       brandResult: body.brandResult,
       selectedLogoUrl,
       selectedLogoType: body.selectedLogoType,
-      mockupUrls: [],
+      mockupUrls,
       referencePhotoUrl,
     })
 

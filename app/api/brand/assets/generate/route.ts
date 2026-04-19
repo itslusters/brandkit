@@ -3,7 +3,6 @@ import sharp from 'sharp'
 import { buildBrandGuidePDF } from '@/lib/pdf'
 import { pngToSvg } from '@/lib/vector'
 import { vectorizeRecraftImage } from '@/lib/recraft'
-import { composeMockupById } from '@/lib/mockups-compose'
 import { requireTier } from '@/lib/tier'
 import type { BrandResult } from '@/lib/types'
 
@@ -11,12 +10,24 @@ interface RequestBody {
   brandName: string
   brandResult: BrandResult
   selectedLogoDataUrl: string
-  mockupTemplateIds?: string[]
+  /** Persistent Blob URLs from the Recraft mockup generation step. */
+  mockupUrls?: { templateId: string; url: string }[]
 }
 
 function dataUrlToBuffer(dataUrl: string): Buffer {
   const b64 = dataUrl.split(',')[1] ?? ''
   return Buffer.from(b64, 'base64')
+}
+
+async function fetchAsBuffer(url: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const arr = new Uint8Array(await res.arrayBuffer())
+    return Buffer.from(arr)
+  } catch {
+    return null
+  }
 }
 
 export async function POST(req: Request) {
@@ -57,20 +68,15 @@ export async function POST(req: Request) {
     }
   }
 
-  // Re-compose all selected mockups server-side (client sends only IDs)
-  const ids = body.mockupTemplateIds ?? []
-  const mockupOutcomes = await Promise.allSettled(ids.map((id) => composeMockupById(id, logoBuffer)))
-  mockupOutcomes.forEach((outcome, idx) => {
-    if (outcome.status === 'fulfilled') {
-      zip.file(`mockups/${ids[idx]}.png`, outcome.value)
-    }
+  // Rehydrate previously-generated mockups from Blob (no regeneration).
+  const mockups = body.mockupUrls ?? []
+  const fetched = await Promise.all(mockups.map((m) => fetchAsBuffer(m.url)))
+  fetched.forEach((buf, idx) => {
+    if (buf) zip.file(`mockups/${mockups[idx].templateId}.png`, buf)
   })
 
-  // PDF brand guide — reuse the mockup buffers we just composed (top 3)
-  const mockupPngs = mockupOutcomes
-    .filter((o): o is PromiseFulfilledResult<Buffer> => o.status === 'fulfilled')
-    .slice(0, 3)
-    .map((o) => o.value)
+  // PDF brand guide — reuse the same buffers we just wrote to the ZIP (top 3)
+  const mockupPngs = fetched.filter((b): b is Buffer => b !== null).slice(0, 3)
   const pdf = await buildBrandGuidePDF({
     brandName: body.brandName,
     result: body.brandResult,

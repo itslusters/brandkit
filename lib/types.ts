@@ -56,4 +56,9 @@ export interface MockupTemplate {
 export interface MockupResult {
   templateId: string
   dataUrl: string
+  /** Persistent Vercel Blob URL — present when the mockup was uploaded
+   *  during generation. Used by the save flow to avoid re-sending the
+   *  base64 payload, and by guide/ZIP downloads to skip regeneration. */
+  url?: string
+  error?: string
 }

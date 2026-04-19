@@ -69,11 +69,17 @@ export default function MockupPage() {
 
     // Strip the (potentially large) referencePhoto base64 from the body —
     // combined with the logo PNG it can push the JSON past Vercel's 4.5MB
-    // serverless body limit. The photo is non-critical for save; we can
-    // route it through its own upload endpoint later.
+    // serverless body limit. The photo is non-critical for save.
     const { referencePhotoDataUrl: _photo, ...trimmedInput } = brandInput
 
-    const mockupTemplateIds = successful.map((r) => r.templateId)
+    // Each mockup already carries a persistent Blob URL from the mockup
+    // generation route. Passing those instead of the base64 dataUrls keeps
+    // the save payload slim and means guide/ZIP downloads can fetch from
+    // Blob directly instead of regenerating Recraft images.
+    const mockupUrls = successful
+      .filter((r) => r.url)
+      .map((r) => ({ templateId: r.templateId, url: r.url as string }))
+
     fetch('/api/brands/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -83,7 +89,7 @@ export default function MockupPage() {
         brandResult,
         selectedLogoDataUrl,
         selectedLogoType: logoType,
-        mockupTemplateIds,
+        mockupUrls,
       }),
     })
       .then(async (res) => {
@@ -121,8 +127,9 @@ export default function MockupPage() {
   }
 
   async function generateMockups() {
-    const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
-    if (!selectedLogoDataUrl || selectedIds.length === 0) return
+    const brandName = getSession<string>('selectedName')
+    const brandResult = getSession<BrandResult>('brandResult')
+    if (!brandName || !brandResult || selectedIds.length === 0) return
     setGenerating(true)
     setHasError(false)
     setErrorMessage('')
@@ -131,7 +138,7 @@ export default function MockupPage() {
       const res = await fetch('/api/brand/mockup/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateIds: selectedIds, logoDataUrl: selectedLogoDataUrl }),
+        body: JSON.stringify({ templateIds: selectedIds, brandName, brandResult }),
       })
       if (!res.ok) {
         setErrorMessage(`Server error ${res.status}`)
@@ -140,7 +147,6 @@ export default function MockupPage() {
       }
       const data = await res.json() as { results: MockupResult[] }
       setResults(data.results)
-      // Don't store in sessionStorage — base64 data URLs exceed 5MB quota
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed')
       setHasError(true)
@@ -158,11 +164,13 @@ export default function MockupPage() {
       setHasError(true)
       return
     }
-    const mockupTemplateIds = (results ?? []).filter((r) => r.dataUrl).map((r) => r.templateId)
+    const mockupUrls = (results ?? [])
+      .filter((r) => r.url)
+      .map((r) => ({ templateId: r.templateId, url: r.url as string }))
     const res = await fetch(apiPath, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupTemplateIds }),
+      body: JSON.stringify({ brandName, brandResult, selectedLogoDataUrl, mockupUrls }),
     })
     if (res.status === 403) {
       setUpgradeOpen(true)
