@@ -1,8 +1,13 @@
 import { auth } from '@clerk/nextjs/server'
 
 export type UserTier = 'free' | 'essentials' | 'pro'
+export type PaidPlan = 'essentials' | 'pro'
 
 const VALID: UserTier[] = ['free', 'essentials', 'pro']
+
+export function isPaidPlan(x: string): x is PaidPlan {
+  return x === 'essentials' || x === 'pro'
+}
 
 export async function getUserTier(): Promise<UserTier> {
   const { userId, sessionClaims } = await auth()

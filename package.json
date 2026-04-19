@@ -44,8 +44,7 @@
     "satori": "^0.26.0",
     "server-only": "^0.0.1",
     "serwist": "^9.5.7",
-    "sharp": "^0.34.5",
-    "stripe": "^22.0.2"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.1",

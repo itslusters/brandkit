@@ -14,7 +14,7 @@
  */
 
 import { isNative } from './native'
-import type { PaidPlan } from './stripe'
+import type { PaidPlan } from './tier'
 
 let initialized = false
 

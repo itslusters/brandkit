@@ -47,8 +47,7 @@ export default function TermsPage() {
       <h2 className="text-lg font-semibold text-white mt-8 mb-2">5. Paid plans</h2>
       <p>
         Paid plans grant additional features per the pricing page. Billing is handled by
-        Stripe (web) or Apple (iOS in-app purchase). Refund policies follow the respective
-        platform&apos;s rules.
+        Apple In-App Purchase through the iOS app. Refund policies follow Apple&apos;s rules.
       </p>
 
       <h2 className="text-lg font-semibold text-white mt-8 mb-2">6. Service changes</h2>

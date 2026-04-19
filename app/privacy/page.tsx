@@ -30,7 +30,7 @@ export default function PrivacyPage() {
       <h2 className="text-lg font-semibold text-white mt-8 mb-2">2. How we use it</h2>
       <ul className="list-disc pl-5 space-y-1">
         <li>Provide the brand-kit generation features you request.</li>
-        <li>Process payments for paid tiers (via Stripe or Apple in-app purchase).</li>
+        <li>Process payments for paid tiers (via Apple in-app purchase on iOS).</li>
         <li>Send transactional emails (e.g., waitlist confirmation).</li>
         <li>Detect and prevent abuse, enforce rate limits, and troubleshoot errors.</li>
         <li>Improve the Service through aggregated, anonymized analytics.</li>
@@ -54,7 +54,8 @@ export default function PrivacyPage() {
       <p>
         We do not sell your personal data. We share data only with processors necessary
         to run the Service: Clerk (auth), Vercel (hosting, analytics, blob storage),
-        Upstash (cache/rate limit), Stripe (payments), Anthropic and Recraft (AI
+        Upstash (cache/rate limit), Apple (iOS in-app purchase), RevenueCat
+        (purchase receipts and entitlements), Anthropic and Recraft (AI
         generation), Resend (email), and Sentry (error monitoring).
       </p>
 
