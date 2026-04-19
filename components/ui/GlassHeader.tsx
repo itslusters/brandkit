@@ -26,7 +26,7 @@ export function GlassHeader() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 flex items-center justify-between px-6 py-4 transition-all duration-300 ${
+        className={`sticky top-0 z-40 flex items-center justify-between px-6 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] transition-all duration-300 ${
           scrolled
             ? 'bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg shadow-black/20'
             : 'bg-transparent border-b border-transparent'

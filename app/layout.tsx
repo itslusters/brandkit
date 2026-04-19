@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en" className="dark">
-        <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-hidden`}>
+        <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-clip`}>
           <GlassHeader />
           <main className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8">
             {children}
