@@ -291,6 +291,37 @@ textarea:focus-visible {
   cursor: not-allowed;
 }
 
+/* ----------------------------------------------------------------------
+   Clerk modal integration — body-scroll lock and mobile width cap
+   ----------------------------------------------------------------------
+   Clerk's `mode="modal"` sign-in/sign-up renders an overlay but does NOT
+   lock the underlying page scroll, so on mobile the body scrolls behind
+   the modal and the modal stops feeling like a modal. The :has() rule
+   below flips overflow:hidden on both <html> and <body> whenever Clerk
+   mounts its backdrop (it uses either `.cl-modalBackdrop` or the newer
+   data-clerk-modal-backdrop attribute depending on the version).
+   ------------------------------------------------------------------- */
+html:has(.cl-modalBackdrop),
+body:has(.cl-modalBackdrop),
+html:has([data-clerk-modal-backdrop]),
+body:has([data-clerk-modal-backdrop]) {
+  overflow: hidden;
+}
+
+/* Clerk modal content — cap width on mobile so it doesn't fill the screen
+   edge-to-edge and feel oversized; keep the card centered with sane margins. */
+.cl-modalContent,
+[data-clerk-modal-content] {
+  max-width: min(420px, calc(100vw - 2rem)) !important;
+  width: 100% !important;
+  margin-inline: auto !important;
+}
+/* The overlay itself — add padding so the card floats nicely on phones */
+.cl-modalBackdrop,
+[data-clerk-modal-backdrop] {
+  padding: 1rem !important;
+}
+
 /* Dot grid drift — subtle wave motion for the background dot pattern */
 @keyframes dot-drift {
   0%, 100% {
