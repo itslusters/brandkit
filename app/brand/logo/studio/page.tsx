@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Download } from 'lucide-react'
 import { LogoResultCard } from '@/components/brand/LogoResultCard'
 import { getSession, setSession } from '@/lib/session'
 import { haptic } from '@/lib/native'
@@ -160,6 +160,20 @@ export default function LogoStudioPage() {
     router.push('/brand/mood')
   }
 
+  function downloadSelectedLogo() {
+    if (selected === null) return
+    const dataUrl = cards[selected]?.dataUrl
+    if (!dataUrl) return
+    const name = (getSession<string>('selectedName') ?? 'logo').replace(/[^a-zA-Z0-9가-힣\- _]/g, '')
+    haptic('success')
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = `${name}-logo.png`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined
   const iterationsLeft = ITERATIONS_MAX - iterationsUsed
   const canIterate = isDone && !hasError && iterationsLeft > 0
@@ -304,14 +318,24 @@ export default function LogoStudioPage() {
       )}
 
       {!hasError && (
-        <button
-          type="button"
-          onClick={continueToMockups}
-          disabled={selected === null || !selectedDataUrl}
-          className="btn btn-primary btn-full btn-lg mt-10"
-        >
-          Continue to brand mood →
-        </button>
+        <div className="mt-10 space-y-3">
+          <button
+            type="button"
+            onClick={continueToMockups}
+            disabled={selected === null || !selectedDataUrl}
+            className="btn btn-primary btn-full btn-lg"
+          >
+            Continue to brand mood →
+          </button>
+          <button
+            type="button"
+            onClick={downloadSelectedLogo}
+            disabled={selected === null || !selectedDataUrl}
+            className="btn btn-secondary btn-full"
+          >
+            <Download size={15} /> Download logo PNG
+          </button>
+        </div>
       )}
     </div>
   )

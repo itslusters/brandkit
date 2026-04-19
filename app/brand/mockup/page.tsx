@@ -48,7 +48,8 @@ export default function MockupPage() {
     setReady(true)
   }, [router])
 
-  // Auto-save when mockup generation completes (signed-in users only, once per session)
+  // Auto-save when mockup generation completes. Re-runs whenever saveState
+  // flips back to 'idle', so a "Try again" tap is just a state reset.
   useEffect(() => {
     if (saveState !== 'idle') return
     if (!user) return
@@ -60,18 +61,25 @@ export default function MockupPage() {
     const brandName = getSession<string>('selectedName')
     const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
     const logoType = getSession<LogoType>('logoType')
-    if (!brandResult || !brandName || !selectedLogoDataUrl || !logoType) return
+    const brandInput = getSession<BrandInput>('brandInput')
+    if (!brandResult || !brandName || !selectedLogoDataUrl || !logoType || !brandInput) return
 
     setSaveState('saving')
-    // Send only template IDs (not full data URLs) to stay under Vercel's 4.5MB body limit.
-    // Server will regenerate mockups from the logo + template IDs.
+    setSaveMessage('')
+
+    // Strip the (potentially large) referencePhoto base64 from the body —
+    // combined with the logo PNG it can push the JSON past Vercel's 4.5MB
+    // serverless body limit. The photo is non-critical for save; we can
+    // route it through its own upload endpoint later.
+    const { referencePhotoDataUrl: _photo, ...trimmedInput } = brandInput
+
     const mockupTemplateIds = successful.map((r) => r.templateId)
     fetch('/api/brands/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: brandName,
-        brandInput: getSession<BrandInput>('brandInput'),
+        brandInput: trimmedInput,
         brandResult,
         selectedLogoDataUrl,
         selectedLogoType: logoType,
@@ -81,21 +89,31 @@ export default function MockupPage() {
       .then(async (res) => {
         if (res.ok) {
           setSaveState('saved')
-          // Confetti celebration on first brand save
           import('canvas-confetti').then(({ default: confetti }) => {
             confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 }, colors: ['#ffffff', '#a1a1aa', '#3b82f6'] })
           })
           return
         }
+        // Surface whatever the server said so the badge can display a real reason.
+        let detail = ''
+        try {
+          const j = await res.json() as { message?: string; error?: string }
+          detail = j.message ?? j.error ?? ''
+        } catch {
+          detail = await res.text().catch(() => '')
+        }
         if (res.status === 402) {
-          const j = await res.json().catch(() => ({})) as { message?: string }
-          setSaveMessage(j.message ?? 'Free tier limit reached')
+          setSaveMessage(detail || 'Free tier limit reached')
           setSaveState('limit')
           return
         }
+        setSaveMessage(detail || `Save failed (${res.status})`)
         setSaveState('error')
       })
-      .catch(() => setSaveState('error'))
+      .catch((err) => {
+        setSaveMessage(err instanceof Error ? err.message : 'Network error')
+        setSaveState('error')
+      })
   }, [user, results, saveState])
 
   function toggle(id: string) {
@@ -204,8 +222,17 @@ export default function MockupPage() {
           <h1 className="text-xl font-bold">Pick your mockups</h1>
           <p className="text-zinc-500 text-sm mt-1">Select which mockups to generate. Recommended ones are marked. Free previews are watermarked.</p>
         </div>
-        <div className="shrink-0 pt-1">
+        <div className="shrink-0 pt-1 flex items-center gap-2">
           <SavedBadge state={saveState} message={saveMessage} />
+          {saveState === 'error' && (
+            <button
+              type="button"
+              onClick={() => { setSaveMessage(''); setSaveState('idle') }}
+              className="text-xs text-zinc-400 hover:text-white underline decoration-zinc-600"
+            >
+              Retry
+            </button>
+          )}
         </div>
       </div>
 
