@@ -99,7 +99,6 @@ function PricingPageInner() {
               'AI brand brief + naming',
               'Logo generation (3 variants)',
               'Clean PNG logo download',
-              '9 mockups (watermarked)',
               'Brand A/B polls',
               'Up to 3 brands saved',
             ]}

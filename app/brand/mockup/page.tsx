@@ -48,14 +48,15 @@ export default function MockupPage() {
     setReady(true)
   }, [router])
 
-  // Auto-save when mockup generation completes. Re-runs whenever saveState
-  // flips back to 'idle', so a "Try again" tap is just a state reset.
+  // Auto-save when the page is ready. Paid users auto-save once mockups come
+  // back; free users auto-save immediately with an empty mockupUrls list,
+  // since mockup generation is paywalled for them.
   useEffect(() => {
     if (saveState !== 'idle') return
-    if (!user) return
-    if (!results || results.length === 0) return
-    const successful = results.filter((r) => r.dataUrl)
-    if (successful.length === 0) return
+    if (!user || !ready) return
+
+    const paidWithoutMockups = !isFreeTier && (!results || results.filter((r) => r.url).length === 0)
+    if (paidWithoutMockups) return // wait for mockup generation
 
     const brandResult = getSession<BrandResult>('brandResult')
     const brandName = getSession<string>('selectedName')
@@ -63,6 +64,8 @@ export default function MockupPage() {
     const logoType = getSession<LogoType>('logoType')
     const brandInput = getSession<BrandInput>('brandInput')
     if (!brandResult || !brandName || !selectedLogoDataUrl || !logoType || !brandInput) return
+
+    const successful = results?.filter((r) => r.url) ?? []
 
     setSaveState('saving')
     setSaveMessage('')
@@ -77,7 +80,6 @@ export default function MockupPage() {
     // the save payload slim and means guide/ZIP downloads can fetch from
     // Blob directly instead of regenerating Recraft images.
     const mockupUrls = successful
-      .filter((r) => r.url)
       .map((r) => ({ templateId: r.templateId, url: r.url as string }))
 
     fetch('/api/brands/save', {
@@ -120,7 +122,7 @@ export default function MockupPage() {
         setSaveMessage(err instanceof Error ? err.message : 'Network error')
         setSaveState('error')
       })
-  }, [user, results, saveState])
+  }, [user, results, saveState, ready, isFreeTier])
 
   function toggle(id: string) {
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
@@ -228,7 +230,11 @@ export default function MockupPage() {
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">Pick your mockups</h1>
-          <p className="text-zinc-500 text-sm mt-1">Select which mockups to generate. Recommended ones are marked. Free previews are watermarked.</p>
+          <p className="text-zinc-500 text-sm mt-1">
+            {isFreeTier
+              ? 'Mockups are an Essentials feature. Your brand will still be saved so you can upgrade and generate later.'
+              : 'Select which mockups to generate. Recommended ones are marked.'}
+          </p>
         </div>
         <div className="shrink-0 pt-1 flex items-center gap-2">
           <SavedBadge state={saveState} message={saveMessage} />
@@ -244,6 +250,30 @@ export default function MockupPage() {
         </div>
       </div>
 
+      {isFreeTier && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-5 rounded-xl border border-zinc-800/70 bg-zinc-900/40 p-4 flex items-start gap-3"
+        >
+          <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 text-zinc-400 text-sm">
+            🔒
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white">Mockups are on Essentials and above</p>
+            <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
+              See your brand rendered on business cards, apps, packaging, and more. Auto-saved brand stays in your library either way.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUpgradeOpen(true)}
+            className="shrink-0 text-xs font-semibold text-white underline decoration-zinc-500 hover:decoration-white"
+          >
+            Upgrade
+          </button>
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {MOCKUP_TEMPLATES.map((tpl, i) => (
@@ -257,7 +287,7 @@ export default function MockupPage() {
               template={tpl}
               selected={selectedIds.includes(tpl.id)}
               recommended={recommendedIds.includes(tpl.id)}
-              onToggle={() => toggle(tpl.id)}
+              onToggle={() => isFreeTier ? setUpgradeOpen(true) : toggle(tpl.id)}
             />
           </motion.div>
         ))}
@@ -265,11 +295,15 @@ export default function MockupPage() {
 
       <button
         type="button"
-        onClick={generateMockups}
-        disabled={selectedIds.length === 0 || generating}
+        onClick={isFreeTier ? () => setUpgradeOpen(true) : generateMockups}
+        disabled={!isFreeTier && (selectedIds.length === 0 || generating)}
         className="btn btn-primary btn-full btn-lg mt-6"
       >
-        {generating ? 'Generating…' : `Generate mockups (${selectedIds.length})`}
+        {generating
+          ? 'Generating…'
+          : isFreeTier
+            ? 'Unlock mockups — upgrade'
+            : `Generate mockups (${selectedIds.length})`}
       </button>
 
       {hasError && (
@@ -292,6 +326,7 @@ export default function MockupPage() {
                   dataUrl={r.dataUrl || undefined}
                   templateName={tpl?.name ?? r.templateId}
                   onDownload={() => downloadSingleMockup(r)}
+                  errorMessage={r.error}
                   watermarked={isFreeTier}
                 />
               )

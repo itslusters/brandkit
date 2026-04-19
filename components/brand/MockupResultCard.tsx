@@ -7,12 +7,13 @@ interface Props {
   dataUrl?: string
   templateName: string
   onDownload?: () => void
+  errorMessage?: string
   /** When true, surfaces a "Watermarked" badge so free users understand why
    *  the PNG has a Atriium mark before they try to download. */
   watermarked?: boolean
 }
 
-export function MockupResultCard({ state, dataUrl, templateName, onDownload, watermarked }: Props) {
+export function MockupResultCard({ state, dataUrl, templateName, onDownload, errorMessage, watermarked }: Props) {
   return (
     <div className="relative aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
       <AnimatePresence mode="wait">
@@ -35,8 +36,11 @@ export function MockupResultCard({ state, dataUrl, templateName, onDownload, wat
           />
         )}
         {state === 'error' && (
-          <div key="error" className="absolute inset-0 flex items-center justify-center bg-zinc-800">
-            <p className="text-xs text-zinc-500">Failed to generate</p>
+          <div key="error" className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-zinc-900 p-4 text-center">
+            <p className="text-xs text-red-300 font-medium">Failed to generate</p>
+            {errorMessage && (
+              <p className="text-[10px] text-zinc-500 line-clamp-4 break-words font-mono">{errorMessage}</p>
+            )}
           </div>
         )}
       </AnimatePresence>

@@ -4,8 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { put } from '@vercel/blob'
 import { nanoid } from 'nanoid'
 import { generateRecraftMockup } from '@/lib/mockups-recraft'
-import { applyWatermark } from '@/lib/watermark'
-import { getUserTier } from '@/lib/tier'
+import { requireTier } from '@/lib/tier'
 import type { BrandResult, MockupResult } from '@/lib/types'
 
 interface RequestBody {
@@ -15,24 +14,24 @@ interface RequestBody {
 }
 
 /**
- * Recraft V3 generates contextual photorealistic mockups per template ID.
- * Each template carries its own scene prompt (see lib/mockups-recraft.ts)
- * and produces a photo-quality mockup with the brand name rendered in the
- * image. Free tier gets a diagonal "ATRIIUM" watermark; paid tiers get the
- * clean output.
- *
- * Each generated mockup is also uploaded to Vercel Blob so the saved
- * brand record can reference persistent URLs — guide / asset-pack
- * downloads then skip regeneration (Recraft is ~$0.04/mockup; regenerating
- * on every PDF or ZIP download would get expensive fast).
+ * Mockups are an Essentials+ feature. Each selected template renders
+ * through Recraft V3 `realistic_image` and gets uploaded to Vercel Blob so
+ * subsequent PDF / ZIP downloads can rehydrate without re-invoking Recraft.
  */
 export async function POST(req: Request) {
   const { userId } = await auth()
-  // Anonymous access is fine — the mockup endpoint is part of the free
-  // preview loop, and watermarking is the free-tier gate. Signed-in
-  // generations get a user-scoped blob path; anonymous ones land under
-  // a shared bucket with a nanoid so they can't collide.
-  const scope = userId ? `u/${userId}` : `anon`
+  if (!userId) return Response.json({ error: 'unauthorized' }, { status: 401 })
+
+  const gate = await requireTier('essentials')
+  if (!gate.ok) {
+    return Response.json(
+      {
+        error: 'tier_required',
+        message: 'Mockups are part of Essentials and above. Upgrade to generate photorealistic mockups of your brand.',
+      },
+      { status: 403 }
+    )
+  }
 
   let body: RequestBody
   try { body = await req.json() as RequestBody } catch { return Response.json({ error: 'invalid_json' }, { status: 400 }) }
@@ -45,25 +44,19 @@ export async function POST(req: Request) {
     return Response.json({ error: 'missing_brand' }, { status: 400 })
   }
 
-  const tier = await getUserTier()
-  const isFree = tier === 'free'
   const batchId = nanoid(8)
 
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
       const raw = await generateRecraftMockup(id, brandName, brandResult)
-      const final = isFree ? await applyWatermark(raw) : raw
-
-      // Upload to Blob for persistent URL — used by save + future PDF/ZIP.
-      const { url } = await put(`mockups/${scope}/${batchId}/${id}.png`, final, {
+      const { url } = await put(`mockups/u/${userId}/${batchId}/${id}.png`, raw, {
         access: 'public',
         contentType: 'image/png',
         addRandomSuffix: true,
       })
-
       const result: MockupResult = {
         templateId: id,
-        dataUrl: `data:image/png;base64,${final.toString('base64')}`,
+        dataUrl: `data:image/png;base64,${raw.toString('base64')}`,
         url,
       }
       return result

@@ -9,16 +9,14 @@ const FREE_FEATURES = [
   'AI brand brief + naming',
   '3 logo variants',
   'Clean PNG logo',
-  '9 mockups (watermarked)',
   'A/B polls',
   'Up to 3 brands saved',
 ]
 
 const PAID_FEATURES = [
+  '9 photorealistic mockups',
   'Vector SVG logo',
-  'PDF brand guide',
-  'Asset pack ZIP',
-  'Clean mockups (no watermark)',
+  'PDF brand guide + asset ZIP',
   'Unlimited brands',
   'Designer-polished logo',
 ]
