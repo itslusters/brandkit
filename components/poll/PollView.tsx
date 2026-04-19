@@ -37,8 +37,8 @@ export function PollView({ initialPoll }: Props) {
 
   return (
     <div className="pt-4 pb-12 max-w-lg mx-auto">
-      <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Brand Poll</p>
-      <h1 className="text-2xl font-bold tracking-tight text-white mb-8">{poll.title}</h1>
+      <p className="text-xs text-zinc-500 mb-2">Brand Poll</p>
+      <h1 className="text-xl font-bold text-white mb-8">{poll.title}</h1>
 
       <div className="grid grid-cols-2 gap-4 mb-8">
         {/* Option A */}

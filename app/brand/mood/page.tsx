@@ -184,7 +184,7 @@ export default function MoodPage() {
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" />
                     </svg>
                   </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-white/90">
+                  <span className="text-[10px] font-semibold text-white/90">
                     Essentials
                   </span>
                 </button>

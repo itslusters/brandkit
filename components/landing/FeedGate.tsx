@@ -8,15 +8,19 @@ interface Props {
 const FREE_FEATURES = [
   'AI brand brief + naming',
   '3 logo variants',
-  'Watermarked PNG preview',
-  'Brand saved to your account',
+  'Clean PNG logo',
+  '9 mockups (watermarked)',
+  'A/B polls',
+  'Up to 3 brands saved',
 ]
 
 const PAID_FEATURES = [
-  'Clean PNG + vector SVG',
-  '9 product mockups',
-  'PDF brand guide + asset ZIP',
-  'Designer handoff path',
+  'Vector SVG logo',
+  'PDF brand guide',
+  'Asset pack ZIP',
+  'Clean mockups (no watermark)',
+  'Unlimited brands',
+  'Designer-polished logo',
 ]
 
 /**

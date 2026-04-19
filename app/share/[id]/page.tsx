@@ -52,7 +52,7 @@ export default async function SharedBrandPage({ params }: Params) {
       ribbon={
         <a
           href="/"
-          className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm rounded-full px-3 py-1.5"
+          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm rounded-full px-3 py-1.5"
         >
           Made with <span className="text-white">Atriium</span>
         </a>
@@ -66,7 +66,7 @@ export default async function SharedBrandPage({ params }: Params) {
 
             <div className="relative">
               <p className="eyebrow mb-3">Your turn</p>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+              <h2 className="text-lg font-bold text-white leading-tight mb-2">
                 Ten minutes, and your brand is here too.
               </h2>
               <p className="text-sm text-zinc-400 max-w-md leading-relaxed">

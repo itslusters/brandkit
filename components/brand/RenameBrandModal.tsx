@@ -55,7 +55,7 @@ export function RenameBrandModal({ open, brandId, currentName, onRenamed, onClos
         <Pencil size={18} className="text-zinc-300" />
       </div>
       <p className="eyebrow mb-3">Rename brand</p>
-      <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+      <h2 className="text-lg font-bold text-white leading-tight mb-2">
         Give it a better name.
       </h2>
       <p className="text-sm text-zinc-400 mb-6 leading-relaxed">

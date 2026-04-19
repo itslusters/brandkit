@@ -25,23 +25,20 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         <div style={{ maxWidth: '32rem', width: '100%' }}>
           <p
             style={{
-              fontSize: '0.6875rem',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
+              fontSize: '0.75rem',
               fontWeight: 600,
               color: '#71717a',
-              marginBottom: '1rem',
+              marginBottom: '0.75rem',
             }}
           >
             Something broke
           </p>
           <h1
             style={{
-              fontSize: 'clamp(2rem, 4vw + 0.75rem, 3.5rem)',
-              lineHeight: 1.02,
-              letterSpacing: '-0.03em',
+              fontSize: '1.5rem',
+              lineHeight: 1.2,
               fontWeight: 700,
-              marginBottom: '1.25rem',
+              marginBottom: '1rem',
             }}
           >
             We dropped the brief.

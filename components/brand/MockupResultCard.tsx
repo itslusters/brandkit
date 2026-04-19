@@ -41,7 +41,7 @@ export function MockupResultCard({ state, dataUrl, templateName, onDownload, wat
         )}
       </AnimatePresence>
       {state === 'result' && watermarked && (
-        <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-medium uppercase tracking-wider text-white/90">
+        <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-medium text-white/90">
           <Lock size={10} /> Watermarked
         </div>
       )}

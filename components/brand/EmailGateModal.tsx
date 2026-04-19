@@ -41,7 +41,7 @@ export function EmailGateModal({ open, onSubmit, onClose }: Props) {
   return (
     <BottomSheet open={open} onClose={onClose}>
       <p className="eyebrow mb-3">One quick step</p>
-      <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+      <h2 className="text-lg font-bold text-white leading-tight mb-2">
         Where should we send it?
       </h2>
       <p className="text-sm text-zinc-400 mb-6 leading-relaxed">

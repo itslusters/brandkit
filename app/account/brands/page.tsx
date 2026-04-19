@@ -17,7 +17,7 @@ export default async function BrandsPage() {
     <div className="pt-4 pb-12">
       <div className="mb-8 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Your brands</h1>
+          <h1 className="text-xl font-bold text-white">Your brands</h1>
           <p className="text-zinc-500 text-sm mt-1">
             {brands.length === 0
               ? 'Brands you create are saved here automatically.'

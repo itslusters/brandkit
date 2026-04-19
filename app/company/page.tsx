@@ -144,7 +144,7 @@ export default function CompanyPage() {
           <div className="aurora-glow w-[400px] h-[300px] bg-violet-600/10 bottom-[-80px] right-[-80px]" style={{ animationDelay: '2s' }} />
           <div className="relative">
             <p className="eyebrow mb-3">Ready when you are</p>
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-white leading-tight mb-3">
+            <h2 className="text-xl font-bold text-white leading-tight mb-3">
               Ten minutes to your brand.
             </h2>
             <p className="text-sm text-zinc-400 max-w-md leading-relaxed mb-6">

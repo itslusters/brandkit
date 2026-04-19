@@ -80,7 +80,7 @@ export function FlowStepper({ currentStep }: Props) {
                     <motion.span
                       initial={{ opacity: 0, x: -4 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="text-[11px] font-semibold tracking-tight whitespace-nowrap"
+                      className="text-[11px] font-semibold whitespace-nowrap"
                     >
                       {step.label}
                     </motion.span>
@@ -108,7 +108,7 @@ export function FlowStepper({ currentStep }: Props) {
       </div>
       {/* Step counter — gives a literal "3 of 7" anchor beneath the capsule */}
       {activeStep && (
-        <p className="mt-2 text-[11px] text-zinc-500 tracking-wide tabular-nums">
+        <p className="mt-2 text-[11px] text-zinc-500 tabular-nums">
           Step {currentIdx + 1} of {STEPS.length} · {activeStep.label}
         </p>
       )}

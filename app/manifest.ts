@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Atriium — Brand identity, forged in minutes',
+    name: 'Atriium — Your brand, picked in minutes',
     short_name: 'Atriium',
     description: 'Where ideas become brands.',
     start_url: '/',

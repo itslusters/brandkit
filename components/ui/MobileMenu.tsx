@@ -86,7 +86,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 >
                   <div>
                     <p className="eyebrow mb-1">{link.eyebrow}</p>
-                    <p className="text-3xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors" style={{ letterSpacing: '-0.02em' }}>
+                    <p className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
                       {link.label}
                     </p>
                   </div>

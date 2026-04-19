@@ -1,5 +1,6 @@
 import { composeMockupById } from '@/lib/mockups-compose'
-import { requireTier } from '@/lib/tier'
+import { applyWatermark } from '@/lib/watermark'
+import { getUserTier } from '@/lib/tier'
 import type { MockupResult } from '@/lib/types'
 
 interface RequestBody {
@@ -7,21 +8,12 @@ interface RequestBody {
   logoDataUrl: string
 }
 
+/**
+ * Mockup generation is available on every tier — free users get watermarked
+ * mockups (stamped "ATRIIUM" diagonally) so they see the product end-to-end
+ * before deciding to pay. Paid tiers get the clean composition.
+ */
 export async function POST(req: Request) {
-  // Mockups are a paid-tier feature. Free users can see the template catalog
-  // on the mockup page (inspiration / upgrade funnel) but generation itself
-  // is gated behind Essentials+. Auth is already enforced by middleware.
-  const gate = await requireTier('essentials')
-  if (!gate.ok) {
-    return Response.json(
-      {
-        error: 'tier_required',
-        message: 'Mockups are part of Essentials ($29) and above. Upgrade to generate.',
-      },
-      { status: 403 }
-    )
-  }
-
   const { templateIds, logoDataUrl }: RequestBody = await req.json()
 
   if (!Array.isArray(templateIds) || templateIds.length === 0) {
@@ -31,6 +23,9 @@ export async function POST(req: Request) {
     return Response.json({ error: 'invalid_logo' }, { status: 400 })
   }
 
+  const tier = await getUserTier()
+  const isFree = tier === 'free'
+
   const base64 = logoDataUrl.split(',')[1] ?? ''
   const logoBuffer = Buffer.from(base64, 'base64')
 
@@ -38,9 +33,10 @@ export async function POST(req: Request) {
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
       const composed = await composeMockupById(id, logoBuffer)
+      const final = isFree ? await applyWatermark(composed) : composed
       const result: MockupResult = {
         templateId: id,
-        dataUrl: `data:image/png;base64,${composed.toString('base64')}`,
+        dataUrl: `data:image/png;base64,${final.toString('base64')}`,
       }
       return result
     })

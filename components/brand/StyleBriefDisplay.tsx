@@ -55,7 +55,7 @@ export function StyleBriefDisplay({ brief }: Props) {
       {/* Recommended style — the single line that summarizes everything */}
       <section>
         <p className="eyebrow mb-2">Style</p>
-        <p className="text-2xl md:text-3xl font-semibold text-white leading-tight tracking-tight">
+        <p className="text-lg font-semibold text-white leading-tight">
           {brief.recommendedStyle}
         </p>
       </section>

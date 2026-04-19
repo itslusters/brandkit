@@ -10,7 +10,7 @@ const UPDATED = 'April 19, 2026'
 export default function PrivacyPage() {
   return (
     <article className="prose prose-invert max-w-none pt-4 pb-16 text-sm leading-relaxed text-zinc-300">
-      <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Privacy Policy</h1>
+      <h1 className="text-xl font-bold text-white mb-1">Privacy Policy</h1>
       <p className="text-xs text-zinc-500 mb-8">Last updated: {UPDATED}</p>
 
       <p>

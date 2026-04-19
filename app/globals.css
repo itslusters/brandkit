@@ -45,29 +45,30 @@ body {
   font-feature-settings: 'ss01' 1, 'cv11' 1; /* Inter: stylistic set 01 + alt. curved numerals */
 }
 
-/* Display heading utility — opticals on, tight tracking, slight weight axis */
+/* Page-heading utilities. Kept intentionally modest — big display type reads
+   as "AI-generated marketing landing" on a product that's still earning
+   trust. These sizes match typical product-app headings (Linear, Vercel
+   dashboard). Letter-spacing is flat 0 so nothing looks "designerly-stretched". */
 .display-1 {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 6vw + 1rem, 5.5rem);
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  font-size: 1.5rem;        /* ~text-2xl */
+  line-height: 1.2;
+  letter-spacing: 0;
   font-weight: 700;
-  font-feature-settings: 'ss01' 1, 'cv11' 1, 'opsz' 96;
 }
 
 .display-2 {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw + 0.75rem, 3.5rem);
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  font-size: 1.25rem;       /* ~text-xl */
+  line-height: 1.25;
+  letter-spacing: 0;
   font-weight: 700;
-  font-feature-settings: 'ss01' 1, 'cv11' 1, 'opsz' 72;
 }
 
 .eyebrow {
-  font-size: 0.6875rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-size: 0.75rem;       /* same as body small */
+  letter-spacing: 0;
+  text-transform: none;
   font-weight: 600;
   color: var(--brand-muted);
 }

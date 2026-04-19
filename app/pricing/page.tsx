@@ -66,9 +66,9 @@ function PricingPageInner() {
     <StaggerChildren className="pt-4 pb-12">
       <StaggerItem>
         <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-white">Your brand&apos;s home, not another logo generator.</h1>
+          <h1 className="text-xl font-bold text-white">Pricing</h1>
           <p className="text-zinc-500 text-sm mt-2 max-w-xl">
-            ChatGPT and Gemini can spit out a logo for free. They can&apos;t remember your brand next week, ship you a vector SVG, compose mockups, or hand it off to a real designer. Atriium does.
+            Free is real. Clean logo PNG, mockups, and save-to-library are all yours. Upgrade when you need vector, brand guide, designer polish, or unlimited brands.
           </p>
         </div>
       </StaggerItem>
@@ -89,7 +89,7 @@ function PricingPageInner() {
 
       {/* Subscription — the main product */}
       <StaggerItem>
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Keep your brand alive</p>
+        <p className="text-xs text-zinc-500 mb-3">Keep your brand alive</p>
         <div className="grid gap-4 md:grid-cols-3">
           <PricingCard
             name="Free"
@@ -98,8 +98,10 @@ function PricingPageInner() {
             features={[
               'AI brand brief + naming',
               'Logo generation (3 variants)',
-              'Watermarked PNG preview',
-              'Brand saved to your account',
+              'Clean PNG logo download',
+              '9 mockups (watermarked)',
+              'Brand A/B polls',
+              'Up to 3 brands saved',
             ]}
             ctaLabel="Get started"
             onCtaClick={() => router.push('/brand/new')}
@@ -143,7 +145,7 @@ function PricingPageInner() {
       {/* One-time — entry ramp for users who don't want to subscribe yet */}
       <StaggerItem>
         <div className="mt-10">
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Or pay once</p>
+          <p className="text-xs text-zinc-500 mb-3">Or pay once</p>
           <div className="grid gap-4 md:grid-cols-2">
             <PricingCard
               name="Essentials"

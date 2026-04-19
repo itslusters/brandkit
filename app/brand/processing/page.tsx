@@ -160,11 +160,10 @@ export default function ProcessingPage() {
 
   return (
     <div className="pt-4 pb-12">
-      {/* Cinematic narrative — rotates as the stream advances */}
-      <div className="mb-10">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-2">
           {liveBadgeState === 'live' && <span className="live-dot" />}
-          <p className="eyebrow">
+          <p className="text-sm text-zinc-500">
             {liveBadgeState === 'live' && 'Building your brand'}
             {liveBadgeState === 'done' && 'Complete'}
             {liveBadgeState === 'error' && 'Interrupted'}
@@ -177,12 +176,12 @@ export default function ProcessingPage() {
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: -10, filter: 'blur(6px)' }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="display-2 text-white"
+            className="text-xl font-semibold text-white"
           >
             {NARRATIVES[narrativeKey]}
           </motion.h1>
         </AnimatePresence>
-        <p className="text-sm text-zinc-500 mt-3 max-w-md leading-relaxed">
+        <p className="text-sm text-zinc-500 mt-2 max-w-md leading-relaxed">
           {hasError
             ? 'We couldn\'t finish the stream. You can try again below.'
             : isDone

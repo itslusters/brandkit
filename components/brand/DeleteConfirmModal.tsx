@@ -17,7 +17,7 @@ export function DeleteConfirmModal({ open, brandName, onConfirm, onClose, busy }
         <Trash2 size={18} className="text-red-400" />
       </div>
       <p className="eyebrow mb-3">Delete brand</p>
-      <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+      <h2 className="text-lg font-bold text-white leading-tight mb-2">
         Remove <span className="text-zinc-400">{brandName}</span>?
       </h2>
       <p className="text-sm text-zinc-400 mb-6 leading-relaxed">

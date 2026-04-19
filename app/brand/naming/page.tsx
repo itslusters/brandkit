@@ -209,7 +209,7 @@ export default function NamingPage() {
                         : 'border-zinc-800/70 bg-zinc-900/40 hover:border-zinc-600 hover:bg-zinc-900/70'
                     }`}
                   >
-                    <p className="text-xl md:text-2xl font-bold tracking-tight text-white leading-tight">{c.name}</p>
+                    <p className="text-lg font-bold text-white leading-tight">{c.name}</p>
                     <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{c.rationale}</p>
                   </button>
                 ))}
@@ -245,8 +245,7 @@ export default function NamingPage() {
                 onChange={e => setCustomName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') confirm() }}
                 placeholder="Enter brand name"
-                className="w-full bg-transparent text-white text-xl md:text-2xl font-bold tracking-tight outline-none placeholder:text-zinc-700 border-0 p-0"
-                style={{ letterSpacing: '-0.02em' }}
+                className="w-full bg-transparent text-white text-lg font-bold outline-none placeholder:text-zinc-700 border-0 p-0"
               />
             ) : (
               <p className="text-sm text-zinc-500">Click to type a custom name</p>
@@ -303,10 +302,10 @@ function SwipeCard({ candidate, isTop, stackPos, onSwipe }: SwipeCardProps) {
       style={isTop ? { x, rotate, zIndex: 10 - stackPos } : { zIndex: 10 - stackPos }}
       className="absolute inset-0 rounded-2xl bg-zinc-900 border border-zinc-800 p-8 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none dot-grid-card"
     >
-      <p className="text-4xl md:text-5xl font-bold text-white tracking-tight text-center leading-none" style={{ letterSpacing: '-0.03em' }}>
+      <p className="text-2xl font-bold text-white text-center leading-tight">
         {candidate.name}
       </p>
-      <p className="mt-4 text-sm text-zinc-400 text-center max-w-xs leading-relaxed">
+      <p className="mt-3 text-sm text-zinc-400 text-center max-w-xs leading-relaxed">
         {candidate.rationale}
       </p>
 
@@ -314,13 +313,13 @@ function SwipeCard({ candidate, isTop, stackPos, onSwipe }: SwipeCardProps) {
         <>
           <motion.div
             style={{ opacity: likeOpacity }}
-            className="absolute top-6 right-6 px-3 py-1 rounded-md border-2 border-emerald-500 text-emerald-500 text-xs font-bold uppercase tracking-wider rotate-12 pointer-events-none"
+            className="absolute top-6 right-6 px-3 py-1 rounded-md border-2 border-emerald-500 text-emerald-500 text-xs font-bold rotate-12 pointer-events-none"
           >
             Keep
           </motion.div>
           <motion.div
             style={{ opacity: passOpacity }}
-            className="absolute top-6 left-6 px-3 py-1 rounded-md border-2 border-red-500 text-red-500 text-xs font-bold uppercase tracking-wider -rotate-12 pointer-events-none"
+            className="absolute top-6 left-6 px-3 py-1 rounded-md border-2 border-red-500 text-red-500 text-xs font-bold -rotate-12 pointer-events-none"
           >
             Skip
           </motion.div>

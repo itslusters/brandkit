@@ -41,7 +41,7 @@ export function RestorePurchasesButton() {
 
   return (
     <section className="mb-6">
-      <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">iOS purchases</p>
+      <p className="text-xs text-zinc-500 mb-2">iOS purchases</p>
       <button
         type="button"
         onClick={handle}

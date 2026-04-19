@@ -26,14 +26,14 @@ export function PricingCard({ name, price, priceSuffix, features, ctaLabel, onCt
       {highlighted && (
         <>
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-          <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-semibold uppercase tracking-widest text-white/90 pointer-events-none">
+          <div className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-semibold text-white/90 pointer-events-none">
             Popular
           </div>
         </>
       )}
       <div className="relative flex flex-col flex-1">
         <h3 className="text-base font-semibold text-white">{name}</h3>
-        <p className="mt-2 text-3xl font-bold tracking-tight text-white" style={{ letterSpacing: '-0.02em' }}>
+        <p className="mt-2 text-2xl font-bold text-white">
           {price} <span className="text-xs font-normal text-zinc-500">{priceSuffix}</span>
         </p>
         <ul className="mt-5 space-y-2 flex-1">

@@ -60,7 +60,7 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
           <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-4">
             <Check size={22} className="text-emerald-400" strokeWidth={3} />
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+          <h2 className="text-lg font-bold text-white leading-tight mb-2">
             You&apos;re on the list.
           </h2>
           <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
@@ -73,7 +73,7 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
       ) : (
         <>
           <p className="eyebrow mb-3">{planLabel} waitlist</p>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+          <h2 className="text-lg font-bold text-white leading-tight mb-2">
             Be first when it drops.
           </h2>
           <p className="text-sm text-zinc-400 mb-6 leading-relaxed">

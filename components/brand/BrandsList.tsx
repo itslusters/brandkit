@@ -97,7 +97,7 @@ export function BrandsList({ initialBrands }: Props) {
           <div className="w-14 h-14 mx-auto rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-5">
             <FolderOpen size={22} className="text-zinc-500" />
           </div>
-          <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-2">
+          <h3 className="text-lg font-bold text-white mb-2">
             Your shelf is empty.
           </h3>
           <p className="text-sm text-zinc-400 mt-1 mb-6 max-w-sm mx-auto leading-relaxed">

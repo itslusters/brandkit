@@ -103,12 +103,6 @@ export default function MockupPage() {
   }
 
   async function generateMockups() {
-    // Free tier can't generate — short-circuit into the upgrade modal before
-    // we hit the server. Server also enforces this (403) as defense in depth.
-    if (isFreeTier) {
-      setUpgradeOpen(true)
-      return
-    }
     const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
     if (!selectedLogoDataUrl || selectedIds.length === 0) return
     setGenerating(true)
@@ -121,11 +115,6 @@ export default function MockupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateIds: selectedIds, logoDataUrl: selectedLogoDataUrl }),
       })
-      if (res.status === 403) {
-        setResults(null)
-        setUpgradeOpen(true)
-        return
-      }
       if (!res.ok) {
         setErrorMessage(`Server error ${res.status}`)
         setHasError(true)
@@ -212,38 +201,14 @@ export default function MockupPage() {
     <div className="pt-4 pb-12">
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Pick your mockups</h1>
-          <p className="text-zinc-500 text-sm mt-1">Select which mockups to generate. Recommended ones are marked.</p>
+          <h1 className="text-xl font-bold">Pick your mockups</h1>
+          <p className="text-zinc-500 text-sm mt-1">Select which mockups to generate. Recommended ones are marked. Free previews are watermarked.</p>
         </div>
         <div className="shrink-0 pt-1">
           <SavedBadge state={saveState} message={saveMessage} />
         </div>
       </div>
 
-      {isFreeTier && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-5 rounded-xl border border-zinc-800/70 bg-zinc-900/40 p-4 flex items-start gap-3"
-        >
-          <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 text-zinc-400">
-            🔒
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white">Mockups are an Essentials feature</p>
-            <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
-              See your logo on business cards, packaging, apps, and more. One-time $29 or $19/mo.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setUpgradeOpen(true)}
-            className="shrink-0 text-xs font-semibold text-white underline decoration-zinc-500 hover:decoration-white"
-          >
-            Upgrade
-          </button>
-        </motion.div>
-      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {MOCKUP_TEMPLATES.map((tpl, i) => (
@@ -269,11 +234,7 @@ export default function MockupPage() {
         disabled={selectedIds.length === 0 || generating}
         className="btn btn-primary btn-full btn-lg mt-6"
       >
-        {generating
-          ? 'Generating…'
-          : isFreeTier
-            ? `Unlock mockups — upgrade`
-            : `Generate mockups (${selectedIds.length})`}
+        {generating ? 'Generating…' : `Generate mockups (${selectedIds.length})`}
       </button>
 
       {hasError && (
@@ -296,6 +257,7 @@ export default function MockupPage() {
                   dataUrl={r.dataUrl || undefined}
                   templateName={tpl?.name ?? r.templateId}
                   onDownload={() => downloadSingleMockup(r)}
+                  watermarked={isFreeTier}
                 />
               )
             })}
@@ -320,8 +282,8 @@ export default function MockupPage() {
           <div className="aurora-glow w-[420px] h-[260px] bg-emerald-600/15 top-[-60px] left-[-60px]" style={{ animationDelay: '0s' }} />
           <div className="aurora-glow w-[380px] h-[240px] bg-blue-600/10 bottom-[-60px] right-[-60px]" style={{ animationDelay: '2s' }} />
           <div className="relative">
-            <p className="eyebrow mb-3">Saved to your library</p>
-            <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+            <p className="eyebrow mb-2">Saved to your library</p>
+            <h3 className="text-lg font-bold text-white leading-tight mb-2">
               Share what you just made.
             </h3>
             <p className="text-sm text-zinc-400 max-w-md leading-relaxed mb-5">
