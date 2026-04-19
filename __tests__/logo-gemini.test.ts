@@ -31,17 +31,17 @@ describe('buildLogoPrompt', () => {
 
   it('includes wordmark description for wordmark type', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('wordmark')
+    expect(prompt.toLowerCase()).toContain('wordmark')
   })
 
   it('includes symbol-and-text description for symbol-text type', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'symbol-text', 0)
-    expect(prompt).toContain('symbol')
+    expect(prompt.toLowerCase()).toContain('symbol')
   })
 
   it('includes emblem description for emblem type', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'emblem', 0)
-    expect(prompt).toContain('emblem')
+    expect(prompt.toLowerCase()).toContain('emblem')
   })
 
   it('does not leak raw hex codes (Imagen renders them as text)', () => {
@@ -66,13 +66,13 @@ describe('buildLogoPrompt', () => {
     expect(prompt.toLowerCase()).toContain('asymmetric')
   })
 
-  it('includes variation hint — variation 1 is monogram', () => {
+  it('includes variation hint — variation 1 leans minimal', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 1)
-    expect(prompt.toLowerCase()).toContain('monogram')
+    expect(prompt.toLowerCase()).toContain('minimal')
   })
 
-  it('includes variation hint — variation 2 is experimental', () => {
+  it('includes variation hint — variation 2 leans editorial', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 2)
-    expect(prompt.toLowerCase()).toContain('experimental')
+    expect(prompt.toLowerCase()).toContain('editorial')
   })
 })

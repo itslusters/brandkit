@@ -10,16 +10,21 @@ export const genai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 })
 
+// Each description is written as a hard structural contract — not a hint. When a
+// trained Recraft style is applied, it will pull every variation toward the
+// reference aesthetic; these descriptions have to fight that by explicitly
+// naming what must and must not appear in the frame so the three logo types
+// remain visually distinguishable even under a dominant trained style.
 const LOGO_TYPE_DESCRIPTIONS: Record<LogoType, string> = {
-  'wordmark': 'wordmark — only the brand name rendered in stylized type, no symbol or icon',
-  'symbol-text': 'combination mark — a single distinct icon or symbol next to the brand name',
-  'emblem': 'emblem — the brand name enclosed within a single badge or shield shape',
+  'wordmark': 'PURE TYPOGRAPHY WORDMARK. Only the brand name rendered as stylized lettering. No icons, no symbols, no graphic marks, no enclosing shapes, no borders, no badges — nothing but the letterforms themselves, arranged as a single refined typographic composition on a clean background.',
+  'symbol-text': 'COMBINATION MARK. A single distinct abstract icon or symbol as the primary graphic element, positioned adjacent to the brand name set in clean supporting type. Icon and wordmark are clearly separate — not fused, not overlapping. The icon carries the visual idea; the type identifies the brand.',
+  'emblem': 'ENCLOSED EMBLEM LOGO. The brand name fully contained inside one defined outer shape — circle, shield, hexagon, rounded rectangle, or heraldic crest. The enclosing container is a load-bearing structural element, visible and continuous. All text and decoration lives inside that shape. Heritage badge energy.',
 }
 
 const VARIATION_HINTS = [
-  'bold asymmetric composition, type pushed to one edge with dramatic negative space',
-  'compact monogram or lettermark, single defining element, ultra-minimal',
-  'experimental layout, overlapping forms, unconventional spacing, editorial edge',
+  'bold asymmetric composition with dramatic negative space',
+  'ultra-minimal, single defining gesture, maximum restraint',
+  'editorial-leaning layout, unconventional spacing, expressive scale',
 ]
 
 // Kiln house aesthetic — injected silently into every logo prompt.
