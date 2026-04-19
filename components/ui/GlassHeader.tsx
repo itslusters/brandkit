@@ -65,7 +65,7 @@ export function GlassHeader() {
         }`}
       >
         <a href="/" aria-label="Atriium — home" className="flex items-center">
-          <img src="/atriium.svg" alt="Atriium" className="h-5 w-auto" />
+          <img src="/atriium-wordmark.svg" alt="Atriium" className="h-5 w-auto" />
         </a>
 
         {/* Desktop nav */}

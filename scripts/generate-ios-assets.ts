@@ -1,5 +1,9 @@
 /**
- * Generates iOS / App Store assets from the Atriium logo SVG.
+ * Generates iOS / App Store assets from the Atriium brand files.
+ *
+ * Sources:
+ *   public/atriium-symbol.svg    — square symbol mark, used for app icons
+ *   public/atriium-wordmark.svg  — horizontal wordmark, used for splashes
  *
  * Outputs (under public/ios/):
  *   app-icon-1024.png          — App Store listing icon (required)
@@ -18,23 +22,22 @@ import path from 'node:path'
 
 const OUT = path.join(process.cwd(), 'public', 'ios')
 const BG = '#09090b' // matches manifest theme_color
-const SVG_PATH = path.join(process.cwd(), 'public', 'atriium.svg')
+const SYMBOL_PATH = path.join(process.cwd(), 'public', 'atriium-symbol.svg')
+const WORDMARK_PATH = path.join(process.cwd(), 'public', 'atriium-wordmark.svg')
+
+// Wordmark viewBox is 902x143 — cached here so splash calculations keep
+// the original aspect ratio without re-parsing the SVG each call.
+const WORDMARK_ASPECT = 902 / 143
 
 async function iconAt(size: number, name: string) {
-  const svg = readFileSync(SVG_PATH)
-  // Render the SVG at ~52% of canvas width, centered, over the dark BG.
-  const logoSize = Math.round(size * 0.52)
-  const logoHeight = Math.round(logoSize * (132 / 248)) // original SVG aspect 248×132
-  const logo = await sharp(svg).resize(logoSize, logoHeight, { fit: 'contain' }).png().toBuffer()
+  const svg = readFileSync(SYMBOL_PATH)
+  // Square symbol looks right at ~62% of canvas width, centered.
+  const markSize = Math.round(size * 0.62)
+  const mark = await sharp(svg).resize(markSize, markSize, { fit: 'contain' }).png().toBuffer()
   const canvas = await sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: BG,
-    },
+    create: { width: size, height: size, channels: 4, background: BG },
   })
-    .composite([{ input: logo, gravity: 'center' }])
+    .composite([{ input: mark, gravity: 'center' }])
     .png()
     .toBuffer()
   await sharp(canvas).png().toFile(path.join(OUT, name))
@@ -42,21 +45,16 @@ async function iconAt(size: number, name: string) {
 }
 
 async function splashAt(width: number, height: number, name: string) {
-  const svg = readFileSync(SVG_PATH)
-  // Logo at ~30% of short dimension (prevents oversize on tall splashes).
+  const svg = readFileSync(WORDMARK_PATH)
+  // Wordmark at ~40% of short dimension, maintain aspect ratio.
   const short = Math.min(width, height)
-  const logoWidth = Math.round(short * 0.34)
-  const logoHeight = Math.round(logoWidth * (132 / 248))
-  const logo = await sharp(svg).resize(logoWidth, logoHeight, { fit: 'contain' }).png().toBuffer()
+  const wordmarkWidth = Math.round(short * 0.4)
+  const wordmarkHeight = Math.round(wordmarkWidth / WORDMARK_ASPECT)
+  const wordmark = await sharp(svg).resize(wordmarkWidth, wordmarkHeight, { fit: 'contain' }).png().toBuffer()
   const canvas = await sharp({
-    create: {
-      width,
-      height,
-      channels: 4,
-      background: BG,
-    },
+    create: { width, height, channels: 4, background: BG },
   })
-    .composite([{ input: logo, gravity: 'center' }])
+    .composite([{ input: wordmark, gravity: 'center' }])
     .png()
     .toBuffer()
   await sharp(canvas).png().toFile(path.join(OUT, name))
