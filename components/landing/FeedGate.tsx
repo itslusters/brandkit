@@ -27,16 +27,17 @@ export function FeedGate({ totalCount }: Props) {
               viewport={{ once: true }}
               className="text-3xl md:text-4xl font-bold text-white mb-3"
             >
-              Upgrade and keep scrolling
+              Give your brand a home.
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.05 }}
-              className="text-sm text-zinc-400 mb-10"
+              className="text-sm text-zinc-400 mb-10 leading-relaxed"
             >
-              Unlimited brand inspiration and downloads await.
+              Ten minutes to the first draft. Saved forever. Evolving with every
+              launch, every campaign, every season.
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -45,7 +46,7 @@ export function FeedGate({ totalCount }: Props) {
               transition={{ delay: 0.08 }}
               className="text-xs uppercase tracking-widest text-zinc-500 mb-4"
             >
-              What&apos;s included
+              What you get on day one
             </motion.p>
 
             <motion.div
@@ -56,14 +57,14 @@ export function FeedGate({ totalCount }: Props) {
               className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-left text-sm mb-12"
             >
               {[
-                'AI brand brief',
+                'AI brand brief + naming',
                 'Vector SVG logo',
                 '3 logo variants',
                 'PDF brand guide',
                 '9 product mockups',
                 'Asset pack ZIP',
-                'Brand cards',
-                'Unlimited inspiration',
+                'Brand memory (saved)',
+                'Designer handoff path',
               ].map((f) => (
                 <div key={f} className="flex items-center gap-2">
                   <span className="text-blue-400">✓</span>
@@ -80,7 +81,7 @@ export function FeedGate({ totalCount }: Props) {
               transition={{ delay: 0.1 }}
               className="inline-flex items-center justify-center bg-white text-zinc-950 px-10 py-4 rounded-full font-semibold text-base hover:bg-zinc-200 transition-colors shadow-xl shadow-white/10"
             >
-              Upgrade and continue
+              Start building — free
             </motion.a>
 
             {totalCount > 0 && (

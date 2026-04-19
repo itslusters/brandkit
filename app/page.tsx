@@ -1,6 +1,7 @@
 import { listPublicBrands, getTotalBrandsCount } from '@/lib/brands'
 import { FeedGallery } from '@/components/landing/FeedGallery'
 import { FeedGate } from '@/components/landing/FeedGate'
+import { Hero } from '@/components/landing/Hero'
 
 export default async function Home() {
   const [publicBrands, totalCount] = await Promise.all([
@@ -42,9 +43,15 @@ export default async function Home() {
   }
 
   return (
-    <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
-      <FeedGallery items={allItems} />
-      <FeedGate totalCount={totalCount} />
-    </div>
+    <>
+      <Hero />
+      <p className="max-w-5xl mx-auto px-4 text-xs text-zinc-500 uppercase tracking-widest mt-4 mb-3">
+        Brands already built on Kiln
+      </p>
+      <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
+        <FeedGallery items={allItems} />
+        <FeedGate totalCount={totalCount} />
+      </div>
+    </>
   )
 }

@@ -10,6 +10,22 @@ interface SearchParams {
   plan?: string
 }
 
+const TIER_LABEL: Record<string, string> = {
+  free: 'Free',
+  essentials: 'Essentials (one-time)',
+  solo: 'Solo — $19/month',
+  pro: 'Pro (one-time)',
+  studio: 'Studio — $79/month',
+}
+
+const TIER_BLURB: Record<string, string> = {
+  free: 'AI brief, 3 logo variants, 9 watermarked mockup previews. Your brand is saved but downloads are locked.',
+  essentials: 'Clean PNG, vector SVG, PDF guide, asset pack ZIP. One brand saved forever.',
+  solo: 'Everything in Essentials + unlimited regen + new mockup templates monthly + brand memory.',
+  pro: 'Essentials + designer hand-polished logo delivered in 2–3 days.',
+  studio: 'Solo + 1 designer polish every month + custom-trained brand style + priority queue + multi-brand workspace.',
+}
+
 export default async function AccountPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
@@ -19,7 +35,9 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const tier = await getUserTier()
   const waitlists = email ? await getWaitlistFor(email) : []
   const sp = await searchParams
-  const upgradeSuccess = sp.upgrade === 'success' && (sp.plan === 'essentials' || sp.plan === 'pro')
+  const upgradeSuccess = sp.upgrade === 'success' &&
+    (sp.plan === 'essentials' || sp.plan === 'pro' || sp.plan === 'solo' || sp.plan === 'studio')
+  const isPaid = tier !== 'free'
 
   return (
     <StaggerChildren className="pt-4 pb-12">
@@ -50,7 +68,16 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <StaggerItem>
         <section className="mb-6">
           <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Current plan</p>
-          <p className="text-base text-white capitalize">{tier}</p>
+          <p className="text-base text-white">{TIER_LABEL[tier] ?? 'Free'}</p>
+          <p className="text-xs text-zinc-500 mt-1.5 leading-relaxed max-w-md">{TIER_BLURB[tier]}</p>
+          {!isPaid && (
+            <a
+              href="/pricing"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm text-white underline decoration-zinc-600 decoration-dotted underline-offset-4 hover:decoration-white transition-colors"
+            >
+              Unlock full downloads from $19/mo →
+            </a>
+          )}
         </section>
       </StaggerItem>
 

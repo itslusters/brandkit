@@ -7,7 +7,7 @@ export default function NewBrandPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">Tell us about your brand</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          AI will handle the rest — naming, style, logo, mockups.
+          AI handles the rest — naming, style, logo, mockups. Saved to your account so your next request starts where this one ended.
         </p>
       </div>
       <Suspense>
