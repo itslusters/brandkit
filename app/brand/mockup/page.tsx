@@ -23,6 +23,8 @@ export default function MockupPage() {
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const { user } = useUser()
+  const userTier = ((user?.publicMetadata as { tier?: 'free' | 'essentials' | 'pro' } | undefined)?.tier) ?? 'free'
+  const isFreeTier = userTier === 'free'
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'limit' | 'error'>('idle')
@@ -243,7 +245,18 @@ export default function MockupPage() {
 
       {results && results.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-sm font-semibold text-white mb-3">Results</h2>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-white">Results</h2>
+            {isFreeTier && (
+              <button
+                type="button"
+                onClick={() => setUpgradeOpen(true)}
+                className="text-xs text-zinc-400 hover:text-white underline decoration-dotted decoration-zinc-600 transition-colors"
+              >
+                Watermarked — upgrade for clean PNG
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {results.map((r) => {
               const tpl = getTemplateById(r.templateId)
