@@ -301,7 +301,7 @@ export default function LogoStudioPage() {
           type="button"
           onClick={continueToMockups}
           disabled={selected === null || !selectedDataUrl}
-          className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="btn btn-primary btn-full btn-lg mt-10"
         >
           Continue to brand mood →
         </button>

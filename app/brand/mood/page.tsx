@@ -194,7 +194,7 @@ export default function MoodPage() {
         <button
           type="button"
           onClick={() => router.push('/brand/mockup')}
-          className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm"
+          className="btn btn-primary btn-full btn-lg mt-8"
         >
           Continue to mockups →
         </button>

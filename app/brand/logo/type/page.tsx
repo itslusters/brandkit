@@ -73,12 +73,16 @@ export default function LogoTypePage() {
 
   return (
     <div className="pt-4 pb-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Choose logo style</h1>
-        <p className="text-zinc-500 text-sm mt-1">What type of logo do you want?</p>
+      <div className="mb-10">
+        <p className="eyebrow mb-3">Logo style</p>
+        <h1 className="display-2 text-white">Pick a direction.</h1>
+        <p className="text-zinc-500 text-sm mt-3 max-w-md">
+          Each type sets the structural shape the AI will explore. You can
+          generate multiple types for the same brand.
+        </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {LOGO_TYPES.map((item, i) => (
           <motion.div
             key={item.type}
@@ -101,7 +105,7 @@ export default function LogoTypePage() {
         type="button"
         onClick={confirm}
         disabled={!selected}
-        className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        className="btn btn-primary btn-full btn-lg mt-10"
       >
         Create logo →
       </button>
