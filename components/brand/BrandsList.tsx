@@ -101,7 +101,7 @@ export function BrandsList({ initialBrands }: Props) {
             Your shelf is empty.
           </h3>
           <p className="text-sm text-zinc-400 mt-1 mb-6 max-w-sm mx-auto leading-relaxed">
-            Every brand you make — name, logo, palette, mockups — lives here. Generate one in ten minutes and it&apos;ll be waiting for you the next time you open Kiln.
+            Every brand you make — name, logo, palette, mockups — lives here. Generate one in ten minutes and it&apos;ll be waiting for you the next time you open Atriium.
           </p>
           <a href="/brand/new" className="btn btn-primary">
             Start your first brand →

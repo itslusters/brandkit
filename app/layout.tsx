@@ -14,13 +14,13 @@ const inter = localFont({
 })
 
 export const metadata: Metadata = {
-  title: { default: 'Kiln — Brand identity, forged in minutes', template: '%s · Kiln' },
-  description: 'Where ideas become brands. AI naming, logos, mockups, and a brand guide PDF — crafted in minutes, refined to ship.',
-  keywords: ['AI logo generator', 'brand identity', 'AI branding', 'startup branding', 'Kiln'],
-  applicationName: 'Kiln',
+  title: { default: 'Atriium — Your brand, picked in minutes', template: '%s · Atriium' },
+  description: 'A brand workspace that remembers your identity. Pick from AI-curated logos, names, palettes, and mockups — or keep refining until it fits.',
+  keywords: ['AI logo generator', 'brand identity', 'AI branding', 'startup branding', 'brand workspace', 'Atriium'],
+  applicationName: 'Atriium',
   appleWebApp: {
     capable: true,
-    title: 'Kiln',
+    title: 'Atriium',
     statusBarStyle: 'black-translucent',
   },
   formatDetection: { telephone: false },
@@ -32,14 +32,14 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
-    title: 'Kiln — Brand identity, forged in minutes',
-    description: 'Where ideas become brands — naming, logos, mockups, brand guide.',
+    title: 'Atriium — Your brand, picked in minutes',
+    description: 'A brand workspace that remembers your identity — pick logos, names, palettes, mockups.',
     type: 'website',
     url: 'https://brandkit-wheat.vercel.app',
-    siteName: 'Kiln',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Kiln' }],
+    siteName: 'Atriium',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Atriium' }],
   },
-  twitter: { card: 'summary_large_image', title: 'Kiln', description: 'Brand identity, forged in minutes', images: ['/og.png'] },
+  twitter: { card: 'summary_large_image', title: 'Atriium', description: 'Your brand, picked in minutes', images: ['/og.png'] },
   metadataBase: new URL('https://brandkit-wheat.vercel.app'),
 }
 

@@ -10,11 +10,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const brand = await getPublicBrand(params.id)
   if (!brand) return { title: 'Brand not found' }
   return {
-    title: `${brand.name} — made with Kiln`,
+    title: `${brand.name} — made with Atriium`,
     description: brand.brandResult.styleBrief.recommendedStyle,
     openGraph: {
       title: `${brand.name}`,
-      description: `Forged on Kiln — ${brand.brandResult.styleBrief.recommendedStyle}`,
+      description: `Forged on Atriium — ${brand.brandResult.styleBrief.recommendedStyle}`,
       type: 'website',
     },
   }
@@ -34,7 +34,7 @@ export default async function SharedBrandPage({ params }: Params) {
     image: brand.selectedLogoUrl,
     dateCreated: new Date(brand.createdAt).toISOString(),
     dateModified: new Date(brand.updatedAt).toISOString(),
-    creator: { '@type': 'Organization', name: 'Kiln', url: 'https://brandkit-wheat.vercel.app' },
+    creator: { '@type': 'Organization', name: 'Atriium', url: 'https://brandkit-wheat.vercel.app' },
     genre: brand.industry,
     keywords: brand.brandInput.tones.join(', '),
   }
@@ -54,7 +54,7 @@ export default async function SharedBrandPage({ params }: Params) {
           href="/"
           className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm rounded-full px-3 py-1.5"
         >
-          Made with <span className="text-white">Kiln</span>
+          Made with <span className="text-white">Atriium</span>
         </a>
       }
       actions={
@@ -70,7 +70,7 @@ export default async function SharedBrandPage({ params }: Params) {
                 Ten minutes, and your brand is here too.
               </h2>
               <p className="text-sm text-zinc-400 max-w-md leading-relaxed">
-                Kiln remembers your brand — colors, type, tone — so every future asset builds on the same DNA. Start free.
+                Atriium remembers your brand — colors, type, tone — so every future asset builds on the same DNA. Start free.
               </p>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
@@ -90,7 +90,7 @@ export default async function SharedBrandPage({ params }: Params) {
             <span className="text-zinc-800">·</span>
             <a href="/pricing" className="hover:text-zinc-200 transition-colors">Pricing</a>
             <span className="text-zinc-800">·</span>
-            <a href="/company" className="hover:text-zinc-200 transition-colors">About Kiln</a>
+            <a href="/company" className="hover:text-zinc-200 transition-colors">About Atriium</a>
           </div>
         </div>
       }

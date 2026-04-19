@@ -363,7 +363,7 @@ body:has([data-clerk-modal-backdrop]) {
   -webkit-backdrop-filter: blur(12px) !important;
 }
 
-/* Clerk card — match Kiln's surface language */
+/* Clerk card — match Atriium's surface language */
 .cl-card {
   background-color: rgba(24, 24, 27, 0.92) !important;
   border: 1px solid rgba(63, 63, 70, 0.6) !important;

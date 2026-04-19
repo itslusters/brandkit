@@ -23,7 +23,7 @@ const steps = [
 const pillars = [
   {
     title: 'Brand memory',
-    body: 'Your DNA — colors, type, trained style — is saved. The next request starts where the last one ended. ChatGPT forgets; Kiln remembers.',
+    body: 'Your DNA — colors, type, trained style — is saved. The next request starts where the last one ended. ChatGPT forgets; Atriium remembers.',
   },
   {
     title: 'A full system',
@@ -62,7 +62,7 @@ const faqs = [
   },
   {
     q: 'Is my email shared?',
-    a: 'No. We use it for auth, save confirmations, and tier updates. Never sold, never used for marketing outside Kiln.',
+    a: 'No. We use it for auth, save confirmations, and tier updates. Never sold, never used for marketing outside Atriium.',
   },
 ]
 
@@ -71,16 +71,16 @@ export default function CompanyPage() {
     <div className="pb-16 space-y-16 md:space-y-20">
       {/* Masthead */}
       <div>
-        <p className="eyebrow mb-4">About Kiln</p>
+        <p className="eyebrow mb-4">About Atriium</p>
         <h1 className="display-2 text-white mb-5">Your brand&apos;s home.</h1>
         <p className="text-zinc-400 text-base md:text-lg max-w-2xl leading-relaxed">
-          Kiln is a brand workspace — not another logo generator. Ship a full
+          Atriium is a brand workspace — not another logo generator. Ship a full
           identity in ten minutes, then come back tomorrow, next season, next
           launch, and evolve it from the same DNA.
         </p>
       </div>
 
-      {/* Pillars — the story of why Kiln exists */}
+      {/* Pillars — the story of why Atriium exists */}
       <ScrollReveal>
         <section>
           <p className="eyebrow mb-5">Why it exists</p>
@@ -170,7 +170,7 @@ export default function CompanyPage() {
           <a href="/terms" className="hover:text-white transition-colors">Terms</a>
           <a href="mailto:we.lusters@gmail.com" className="hover:text-white transition-colors">Contact</a>
         </div>
-        <div>© 2026 Kiln</div>
+        <div>© 2026 Atriium</div>
       </footer>
     </div>
   )

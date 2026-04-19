@@ -90,7 +90,7 @@ function buildCardJsx(args: CardArgs): React.ReactElement {
         children: [
           { type: 'div', key: 'name', props: { style: { display: 'flex', fontSize: 72, fontWeight: 800, color: textColor, letterSpacing: '-0.03em', lineHeight: 1 }, children: brandName } },
           { type: 'div', key: 'dot', props: { style: { display: 'flex', width: 12, height: 12, borderRadius: 6, backgroundColor: a, marginTop: '24px' } } },
-          { type: 'div', key: 'made', props: { style: { display: 'flex', fontSize: 14, color: textColor, opacity: 0.5, marginTop: '16px' }, children: 'Made with Kiln' } },
+          { type: 'div', key: 'made', props: { style: { display: 'flex', fontSize: 14, color: textColor, opacity: 0.5, marginTop: '16px' }, children: 'Made with Atriium' } },
         ],
       },
     } as unknown as React.ReactElement
@@ -126,7 +126,7 @@ function buildCardJsx(args: CardArgs): React.ReactElement {
                 { type: 'div', key: 'c3', props: { style: { display: 'flex', width: 48, height: 48, borderRadius: 8, backgroundColor: a } } },
               ],
             }},
-            { type: 'div', key: 'credit', props: { style: { display: 'flex', fontSize: 12, color: '#a1a1aa' }, children: 'Kiln' } },
+            { type: 'div', key: 'credit', props: { style: { display: 'flex', fontSize: 12, color: '#a1a1aa' }, children: 'Atriium' } },
           ],
         }},
       ],
@@ -157,9 +157,9 @@ export const BRAND_CARD_VARIANTS: CardArgs['variant'][] = ['dark-hero', 'color-b
  *
  * Layout: dark canvas, giant brand name as the hero, a wide color palette
  * band locked to the top third, then a small editorial footer with style
- * label, typography, and a "MADE WITH KILN" ribbon. The card carries
+ * label, typography, and a "MADE WITH ATRIIUM" ribbon. The card carries
  * three moves: confident display type, the brand's actual colors in a
- * strip people can eyeball at thumb-size, and a clear Kiln attribution
+ * strip people can eyeball at thumb-size, and a clear Atriium attribution
  * for the viral loop.
  */
 export async function renderDNACard(args: {
@@ -198,7 +198,7 @@ export async function renderDNACard(args: {
             })),
           },
         },
-        // "MADE WITH KILN" ribbon, pinned top-right over the band
+        // "MADE WITH ATRIIUM" ribbon, pinned top-right over the band
         {
           type: 'div',
           key: 'ribbon',
@@ -222,7 +222,7 @@ export async function renderDNACard(args: {
             },
             children: [
               { type: 'span', key: 'pre', props: { style: { display: 'flex', opacity: 0.7 }, children: 'Made with' } },
-              { type: 'span', key: 'kiln', props: { style: { display: 'flex' }, children: 'KILN' } },
+              { type: 'span', key: 'kiln', props: { style: { display: 'flex' }, children: 'ATRIIUM' } },
             ],
           },
         },

@@ -10,7 +10,7 @@ export default async function Home() {
     getTotalBrandsCount(),
   ])
 
-  // Structured data — helps Google surface Kiln as a SoftwareApplication in
+  // Structured data — helps Google surface Atriium as a SoftwareApplication in
   // the knowledge panel and pulls the brand count in as a usage signal.
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -18,14 +18,14 @@ export default async function Home() {
       {
         '@type': 'Organization',
         '@id': `${BASE}#organization`,
-        name: 'Kiln',
+        name: 'Atriium',
         url: BASE,
         logo: `${BASE}/icon-512.png`,
         description: 'AI-powered brand workspace — name, logo, mockups, guide in ten minutes.',
       },
       {
         '@type': 'SoftwareApplication',
-        name: 'Kiln',
+        name: 'Atriium',
         url: BASE,
         applicationCategory: 'DesignApplication',
         operatingSystem: 'Web, iOS',

@@ -7,7 +7,7 @@ interface Props {
   brand: SavedBrand
   /** What the eyebrow above the name says — "Saved brand", "Shared brand", etc. */
   eyebrow: string
-  /** Optional badge rendered top-right (e.g. "Made with Kiln" on the share page). */
+  /** Optional badge rendered top-right (e.g. "Made with Atriium" on the share page). */
   ribbon?: ReactNode
   /** Action bar rendered after the artifact block (downloads, share toggle, remix…). */
   actions: ReactNode

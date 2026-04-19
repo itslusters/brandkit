@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Kiln</string>
+        <string>Atriium</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -48,7 +48,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Take photos of inspiration — packaging, scenery, color palettes — to attach to your brand kit.</string>
+	<string>Atriium uses the camera to let you photograph inspiration — packaging, scenery, color palettes — and attach it to your brand kit.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Pick reference images from your photo library to attach to your brand kit.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

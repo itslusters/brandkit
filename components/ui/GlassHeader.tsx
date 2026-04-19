@@ -64,8 +64,8 @@ export function GlassHeader() {
             : 'bg-transparent border-b border-transparent'
         }`}
       >
-        <a href="/" aria-label="Kiln — home" className="flex items-center">
-          <img src="/kiln.svg" alt="Kiln" className="h-5 w-auto" />
+        <a href="/" aria-label="Atriium — home" className="flex items-center">
+          <img src="/atriium.svg" alt="Atriium" className="h-5 w-auto" />
         </a>
 
         {/* Desktop nav */}

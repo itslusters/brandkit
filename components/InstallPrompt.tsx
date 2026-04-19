@@ -8,7 +8,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-const DISMISSED_KEY = 'kiln:pwa-install-dismissed'
+const DISMISSED_KEY = 'atriium:pwa-install-dismissed'
 const DISMISS_DAYS = 7
 const SHOW_DELAY_MS = 20_000
 
@@ -105,9 +105,9 @@ export function InstallPrompt() {
                 K
               </div>
               <div className="flex-1 min-w-0 pr-6">
-                <p className="eyebrow mb-1">Install Kiln</p>
+                <p className="eyebrow mb-1">Install Atriium</p>
                 <p className="text-sm font-semibold text-white leading-tight">
-                  {mode === 'android' ? 'One tap to home screen' : 'Add Kiln to your home screen'}
+                  {mode === 'android' ? 'One tap to home screen' : 'Add Atriium to your home screen'}
                 </p>
                 <p className="mt-1 text-xs text-zinc-400 leading-relaxed">
                   {mode === 'android'

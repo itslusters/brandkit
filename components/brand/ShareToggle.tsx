@@ -55,8 +55,8 @@ export function ShareToggle({ brandId, initialPublic }: Props) {
   async function openShareSheet() {
     haptic('light')
     const ok = await nativeShare({
-      title: 'My brand — Kiln',
-      text: 'Check out the brand identity I made on Kiln.',
+      title: 'My brand — Atriium',
+      text: 'Check out the brand identity I made on Atriium.',
       url: shareUrl,
       dialogTitle: 'Share brand',
     })

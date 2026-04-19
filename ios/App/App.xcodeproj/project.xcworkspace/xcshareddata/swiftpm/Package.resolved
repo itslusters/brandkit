@@ -11,12 +11,39 @@
       }
     },
     {
+      "identity" : "ion-ios-camera",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ionic-team/ion-ios-camera.git",
+      "state" : {
+        "revision" : "f6e58e8d78913c00433efa230f2ef20451566d51",
+        "version" : "1.0.0"
+      }
+    },
+    {
       "identity" : "ion-ios-filesystem",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ionic-team/ion-ios-filesystem.git",
       "state" : {
         "revision" : "0d81e26e828ff9582807e2339112cedf2e0fab85",
         "version" : "1.1.2"
+      }
+    },
+    {
+      "identity" : "purchases-hybrid-common",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-hybrid-common.git",
+      "state" : {
+        "revision" : "f95aee4cd5907e578a34e1bb5608379f1b9fede1",
+        "version" : "18.0.0"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm",
+      "state" : {
+        "revision" : "a78d10e43fd32e636cef073b8fede9a24a0b2d0b",
+        "version" : "5.67.2"
       }
     }
   ],

@@ -1,5 +1,5 @@
 /**
- * Generates iOS / App Store assets from the Kiln logo SVG.
+ * Generates iOS / App Store assets from the Atriium logo SVG.
  *
  * Outputs (under public/ios/):
  *   app-icon-1024.png          — App Store listing icon (required)
@@ -18,7 +18,7 @@ import path from 'node:path'
 
 const OUT = path.join(process.cwd(), 'public', 'ios')
 const BG = '#09090b' // matches manifest theme_color
-const SVG_PATH = path.join(process.cwd(), 'public', 'kiln.svg')
+const SVG_PATH = path.join(process.cwd(), 'public', 'atriium.svg')
 
 async function iconAt(size: number, name: string) {
   const svg = readFileSync(SVG_PATH)

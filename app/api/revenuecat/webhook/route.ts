@@ -21,10 +21,10 @@ import {
  * `REVENUECAT_WEBHOOK_SECRET`.
  *
  * Product / entitlement mapping:
- *   - kiln.essentials.onetime / entitlement "essentials" → one-time Essentials
- *   - kiln.pro.onetime        / entitlement "pro"        → one-time Pro
- *   - kiln.solo.monthly       / entitlement "solo"       → auto-renewable Solo
- *   - kiln.studio.monthly     / entitlement "studio"     → auto-renewable Studio
+ *   - atriium.essentials.onetime / entitlement "essentials" → one-time Essentials
+ *   - atriium.pro.onetime        / entitlement "pro"        → one-time Pro
+ *   - atriium.solo.monthly       / entitlement "solo"       → auto-renewable Solo
+ *   - atriium.studio.monthly     / entitlement "studio"     → auto-renewable Studio
  *
  * Event routing:
  *   GRANT (onetime):     NON_RENEWING_PURCHASE                    → grantOnetimeTier
@@ -68,13 +68,13 @@ interface RevenueCatWebhookPayload {
 }
 
 const PRODUCT_TO_ONETIME: Record<string, OnetimeTier> = {
-  'kiln.essentials.onetime': 'essentials',
-  'kiln.pro.onetime': 'pro',
+  'atriium.essentials.onetime': 'essentials',
+  'atriium.pro.onetime': 'pro',
 }
 
 const PRODUCT_TO_SUBSCRIPTION: Record<string, SubscriptionTier> = {
-  'kiln.solo.monthly': 'solo',
-  'kiln.studio.monthly': 'studio',
+  'atriium.solo.monthly': 'solo',
+  'atriium.studio.monthly': 'studio',
 }
 
 export async function POST(req: Request) {

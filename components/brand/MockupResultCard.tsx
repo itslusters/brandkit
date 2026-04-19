@@ -8,7 +8,7 @@ interface Props {
   templateName: string
   onDownload?: () => void
   /** When true, surfaces a "Watermarked" badge so free users understand why
-   *  the PNG has a Kiln mark before they try to download. */
+   *  the PNG has a Atriium mark before they try to download. */
   watermarked?: boolean
 }
 

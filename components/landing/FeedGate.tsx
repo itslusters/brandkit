@@ -132,7 +132,7 @@ export function FeedGate({ totalCount }: Props) {
               <a href="/terms" className="hover:text-zinc-300 transition-colors">Terms</a>
               <a href="mailto:we.lusters@gmail.com" className="hover:text-zinc-300 transition-colors">Contact</a>
             </div>
-            <span>© 2026 Kiln</span>
+            <span>© 2026 Atriium</span>
           </div>
         </div>
       </div>

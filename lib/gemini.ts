@@ -27,7 +27,7 @@ const VARIATION_HINTS = [
   'editorial-leaning layout, unconventional spacing, expressive scale',
 ]
 
-// Kiln house aesthetic — injected silently into every logo prompt.
+// Atriium house aesthetic — injected silently into every logo prompt.
 // Job: force the model toward the polish bar of Pentagram / Apple / Linear
 // and away from the AI-image cliches that make vanilla Imagen outputs
 // read as "AI-generated": rainbow gradients, generic tech swoosh, chromatic

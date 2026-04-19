@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 /**
- * Capacitor config — wraps the hosted Kiln web app in a native iOS shell.
+ * Capacitor config — wraps the hosted Atriium web app in a native iOS shell.
  *
  * Strategy: `server.url` points to production, so the native app loads the
  * full Next.js experience over the network but gets iOS-native capabilities
@@ -13,8 +13,8 @@ import type { CapacitorConfig } from '@capacitor/cli'
  * uses the bundled `webDir` instead — required for offline shell.
  */
 const config: CapacitorConfig = {
-  appId: 'app.kiln',
-  appName: 'Kiln',
+  appId: 'app.aatrium',
+  appName: 'Atriium',
   webDir: 'out',
   server: {
     url: 'https://brandkit-wheat.vercel.app',
@@ -33,7 +33,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'always',
     backgroundColor: '#09090b',
-    scheme: 'Kiln',
+    scheme: 'Atriium',
     // Disable scroll bounce so the app feels more native.
     scrollEnabled: true,
   },

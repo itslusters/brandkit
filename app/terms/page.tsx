@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'The rules and responsibilities of using Kiln.',
+  description: 'The rules and responsibilities of using Atriium.',
 }
 
 const UPDATED = 'April 19, 2026'
@@ -14,12 +14,12 @@ export default function TermsPage() {
       <p className="text-xs text-zinc-500 mb-8">Last updated: {UPDATED}</p>
 
       <p>
-        By using Kiln (the &quot;Service&quot;), you agree to these Terms. If you do not agree, do
+        By using Atriium (the &quot;Service&quot;), you agree to these Terms. If you do not agree, do
         not use the Service.
       </p>
 
       <h2 className="text-lg font-semibold text-white mt-8 mb-2">1. Eligibility</h2>
-      <p>You must be at least 13 years old (or the age of digital consent in your jurisdiction) to use Kiln.</p>
+      <p>You must be at least 13 years old (or the age of digital consent in your jurisdiction) to use Atriium.</p>
 
       <h2 className="text-lg font-semibold text-white mt-8 mb-2">2. Your account</h2>
       <p>
@@ -64,7 +64,7 @@ export default function TermsPage() {
 
       <h2 className="text-lg font-semibold text-white mt-8 mb-2">8. Limitation of liability</h2>
       <p>
-        To the maximum extent permitted by law, Kiln is not liable for indirect,
+        To the maximum extent permitted by law, Atriium is not liable for indirect,
         incidental, or consequential damages. Our total liability in any matter is
         capped at the amount you paid us in the 12 months prior to the claim, or $50,
         whichever is greater.

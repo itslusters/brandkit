@@ -60,7 +60,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             className="relative flex items-center justify-between px-6 py-4"
             style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
           >
-            <img src="/kiln.svg" alt="Kiln" className="h-5 w-auto" />
+            <img src="/atriium.svg" alt="Atriium" className="h-5 w-auto" />
             <button
               type="button"
               onClick={onClose}

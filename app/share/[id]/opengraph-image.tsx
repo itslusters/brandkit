@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 import { getPublicBrand } from '@/lib/brands'
 
 export const runtime = 'edge'
-export const alt = 'Brand kit — made with Kiln'
+export const alt = 'Brand kit — made with Atriium'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -10,7 +10,7 @@ interface Params { params: { id: string } }
 
 export default async function Image({ params }: Params) {
   const brand = await getPublicBrand(params.id)
-  const name = brand?.name ?? 'Kiln'
+  const name = brand?.name ?? 'Atriium'
   const style = brand?.brandResult.styleBrief.recommendedStyle ?? 'AI-generated brand kit'
   const logoUrl = brand?.selectedLogoUrl
   const palette = (brand?.brandResult.styleBrief.colorPalette ?? ['#09090b', '#18181b', '#3f3f46', '#71717a', '#a1a1aa']).slice(0, 5)
@@ -29,7 +29,7 @@ export default async function Image({ params }: Params) {
           position: 'relative',
         }}
       >
-        {/* Ribbon — top-right Kiln attribution */}
+        {/* Ribbon — top-right Atriium attribution */}
         <div
           style={{
             position: 'absolute',
@@ -48,7 +48,7 @@ export default async function Image({ params }: Params) {
             padding: '10px 18px',
           }}
         >
-          Made with <span style={{ color: '#ffffff' }}>Kiln</span>
+          Made with <span style={{ color: '#ffffff' }}>Atriium</span>
         </div>
 
         {/* Body — logo on left, name + style on right */}

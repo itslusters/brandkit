@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'How Kiln collects, uses, and protects your data.',
+  description: 'How Atriium collects, uses, and protects your data.',
 }
 
 const UPDATED = 'April 19, 2026'
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <p className="text-xs text-zinc-500 mb-8">Last updated: {UPDATED}</p>
 
       <p>
-        This Privacy Policy explains how Kiln (&quot;we&quot;, &quot;us&quot;) collects, uses, and protects
+        This Privacy Policy explains how Atriium (&quot;we&quot;, &quot;us&quot;) collects, uses, and protects
         information when you use our web and mobile applications (the &quot;Service&quot;).
       </p>
 

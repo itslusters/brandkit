@@ -68,7 +68,7 @@ function PricingPageInner() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-white">Your brand&apos;s home, not another logo generator.</h1>
           <p className="text-zinc-500 text-sm mt-2 max-w-xl">
-            ChatGPT and Gemini can spit out a logo for free. They can&apos;t remember your brand next week, ship you a vector SVG, compose mockups, or hand it off to a real designer. Kiln does.
+            ChatGPT and Gemini can spit out a logo for free. They can&apos;t remember your brand next week, ship you a vector SVG, compose mockups, or hand it off to a real designer. Atriium does.
           </p>
         </div>
       </StaggerItem>
@@ -80,7 +80,7 @@ function PricingPageInner() {
             <div>
               <p className="text-sm font-medium text-white">Paid plans live in the iOS app</p>
               <p className="text-xs text-zinc-500 mt-1">
-                Download Kiln on the App Store to subscribe or make a one-time purchase. Free tier works fine on the web.
+                Download Atriium on the App Store to subscribe or make a one-time purchase. Free tier works fine on the web.
               </p>
             </div>
           </div>
