@@ -129,10 +129,12 @@ export default function MoodPage() {
 
   return (
     <div className="pt-4 pb-16">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Brand mood</h1>
-        <p className="text-zinc-500 text-sm mt-1">
-          A visual direction for your brand. {user ? '' : 'Free preview — upgrade to unlock all.'}
+      <div className="mb-8">
+        <p className="eyebrow mb-3">Brand mood</p>
+        <h1 className="display-2 text-white">Your visual world.</h1>
+        <p className="text-zinc-500 text-sm mt-3 max-w-md leading-relaxed">
+          Moments, textures, and scenes that match your brand&apos;s style brief —
+          useful for future asset direction.
         </p>
       </div>
 
@@ -173,13 +175,18 @@ export default function MoodPage() {
                 <button
                   type="button"
                   onClick={onLockedClick}
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 backdrop-blur-sm bg-zinc-950/60 cursor-pointer group"
+                  aria-label={`Unlock ${tpl.label}`}
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 backdrop-blur-md bg-zinc-950/70 cursor-pointer group transition-all hover:bg-zinc-950/55"
                 >
-                  <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-300 group-hover:text-white transition" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" />
-                  </svg>
-                  <p className="text-[10px] font-medium text-zinc-200">Unlock</p>
+                  <div className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center group-hover:bg-white/20 group-hover:scale-110 transition-all">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-white/90">
+                    Essentials
+                  </span>
                 </button>
               )}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5 pointer-events-none">

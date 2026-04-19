@@ -71,6 +71,14 @@ export async function deleteBrand(userId: string, brandId: string): Promise<void
   await redis.zrem(userIndexKey(userId), brandId)
 }
 
+export async function renameBrand(userId: string, brandId: string, name: string): Promise<SavedBrand | null> {
+  const brand = await getBrand(userId, brandId)
+  if (!brand) return null
+  const updated: SavedBrand = { ...brand, name, updatedAt: Date.now() }
+  await redis.set(brandKey(userId, brandId), updated)
+  return updated
+}
+
 export async function countBrands(userId: string): Promise<number> {
   return (await redis.zcard(userIndexKey(userId))) ?? 0
 }

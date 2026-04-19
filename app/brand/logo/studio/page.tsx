@@ -167,15 +167,18 @@ export default function LogoStudioPage() {
   return (
     <div className="pt-4 pb-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Pick your logo</h1>
-        <p className="text-zinc-500 text-sm mt-1">
+        <p className="eyebrow mb-3">Logo studio</p>
+        <h1 className="display-2 text-white">
+          {isDone ? 'Pick your logo.' : 'Drawing your logo.'}
+        </h1>
+        <p className="text-zinc-500 text-sm mt-3 max-w-md leading-relaxed">
           {isDone
             ? modifier
-              ? `Refined: ${ITERATION_CHIPS.find(c => c.id === modifier)?.label.toLowerCase()}. Pick one or refine again.`
-              : 'Select the one you like best — or refine below.'
+              ? `Refined: ${ITERATION_CHIPS.find(c => c.id === modifier)?.label.toLowerCase()}. Pick one, refine again, or go back.`
+              : 'Tap the one you like. Tap the selected one again to enlarge.'
             : modifier
-              ? `Refining (${ITERATION_CHIPS.find(c => c.id === modifier)?.label.toLowerCase()})…`
-              : 'AI is generating your logos...'}
+              ? `Refining — ${ITERATION_CHIPS.find(c => c.id === modifier)?.label.toLowerCase()}…`
+              : 'Each variation explores the same brand from a different angle.'}
         </p>
       </div>
 
@@ -183,9 +186,13 @@ export default function LogoStudioPage() {
         {cards.map((card, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06, type: 'spring', stiffness: 300, damping: 25 }}
+            initial={{ opacity: 0, y: 24, scale: 0.92, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            transition={{
+              delay: i * 0.15,
+              duration: 0.55,
+              ease: [0.22, 1, 0.36, 1],
+            }}
           >
             <LogoResultCard
               state={card.state}

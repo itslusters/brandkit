@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FolderOpen, Search, ArrowDownUp } from 'lucide-react'
 import { BrandLibraryCard } from './BrandLibraryCard'
 import { DeleteConfirmModal } from './DeleteConfirmModal'
+import { RenameBrandModal } from './RenameBrandModal'
 import type { SavedBrand } from '@/lib/brands'
 
 type SortMode = 'recent' | 'oldest' | 'name'
@@ -25,6 +26,7 @@ export function BrandsList({ initialBrands }: Props) {
   const [pendingDelete, setPendingDelete] = useState<SavedBrand | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [duplicating, setDuplicating] = useState<string | null>(null)
+  const [pendingRename, setPendingRename] = useState<SavedBrand | null>(null)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
 
@@ -142,6 +144,7 @@ export function BrandsList({ initialBrands }: Props) {
                   brand={brand}
                   onDelete={() => setPendingDelete(brand)}
                   onDuplicate={() => duplicate(brand.id)}
+                  onRename={() => setPendingRename(brand)}
                 />
               </motion.div>
             ))}
@@ -150,10 +153,24 @@ export function BrandsList({ initialBrands }: Props) {
       )}
 
       <DeleteConfirmModal
-        open={pendingDelete !== null && !deleting}
+        open={pendingDelete !== null}
         brandName={pendingDelete?.name ?? ''}
         onConfirm={confirmDelete}
-        onClose={() => setPendingDelete(null)}
+        onClose={() => !deleting && setPendingDelete(null)}
+        busy={deleting}
+      />
+
+      <RenameBrandModal
+        open={pendingRename !== null}
+        brandId={pendingRename?.id ?? ''}
+        currentName={pendingRename?.name ?? ''}
+        onRenamed={(newName) => {
+          if (!pendingRename) return
+          const id = pendingRename.id
+          setBrands((prev) => prev.map((b) => (b.id === id ? { ...b, name: newName } : b)))
+          setPendingRename(null)
+        }}
+        onClose={() => setPendingRename(null)}
       />
     </>
   )
