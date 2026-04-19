@@ -1,27 +1,61 @@
 export const maxDuration = 15
 export const runtime = 'nodejs'
 
-import { upgradeUserTier } from '@/lib/entitlements'
-import type { UserTier } from '@/lib/tier'
+import {
+  grantOnetimeTier,
+  grantSubscriptionTier,
+  revokeSubscriptionTier,
+} from '@/lib/entitlements'
+import {
+  isOnetimeTier,
+  isSubscriptionTier,
+  type OnetimeTier,
+  type SubscriptionTier,
+} from '@/lib/tier'
 
 /**
  * RevenueCat webhook — https://www.revenuecat.com/docs/integrations/webhooks
  *
  * Authentication: RevenueCat posts a bearer token in the `Authorization`
  * header, whose value is configured in their dashboard. We compare against
- * `REVENUECAT_WEBHOOK_SECRET`. This gives us server-verified entitlement
- * updates without needing to validate App Store receipts ourselves.
+ * `REVENUECAT_WEBHOOK_SECRET`.
  *
- * Event types we care about:
- *   INITIAL_PURCHASE / NON_RENEWING_PURCHASE → grant tier
- *   TRANSFER                                 → grant tier on the new user
- *   Everything else (RENEWAL, CANCELLATION, EXPIRATION for subscriptions,
- *   PRODUCT_CHANGE, BILLING_ISSUE, …) — ignored because our products are
- *   non-consumable lifetime unlocks. Refunds happen out-of-band.
+ * Product / entitlement mapping:
+ *   - kiln.essentials.onetime / entitlement "essentials" → one-time Essentials
+ *   - kiln.pro.onetime        / entitlement "pro"        → one-time Pro
+ *   - kiln.solo.monthly       / entitlement "solo"       → auto-renewable Solo
+ *   - kiln.studio.monthly     / entitlement "studio"     → auto-renewable Studio
+ *
+ * Event routing:
+ *   GRANT (onetime):     NON_RENEWING_PURCHASE                    → grantOnetimeTier
+ *   GRANT (subscription): INITIAL_PURCHASE, RENEWAL,
+ *                         UNCANCELLATION, TRANSFER                → grantSubscriptionTier
+ *   REVOKE (subscription): EXPIRATION, SUBSCRIPTION_PAUSED        → revokeSubscriptionTier
+ *   IGNORE: CANCELLATION (access runs to period end — the
+ *           EXPIRATION event at that time is what we act on),
+ *           BILLING_ISSUE, PRODUCT_CHANGE, TEST.
+ *
+ * CANCELLATION is intentionally ignored because Apple subscriptions stay
+ * active until the end of the billing period after cancellation; we wait for
+ * EXPIRATION to actually revoke. Otherwise users who cancel mid-month would
+ * lose access immediately, which breaks App Store review expectations.
  */
 
+type EventType =
+  | 'INITIAL_PURCHASE'
+  | 'NON_RENEWING_PURCHASE'
+  | 'RENEWAL'
+  | 'UNCANCELLATION'
+  | 'TRANSFER'
+  | 'CANCELLATION'
+  | 'EXPIRATION'
+  | 'SUBSCRIPTION_PAUSED'
+  | 'BILLING_ISSUE'
+  | 'PRODUCT_CHANGE'
+  | 'TEST'
+
 interface RevenueCatEvent {
-  type: string
+  type: EventType | string
   app_user_id: string
   original_app_user_id?: string
   product_id?: string
@@ -33,17 +67,15 @@ interface RevenueCatWebhookPayload {
   api_version?: string
 }
 
-const PRODUCT_TO_TIER: Record<string, UserTier> = {
+const PRODUCT_TO_ONETIME: Record<string, OnetimeTier> = {
   'kiln.essentials.onetime': 'essentials',
   'kiln.pro.onetime': 'pro',
 }
 
-const ENTITLEMENT_TO_TIER: Record<string, UserTier> = {
-  essentials: 'essentials',
-  pro: 'pro',
+const PRODUCT_TO_SUBSCRIPTION: Record<string, SubscriptionTier> = {
+  'kiln.solo.monthly': 'solo',
+  'kiln.studio.monthly': 'studio',
 }
-
-const GRANTING_EVENTS = new Set(['INITIAL_PURCHASE', 'NON_RENEWING_PURCHASE', 'TRANSFER', 'UNCANCELLATION'])
 
 export async function POST(req: Request) {
   const secret = process.env.REVENUECAT_WEBHOOK_SECRET
@@ -53,8 +85,7 @@ export async function POST(req: Request) {
   }
 
   const authHeader = req.headers.get('authorization') ?? ''
-  const expected = `Bearer ${secret}`
-  if (authHeader !== expected) {
+  if (authHeader !== `Bearer ${secret}`) {
     return new Response('unauthorized', { status: 401 })
   }
 
@@ -70,36 +101,81 @@ export async function POST(req: Request) {
     return new Response('invalid_event', { status: 400 })
   }
 
-  if (!GRANTING_EVENTS.has(event.type)) {
-    // Acknowledge so RevenueCat doesn't keep retrying events we explicitly ignore.
-    return new Response('ignored', { status: 200 })
-  }
-
-  const tier = resolveTier(event)
-  if (!tier) {
-    console.warn('[revenuecat/webhook] could not resolve tier from event:', {
-      product_id: event.product_id,
-      entitlement_ids: event.entitlement_ids,
-    })
-    return new Response('no_tier_match', { status: 200 })
-  }
-
   try {
-    await upgradeUserTier(event.app_user_id, tier)
+    await routeEvent(event)
   } catch (err) {
-    console.error('[revenuecat/webhook] entitlement update failed:', err)
+    console.error('[revenuecat/webhook] handler error:', err)
     return new Response('handler_failed', { status: 500 })
   }
 
   return new Response('ok', { status: 200 })
 }
 
-function resolveTier(event: RevenueCatEvent): UserTier | null {
-  for (const id of event.entitlement_ids ?? []) {
-    if (ENTITLEMENT_TO_TIER[id]) return ENTITLEMENT_TO_TIER[id]
+async function routeEvent(event: RevenueCatEvent): Promise<void> {
+  const userId = event.app_user_id
+
+  switch (event.type) {
+    case 'NON_RENEWING_PURCHASE': {
+      const tier = resolveOnetime(event)
+      if (tier) await grantOnetimeTier(userId, tier)
+      else logUnresolved(event)
+      return
+    }
+    case 'INITIAL_PURCHASE':
+    case 'RENEWAL':
+    case 'UNCANCELLATION':
+    case 'TRANSFER': {
+      // For subscription products this path fires. INITIAL_PURCHASE can ALSO
+      // fire for one-time products in some Apple configurations, so we
+      // fall through to onetime resolution if subscription lookup misses.
+      const subTier = resolveSubscription(event)
+      if (subTier) {
+        await grantSubscriptionTier(userId, subTier)
+        return
+      }
+      const oneTier = resolveOnetime(event)
+      if (oneTier) {
+        await grantOnetimeTier(userId, oneTier)
+        return
+      }
+      logUnresolved(event)
+      return
+    }
+    case 'EXPIRATION':
+    case 'SUBSCRIPTION_PAUSED': {
+      await revokeSubscriptionTier(userId)
+      return
+    }
+    default:
+      // CANCELLATION / BILLING_ISSUE / PRODUCT_CHANGE / TEST — no-op.
+      return
   }
-  if (event.product_id && PRODUCT_TO_TIER[event.product_id]) {
-    return PRODUCT_TO_TIER[event.product_id]
+}
+
+function resolveOnetime(event: RevenueCatEvent): OnetimeTier | null {
+  for (const id of event.entitlement_ids ?? []) {
+    if (isOnetimeTier(id)) return id
+  }
+  if (event.product_id && PRODUCT_TO_ONETIME[event.product_id]) {
+    return PRODUCT_TO_ONETIME[event.product_id]
   }
   return null
+}
+
+function resolveSubscription(event: RevenueCatEvent): SubscriptionTier | null {
+  for (const id of event.entitlement_ids ?? []) {
+    if (isSubscriptionTier(id)) return id
+  }
+  if (event.product_id && PRODUCT_TO_SUBSCRIPTION[event.product_id]) {
+    return PRODUCT_TO_SUBSCRIPTION[event.product_id]
+  }
+  return null
+}
+
+function logUnresolved(event: RevenueCatEvent): void {
+  console.warn('[revenuecat/webhook] could not resolve tier from event:', {
+    type: event.type,
+    product_id: event.product_id,
+    entitlement_ids: event.entitlement_ids,
+  })
 }

@@ -23,7 +23,7 @@ export default function MockupPage() {
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const { user } = useUser()
-  const userTier = ((user?.publicMetadata as { tier?: 'free' | 'essentials' | 'pro' } | undefined)?.tier) ?? 'free'
+  const userTier = ((user?.publicMetadata as { tier?: 'free' | 'essentials' | 'solo' | 'pro' | 'studio' } | undefined)?.tier) ?? 'free'
   const isFreeTier = userTier === 'free'
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)

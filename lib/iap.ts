@@ -6,8 +6,10 @@
  * use to update Clerk `publicMetadata.tier` without trusting client state.
  *
  * Product layout (configured in App Store Connect + mirrored in RevenueCat):
- *   - Non-consumable `kiln.essentials.onetime` → `essentials` entitlement
- *   - Non-consumable `kiln.pro.onetime`        → `pro` entitlement
+ *   - Non-consumable        `kiln.essentials.onetime`  → entitlement `essentials`
+ *   - Non-consumable        `kiln.pro.onetime`         → entitlement `pro`
+ *   - Auto-renewable monthly `kiln.solo.monthly`       → entitlement `solo`
+ *   - Auto-renewable monthly `kiln.studio.monthly`     → entitlement `studio`
  *
  * On web this module is a set of no-ops so the pricing page can import it
  * unconditionally without polluting the browser bundle with native SDK code.
@@ -45,6 +47,8 @@ async function ensureInitialized(userId: string): Promise<boolean> {
 const PRODUCT_IDS: Record<PaidPlan, string> = {
   essentials: 'kiln.essentials.onetime',
   pro: 'kiln.pro.onetime',
+  solo: 'kiln.solo.monthly',
+  studio: 'kiln.studio.monthly',
 }
 
 /**
