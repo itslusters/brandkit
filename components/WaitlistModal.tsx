@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Check, ArrowRight } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { trackEvent } from '@/lib/analytics'
+import { readRef } from '@/lib/ref'
 
 interface Props {
   open: boolean
@@ -32,10 +33,17 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
     setError('')
     setLoading(true)
     try {
+      const ref = readRef()
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: finalEmail, plan, note: note.trim() || undefined }),
+        body: JSON.stringify({
+          email: finalEmail,
+          plan,
+          note: note.trim() || undefined,
+          locale: 'en',
+          ref,
+        }),
       })
       if (!res.ok) {
         if (res.status === 429) {
@@ -46,7 +54,7 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
         }
         return
       }
-      trackEvent('waitlist_signup', { locale: 'en', plan })
+      trackEvent('waitlist_signup', { locale: 'en', plan, ref: ref ?? null })
       setDone(true)
     } catch {
       setError('Network error. Try again.')

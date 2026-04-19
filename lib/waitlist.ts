@@ -4,12 +4,17 @@ import { Redis } from '@upstash/redis'
 const redis = Redis.fromEnv()
 
 export type WaitlistPlan = 'essentials' | 'pro'
+export type WaitlistLocale = 'en' | 'ko'
 
 export interface WaitlistEntry {
   email: string
   plan: WaitlistPlan
   note?: string
   userId?: string
+  /** User's inferred locale — drives welcome email language + market analytics. */
+  locale?: WaitlistLocale
+  /** Referral code from `?ref=xxx`. Free-form — we ingest and segment later. */
+  ref?: string
   ts: number
 }
 

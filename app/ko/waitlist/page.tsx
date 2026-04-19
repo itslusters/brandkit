@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
 import { trackEvent } from '@/lib/analytics'
+import { readRef } from '@/lib/ref'
 
 /**
  * Korean-language waitlist landing. Standalone page — deliberately not wired
@@ -44,10 +45,17 @@ export default function KoreanWaitlistPage() {
     setLoading(true)
     setError('')
     try {
+      const ref = readRef()
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: finalEmail, plan: 'essentials', note: note.trim() || undefined }),
+        body: JSON.stringify({
+          email: finalEmail,
+          plan: 'essentials',
+          note: note.trim() || undefined,
+          locale: 'ko',
+          ref,
+        }),
       })
       if (!res.ok) {
         if (res.status === 429) {
@@ -58,7 +66,12 @@ export default function KoreanWaitlistPage() {
         }
         return
       }
-      trackEvent('waitlist_signup', { locale: 'ko', plan: 'essentials', has_note: Boolean(note.trim()) })
+      trackEvent('waitlist_signup', {
+        locale: 'ko',
+        plan: 'essentials',
+        has_note: Boolean(note.trim()),
+        ref: ref ?? null,
+      })
       setDone(true)
     } catch {
       setError('네트워크 오류. 다시 시도해주세요.')
