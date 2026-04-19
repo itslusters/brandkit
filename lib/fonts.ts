@@ -17,23 +17,26 @@ export interface FontEntry {
 //
 // Satori v0.26 has parsing issues with some variable fonts and certain
 // TTF builds (fails with "Cannot read properties of undefined reading '256'"
-// on malformed/unsupported cmap subtables). Excluded files as of 2026-04-18:
-//   Inter-var.ttf, SpaceGrotesk-var.ttf, Manrope-var.ttf, Fraunces-var.ttf,
-//   BricolageGrotesque-800.ttf
-// When static replacements become available (e.g., Inter-Bold.ttf), they can
-// be re-added. Variable fonts must be converted to static instances first.
+// on malformed/unsupported cmap subtables).
+//
+// Excluded variable fonts (from 2026-04-18): Inter-var.ttf, SpaceGrotesk-var.ttf,
+// Manrope-var.ttf, Fraunces-var.ttf, BricolageGrotesque-800.ttf.
+//
+// Excluded static TTFs (from 2026-04-19, verified reproducing the '256' crash):
+// PlayfairDisplay-400.ttf, JetBrainsMono-400.ttf — their cmap tables are
+// incompatible with opentype.js used by satori. Files remain in public/fonts/
+// so we can swap in known-good builds from Google Fonts' "Download Family" ZIP
+// later without having to re-register them.
 export const FONT_CATALOG: FontEntry[] = [
   // Editorial serif — elegant, luxurious, classic
-  { family: 'Playfair Display', file: 'PlayfairDisplay-400.ttf', weight: 400, style: 'normal', category: 'serif', tags: ['elegant', 'editorial', 'luxurious', 'classic', 'fashion', 'premium'] },
-  { family: 'DM Serif Display', file: 'DMSerifDisplay-400.ttf', weight: 400, style: 'normal', category: 'serif', tags: ['elegant', 'fashion', 'display', 'classic', 'refined', 'modern'] },
+  { family: 'DM Serif Display', file: 'DMSerifDisplay-400.ttf', weight: 400, style: 'normal', category: 'serif', tags: ['elegant', 'editorial', 'luxurious', 'classic', 'fashion', 'premium', 'refined', 'modern'] },
   { family: 'Instrument Serif', file: 'InstrumentSerif-400.ttf', weight: 400, style: 'normal', category: 'serif', tags: ['minimal', 'editorial', 'refined', 'quiet', 'understated', 'clean'] },
 
   // Display / heavy — impact, bold, expressive
   { family: 'Archivo Black', file: 'ArchivoBlack-900.ttf', weight: 900, style: 'normal', category: 'display', tags: ['bold', 'heavy', 'confident', 'impact', 'loud', 'strong', 'modern', 'tech'] },
 
   // Mono — tech, developer, precise
-  { family: 'JetBrains Mono', file: 'JetBrainsMono-400.ttf', weight: 400, style: 'normal', category: 'mono', tags: ['tech', 'developer', 'precise', 'code', 'hacker', 'startup', 'minimal'] },
-  { family: 'IBM Plex Mono', file: 'IBMPlexMono-400.ttf', weight: 400, style: 'normal', category: 'mono', tags: ['corporate', 'precise', 'tech', 'trusted', 'professional', 'clean'] },
+  { family: 'IBM Plex Mono', file: 'IBMPlexMono-400.ttf', weight: 400, style: 'normal', category: 'mono', tags: ['corporate', 'precise', 'tech', 'trusted', 'professional', 'clean', 'developer', 'code', 'startup', 'minimal'] },
 ]
 
 // Cache loaded font buffers in memory (Node process lifetime = Vercel warm instance)

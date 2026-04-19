@@ -64,6 +64,11 @@ export function resolveMoodStyleId(variationIndex = 0, override?: string): strin
  * Recraft caps training uploads at 5 images per style, so users with larger
  * reference sets split them across multiple styles; rotating through them
  * uses every trained style AND makes the 3 variations more distinct.
+ *
+ * NOTE 2026-04-19: The logo-generation path no longer consumes this; a
+ * trained style was flattening the structural differences between wordmark,
+ * symbol-text, and emblem. Kept for mood boards (see `resolveMoodStyleId`)
+ * and for future per-surface opt-in.
  */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -94,7 +99,13 @@ export async function generateRecraftImage(
   const apiKey = process.env.RECRAFT_API_KEY
   if (!apiKey) throw new Error('RECRAFT_API_KEY not configured')
 
-  const styleId = resolveStyleId(options.variationIndex ?? 0, options.styleId)
+  // Only use a trained style_id when the caller explicitly passes one.
+  // Previously this silently resolved `RECRAFT_STYLE_ID` from env, which made
+  // every logo generation inherit the trained aesthetic — flattening the
+  // structural differences between wordmark / symbol-text / emblem. Callers
+  // that want env-rotated styles (e.g. mood images) should run `resolveStyleId()`
+  // themselves and pass the result in `options.styleId`.
+  const styleId = options.styleId
   const styleField = styleId
     ? { style_id: styleId }
     : { style: options.style ?? 'vector_illustration', ...(options.substyle ? { substyle: options.substyle } : {}) }
