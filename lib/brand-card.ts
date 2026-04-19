@@ -151,7 +151,17 @@ export async function renderBrandCard(args: CardArgs): Promise<Buffer> {
 
 export const BRAND_CARD_VARIANTS: CardArgs['variant'][] = ['dark-hero', 'color-block', 'editorial-grid']
 
-// DNA Card — single 1:1 trading-card style for social sharing
+/**
+ * DNA Card — the single-image brand artifact users share on social. 1080×1080
+ * so it works natively on IG feed, Twitter, LinkedIn, Discord, and iMessage.
+ *
+ * Layout: dark canvas, giant brand name as the hero, a wide color palette
+ * band locked to the top third, then a small editorial footer with style
+ * label, typography, and a "MADE WITH KILN" ribbon. The card carries
+ * three moves: confident display type, the brand's actual colors in a
+ * strip people can eyeball at thumb-size, and a clear Kiln attribution
+ * for the viral loop.
+ */
 export async function renderDNACard(args: {
   brandName: string
   primaryColor: string
@@ -161,57 +171,217 @@ export async function renderDNACard(args: {
   typography: string[]
 }): Promise<Buffer> {
   const { brandName, primaryColor: p, secondaryColor: s, accentColor: a, style, typography } = args
+  const paletteHex = [p, s, a]
 
   const jsx = {
     type: 'div',
     props: {
       style: {
-        width: '100%', height: '100%', display: 'flex',
-        flexDirection: 'column', justifyContent: 'space-between',
-        backgroundColor: '#0a0a0b', padding: '64px',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#09090b',
+        position: 'relative',
       },
       children: [
-        // Top: brand name large
-        { type: 'div', key: 'top', props: {
-          style: { display: 'flex', flexDirection: 'column' },
-          children: [
-            { type: 'div', key: 'name', props: {
-              style: { display: 'flex', fontSize: 64, fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 },
-              children: brandName,
-            }},
-            { type: 'div', key: 'style', props: {
-              style: { display: 'flex', fontSize: 16, color: '#71717a', marginTop: '16px', lineHeight: 1.4 },
-              children: style,
-            }},
-          ],
-        }},
-        // Bottom: palette + typography + kiln watermark
-        { type: 'div', key: 'bottom', props: {
-          style: { display: 'flex', flexDirection: 'column', gap: '20px' },
-          children: [
-            // Palette
-            { type: 'div', key: 'palette', props: {
-              style: { display: 'flex', gap: '8px' },
-              children: [
-                { type: 'div', key: 'c1', props: { style: { display: 'flex', width: 40, height: 40, borderRadius: 8, backgroundColor: p } } },
-                { type: 'div', key: 'c2', props: { style: { display: 'flex', width: 40, height: 40, borderRadius: 8, backgroundColor: s } } },
-                { type: 'div', key: 'c3', props: { style: { display: 'flex', width: 40, height: 40, borderRadius: 8, backgroundColor: a } } },
-              ],
-            }},
-            // Typography
-            { type: 'div', key: 'typo', props: {
-              style: { display: 'flex', flexDirection: 'column', gap: '4px' },
-              children: typography.map((t, i) => (
-                { type: 'div', key: `t${i}`, props: { style: { display: 'flex', fontSize: 13, color: '#a1a1aa' }, children: t } }
-              )),
-            }},
-            // Watermark
-            { type: 'div', key: 'wm', props: {
-              style: { display: 'flex', fontSize: 11, color: '#3f3f46' },
-              children: 'kiln.app',
-            }},
-          ],
-        }},
+        // Full-width palette band at top (1/4 of card height)
+        {
+          type: 'div',
+          key: 'band',
+          props: {
+            style: { display: 'flex', width: '100%', height: 240 },
+            children: paletteHex.map((hex, i) => ({
+              type: 'div',
+              key: `swatch-${i}`,
+              props: { style: { display: 'flex', flex: 1, backgroundColor: hex } },
+            })),
+          },
+        },
+        // "MADE WITH KILN" ribbon, pinned top-right over the band
+        {
+          type: 'div',
+          key: 'ribbon',
+          props: {
+            style: {
+              position: 'absolute',
+              top: 40,
+              right: 40,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 16,
+              fontWeight: 600,
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 999,
+              padding: '8px 16px',
+            },
+            children: [
+              { type: 'span', key: 'pre', props: { style: { display: 'flex', opacity: 0.7 }, children: 'Made with' } },
+              { type: 'span', key: 'kiln', props: { style: { display: 'flex' }, children: 'KILN' } },
+            ],
+          },
+        },
+        // Main canvas
+        {
+          type: 'div',
+          key: 'main',
+          props: {
+            style: {
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '72px 64px',
+            },
+            children: [
+              // Hero — brand name in display scale
+              {
+                type: 'div',
+                key: 'hero',
+                props: {
+                  style: { display: 'flex', flexDirection: 'column' },
+                  children: [
+                    {
+                      type: 'div',
+                      key: 'eyebrow',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          fontSize: 18,
+                          fontWeight: 600,
+                          letterSpacing: '0.22em',
+                          textTransform: 'uppercase',
+                          color: '#52525b',
+                          marginBottom: 28,
+                        },
+                        children: 'Brand DNA',
+                      },
+                    },
+                    {
+                      type: 'div',
+                      key: 'name',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          fontSize: 132,
+                          fontWeight: 800,
+                          color: '#ffffff',
+                          letterSpacing: '-0.04em',
+                          lineHeight: 0.94,
+                          maxWidth: 920,
+                        },
+                        children: brandName,
+                      },
+                    },
+                    {
+                      type: 'div',
+                      key: 'style',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          fontSize: 22,
+                          color: '#a1a1aa',
+                          marginTop: 28,
+                          maxWidth: 920,
+                          lineHeight: 1.35,
+                        },
+                        children: style,
+                      },
+                    },
+                  ],
+                },
+              },
+              // Footer — typography + hex swatches
+              {
+                type: 'div',
+                key: 'foot',
+                props: {
+                  style: {
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-end',
+                    gap: 32,
+                  },
+                  children: [
+                    // Typography column
+                    {
+                      type: 'div',
+                      key: 'typo',
+                      props: {
+                        style: { display: 'flex', flexDirection: 'column', gap: 6 },
+                        children: [
+                          {
+                            type: 'div',
+                            key: 'typolabel',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                letterSpacing: '0.22em',
+                                textTransform: 'uppercase',
+                                color: '#52525b',
+                                marginBottom: 4,
+                              },
+                              children: 'Typography',
+                            },
+                          },
+                          ...typography.slice(0, 3).map((t, i) => ({
+                            type: 'div',
+                            key: `t${i}`,
+                            props: {
+                              style: { display: 'flex', fontSize: 16, color: '#d4d4d8' },
+                              children: t,
+                            },
+                          })),
+                        ],
+                      },
+                    },
+                    // Hex row
+                    {
+                      type: 'div',
+                      key: 'hex',
+                      props: {
+                        style: { display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' },
+                        children: [
+                          {
+                            type: 'div',
+                            key: 'hexlabel',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                letterSpacing: '0.22em',
+                                textTransform: 'uppercase',
+                                color: '#52525b',
+                                marginBottom: 4,
+                              },
+                              children: 'Palette',
+                            },
+                          },
+                          ...paletteHex.map((hex, i) => ({
+                            type: 'div',
+                            key: `h${i}`,
+                            props: {
+                              style: { display: 'flex', fontSize: 15, color: '#d4d4d8', fontFamily: 'Inter' },
+                              children: hex.toUpperCase(),
+                            },
+                          })),
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
       ],
     },
   } as unknown as React.ReactElement

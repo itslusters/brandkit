@@ -1,5 +1,5 @@
 import { listPublicBrands, getTotalBrandsCount } from '@/lib/brands'
-import { FeedGallery } from '@/components/landing/FeedGallery'
+import { FeedGallery, type FeedItem } from '@/components/landing/FeedGallery'
 import { FeedGate } from '@/components/landing/FeedGate'
 
 export default async function Home() {
@@ -8,34 +8,35 @@ export default async function Home() {
     getTotalBrandsCount(),
   ])
 
-  // Build feed items from public brands — mix logos, mockups, cards for visual variety
-  const feedItems: { id: string; imageUrl: string; brandName: string; brandId: string }[] = []
+  // Build feed items from public brands — mix logos, mockups, cards for visual variety.
+  // Attach the brand's stylePack so the client-side filter can narrow by aesthetic
+  // without refetching.
+  const feedItems: FeedItem[] = []
 
   for (const brand of publicBrands) {
-    // Logo
+    const stylePack = brand.brandInput?.stylePack
     if (brand.selectedLogoUrl) {
-      feedItems.push({ id: `${brand.id}-logo`, imageUrl: brand.selectedLogoUrl, brandName: brand.name, brandId: brand.id })
+      feedItems.push({ id: `${brand.id}-logo`, imageUrl: brand.selectedLogoUrl, brandName: brand.name, brandId: brand.id, stylePack })
     }
-    // First 2 mockups
     for (const m of brand.mockupUrls.slice(0, 2)) {
-      feedItems.push({ id: `${brand.id}-${m.templateId}`, imageUrl: m.url, brandName: brand.name, brandId: brand.id })
+      feedItems.push({ id: `${brand.id}-${m.templateId}`, imageUrl: m.url, brandName: brand.name, brandId: brand.id, stylePack })
     }
   }
 
-  // Curated showcase images (hand-picked by the designer)
+  // Curated showcase images (hand-picked by the designer). Showcase items
+  // appear under every filter since they don't carry a stylePack.
   const showcaseImages = Array.from({ length: 14 }, (_, i) =>
     `/showcase/ref-${String(i + 1).padStart(2, '0')}.png`
   )
-  const showcaseItems = showcaseImages.map((url, i) => ({
+  const showcaseItems: FeedItem[] = showcaseImages.map((url, i) => ({
     id: `showcase-${i}`,
     imageUrl: url,
     brandName: '',
     brandId: '',
   }))
 
-  // Interleave user brands with showcase images
+  // Interleave user brands with showcase images + shuffle for visual variety
   const allItems = [...feedItems, ...showcaseItems]
-  // Shuffle for variety
   for (let i = allItems.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[allItems[i], allItems[j]] = [allItems[j], allItems[i]]

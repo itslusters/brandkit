@@ -291,6 +291,11 @@ textarea:focus-visible {
   cursor: not-allowed;
 }
 
+/* Hide the horizontal scrollbar for filter strips / pill rows without
+   preventing scroll interaction. */
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
 /* ----------------------------------------------------------------------
    Clerk modal integration — body-scroll lock and mobile width cap
    ----------------------------------------------------------------------

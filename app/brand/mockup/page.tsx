@@ -311,40 +311,56 @@ export default function MockupPage() {
 
       {/* Share & DNA Card — visible after save success */}
       {saveState === 'saved' && (
-        <div className="mt-6 space-y-3">
-          <button
-            type="button"
-            onClick={async () => {
-              const brandResult = getSession<BrandResult>('brandResult')
-              const brandName = getSession<string>('selectedName') ?? 'brand'
-              if (!brandResult) return
-              const res = await fetch('/api/brand/dna-card', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ brandName, brandResult }),
-              })
-              if (!res.ok) return
-              const blob = await res.blob()
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = `${brandName}-dna-card.png`
-              document.body.appendChild(a)
-              a.click()
-              document.body.removeChild(a)
-              URL.revokeObjectURL(url)
-            }}
-            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full border border-zinc-700 text-zinc-200 font-medium text-sm hover:border-zinc-500 transition-colors"
-          >
-            ✨ Download DNA Card (1080×1080)
-          </button>
-          <a
-            href="/account/brands"
-            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors"
-          >
-            View in library → (share from there)
-          </a>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mt-10 rounded-3xl border border-zinc-800/70 bg-zinc-900/40 overflow-hidden p-6 md:p-8"
+        >
+          <div className="aurora-glow w-[420px] h-[260px] bg-emerald-600/15 top-[-60px] left-[-60px]" style={{ animationDelay: '0s' }} />
+          <div className="aurora-glow w-[380px] h-[240px] bg-blue-600/10 bottom-[-60px] right-[-60px]" style={{ animationDelay: '2s' }} />
+          <div className="relative">
+            <p className="eyebrow mb-3">Saved to your library</p>
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+              Share what you just made.
+            </h3>
+            <p className="text-sm text-zinc-400 max-w-md leading-relaxed mb-5">
+              Download the DNA Card for social, or open your library to get a
+              public share link.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  const brandResult = getSession<BrandResult>('brandResult')
+                  const brandName = getSession<string>('selectedName') ?? 'brand'
+                  if (!brandResult) return
+                  const res = await fetch('/api/brand/dna-card', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ brandName, brandResult }),
+                  })
+                  if (!res.ok) return
+                  const blob = await res.blob()
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${brandName}-dna-card.png`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+                }}
+                className="btn btn-primary"
+              >
+                ✨ Download DNA Card
+              </button>
+              <a href="/account/brands" className="btn btn-secondary">
+                View in library →
+              </a>
+            </div>
+          </div>
+        </motion.div>
       )}
 
       <UpgradeModal
