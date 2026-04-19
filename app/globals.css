@@ -320,7 +320,91 @@ body:has([data-clerk-modal-backdrop]) {
 .cl-modalBackdrop,
 [data-clerk-modal-backdrop] {
   padding: 1rem !important;
+  background-color: rgba(9, 9, 11, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
 }
+
+/* Clerk card — match Kiln's surface language */
+.cl-card {
+  background-color: rgba(24, 24, 27, 0.92) !important;
+  border: 1px solid rgba(63, 63, 70, 0.6) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 20px 40px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(16px);
+}
+
+/* Clerk headings — brand type scale */
+.cl-headerTitle {
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  color: #fafafa !important;
+}
+.cl-headerSubtitle {
+  color: #a1a1aa !important;
+}
+
+/* Clerk primary button — match .btn-primary */
+.cl-formButtonPrimary {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%) !important;
+  color: #09090b !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 10px 30px -10px rgba(255, 255, 255, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.1s ease, box-shadow 0.2s ease !important;
+}
+.cl-formButtonPrimary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 14px 36px -10px rgba(255, 255, 255, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+.cl-formButtonPrimary:active { transform: scale(0.97); }
+
+/* Clerk inputs — match .input */
+.cl-formFieldInput,
+.cl-formFieldInput[type='text'],
+.cl-formFieldInput[type='email'],
+.cl-formFieldInput[type='password'] {
+  background: rgba(9, 9, 11, 0.6) !important;
+  border: 1px solid rgba(63, 63, 70, 0.6) !important;
+  border-radius: var(--radius-md) !important;
+  color: #fafafa !important;
+}
+.cl-formFieldInput:focus-visible {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+  outline: none !important;
+}
+.cl-formFieldLabel { color: #a1a1aa !important; }
+
+/* Social / OAuth buttons — ghost-outline style */
+.cl-socialButtonsBlockButton {
+  background: rgba(39, 39, 42, 0.4) !important;
+  border: 1px solid rgba(63, 63, 70, 0.6) !important;
+  border-radius: 9999px !important;
+  color: #fafafa !important;
+}
+.cl-socialButtonsBlockButton:hover {
+  background: rgba(39, 39, 42, 0.7) !important;
+  border-color: rgba(82, 82, 91, 0.8) !important;
+}
+
+/* Footer links (sign-in/sign-up toggles, forgot password) */
+.cl-footerActionLink {
+  color: #fafafa !important;
+  font-weight: 600 !important;
+}
+.cl-dividerLine { background-color: rgba(63, 63, 70, 0.5) !important; }
+.cl-dividerText { color: #71717a !important; }
 
 /* Dot grid drift — subtle wave motion for the background dot pattern */
 @keyframes dot-drift {
