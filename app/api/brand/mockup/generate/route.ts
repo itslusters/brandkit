@@ -4,7 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { put } from '@vercel/blob'
 import { nanoid } from 'nanoid'
 import { generateRecraftMockup } from '@/lib/mockups-recraft'
-import { requireTier } from '@/lib/tier'
+import { getLogoLimiter } from '@/lib/ratelimit'
+import { requireTier, getUserTier } from '@/lib/tier'
 import type { BrandResult, MockupResult } from '@/lib/types'
 
 interface RequestBody {
@@ -31,6 +32,21 @@ export async function POST(req: Request) {
       },
       { status: 403 }
     )
+  }
+
+  // Rate limit before hitting Recraft — each mockup costs ~$0.04. Without a
+  // cap a single user could burn tens of dollars by re-generating in a loop.
+  // Reuse the logo limiter (same tier ladder: free 30 / essentials 80 /
+  // solo+pro 250 / studio 800 per day).
+  if (process.env.NODE_ENV !== 'development') {
+    const tier = await getUserTier()
+    const { success } = await getLogoLimiter(tier).limit(`mockup:${userId}`)
+    if (!success) {
+      return Response.json(
+        { error: 'rate_limited', message: 'Daily mockup limit reached. Try again tomorrow.' },
+        { status: 429 }
+      )
+    }
   }
 
   let body: RequestBody

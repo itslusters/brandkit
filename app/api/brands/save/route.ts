@@ -1,9 +1,10 @@
 export const maxDuration = 30
 
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { uploadDataUrl } from '@/lib/blob'
 import { saveBrand, countBrands, FREE_TIER_BRAND_LIMIT } from '@/lib/brands'
 import { getUserTier } from '@/lib/tier'
+import { sendBrandSavedConfirmation } from '@/lib/resend'
 import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
 
 interface RequestBody {
@@ -68,6 +69,23 @@ export async function POST(req: Request) {
       mockupUrls,
       referencePhotoUrl,
     })
+
+    // Fire-and-forget email. Uses currentUser() to pull the verified
+    // primary email from Clerk — not blocking the response. Errors
+    // inside sendBrandSavedConfirmation are swallowed so a mail outage
+    // can't poison the save result.
+    currentUser()
+      .then((user) => {
+        const email = user?.primaryEmailAddress?.emailAddress
+        if (!email) return
+        return sendBrandSavedConfirmation({
+          to: email,
+          brandName: saved.name,
+          brandId: saved.id,
+          logoUrl: saved.selectedLogoUrl,
+        })
+      })
+      .catch((err) => console.error('[brands/save] email dispatch failed:', err))
 
     return Response.json({ brand: saved })
   } catch (err) {
