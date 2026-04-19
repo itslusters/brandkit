@@ -103,6 +103,12 @@ export default function MockupPage() {
   }
 
   async function generateMockups() {
+    // Free tier can't generate — short-circuit into the upgrade modal before
+    // we hit the server. Server also enforces this (403) as defense in depth.
+    if (isFreeTier) {
+      setUpgradeOpen(true)
+      return
+    }
     const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
     if (!selectedLogoDataUrl || selectedIds.length === 0) return
     setGenerating(true)
@@ -115,6 +121,11 @@ export default function MockupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateIds: selectedIds, logoDataUrl: selectedLogoDataUrl }),
       })
+      if (res.status === 403) {
+        setResults(null)
+        setUpgradeOpen(true)
+        return
+      }
       if (!res.ok) {
         setErrorMessage(`Server error ${res.status}`)
         setHasError(true)
@@ -209,6 +220,31 @@ export default function MockupPage() {
         </div>
       </div>
 
+      {isFreeTier && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-5 rounded-xl border border-zinc-800/70 bg-zinc-900/40 p-4 flex items-start gap-3"
+        >
+          <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 text-zinc-400">
+            🔒
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white">Mockups are an Essentials feature</p>
+            <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
+              See your logo on business cards, packaging, apps, and more. One-time $29 or $19/mo.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUpgradeOpen(true)}
+            className="shrink-0 text-xs font-semibold text-white underline decoration-zinc-500 hover:decoration-white"
+          >
+            Upgrade
+          </button>
+        </motion.div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {MOCKUP_TEMPLATES.map((tpl, i) => (
           <motion.div
@@ -233,7 +269,11 @@ export default function MockupPage() {
         disabled={selectedIds.length === 0 || generating}
         className="btn btn-primary btn-full btn-lg mt-6"
       >
-        {generating ? 'Generating…' : `Generate mockups (${selectedIds.length})`}
+        {generating
+          ? 'Generating…'
+          : isFreeTier
+            ? `Unlock mockups — upgrade`
+            : `Generate mockups (${selectedIds.length})`}
       </button>
 
       {hasError && (
@@ -245,18 +285,7 @@ export default function MockupPage() {
 
       {results && results.length > 0 && (
         <div className="mt-10">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold text-white">Results</h2>
-            {isFreeTier && (
-              <button
-                type="button"
-                onClick={() => setUpgradeOpen(true)}
-                className="text-xs text-zinc-400 hover:text-white underline decoration-dotted decoration-zinc-600 transition-colors"
-              >
-                Watermarked — upgrade for clean PNG
-              </button>
-            )}
-          </div>
+          <h2 className="text-sm font-semibold text-white mb-3">Results</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {results.map((r) => {
               const tpl = getTemplateById(r.templateId)
@@ -267,7 +296,6 @@ export default function MockupPage() {
                   dataUrl={r.dataUrl || undefined}
                   templateName={tpl?.name ?? r.templateId}
                   onDownload={() => downloadSingleMockup(r)}
-                  watermarked={isFreeTier}
                 />
               )
             })}
@@ -321,7 +349,7 @@ export default function MockupPage() {
 
       <UpgradeModal
         open={upgradeOpen}
-        reason="Free tier includes watermarked previews. Upgrade to remove watermarks and unlock vector SVG, PDF guide, and asset pack ZIP."
+        reason="Mockups are part of Essentials and above — see your logo on business cards, packaging, apps, and more. You also unlock vector SVG, PDF guide, and the full asset pack."
         onClose={() => setUpgradeOpen(false)}
         onChoosePlan={(plan) => { setUpgradeOpen(false); setWaitlistPlan(plan) }}
       />

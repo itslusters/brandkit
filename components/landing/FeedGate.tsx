@@ -5,14 +5,17 @@ interface Props {
   totalCount: number
 }
 
-const FEATURES = [
+const FREE_FEATURES = [
   'AI brand brief + naming',
-  'Vector SVG logo',
   '3 logo variants',
-  'PDF brand guide',
+  'Watermarked PNG preview',
+  'Brand saved to your account',
+]
+
+const PAID_FEATURES = [
+  'Clean PNG + vector SVG',
   '9 product mockups',
-  'Asset pack ZIP',
-  'Brand memory (saved)',
+  'PDF brand guide + asset ZIP',
   'Designer handoff path',
 ]
 
@@ -91,19 +94,30 @@ export function FeedGate({ totalCount }: Props) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="border-t border-zinc-800/60 pt-8 max-w-xl mx-auto"
+              className="border-t border-zinc-800/60 pt-8 max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8 text-left"
             >
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-5">
-                What you get on day one
-              </p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left">
-                {FEATURES.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-200">
-                    <span className="text-blue-400 mt-0.5" aria-hidden>✓</span>
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <p className="eyebrow mb-4">Free, day one</p>
+                <ul className="space-y-2.5">
+                  {FREE_FEATURES.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-200">
+                      <span className="text-blue-400 mt-0.5" aria-hidden>✓</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="eyebrow mb-4">Unlocks with paid</p>
+                <ul className="space-y-2.5">
+                  {PAID_FEATURES.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-400">
+                      <span className="text-zinc-500 mt-0.5" aria-hidden>+</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </motion.div>
           </div>
         </div>

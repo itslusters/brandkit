@@ -97,9 +97,9 @@ function PricingPageInner() {
             priceSuffix=""
             features={[
               'AI brand brief + naming',
-              'Logo generation',
-              '9 mockup previews',
-              'Watermarked PNG only',
+              'Logo generation (3 variants)',
+              'Watermarked PNG preview',
+              'Brand saved to your account',
             ]}
             ctaLabel="Get started"
             onCtaClick={() => router.push('/brand/new')}
@@ -151,6 +151,7 @@ function PricingPageInner() {
               priceSuffix="one-time"
               features={[
                 'Clean PNG + vector SVG',
+                '9 product mockups',
                 'PDF brand guide',
                 'Asset Pack ZIP',
                 'One brand saved forever',
