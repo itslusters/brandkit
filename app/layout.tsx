@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { ClerkProvider } from '@clerk/nextjs'
 import { GlassHeader } from '@/components/ui/GlassHeader'
 import { InstallPrompt } from '@/components/InstallPrompt'
+import { RefCapture } from '@/components/RefCapture'
 import { ToastProvider } from '@/components/ui/Toast'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -41,6 +42,14 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image', title: 'Atriium', description: 'Your brand, picked in minutes', images: ['/og.png'] },
   metadataBase: new URL('https://brandkit-wheat.vercel.app'),
+  alternates: {
+    canonical: 'https://brandkit-wheat.vercel.app',
+    languages: {
+      'en-US': 'https://brandkit-wheat.vercel.app',
+      'ko-KR': 'https://brandkit-wheat.vercel.app/ko',
+      'x-default': 'https://brandkit-wheat.vercel.app',
+    },
+  },
 }
 
 export const viewport: Viewport = {
@@ -74,6 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </main>
             <InstallPrompt />
+            <RefCapture />
           </ToastProvider>
           <Analytics />
         </body>
