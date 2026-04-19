@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
-import { generateRecraftImage, resolveStyleId } from '@/lib/recraft'
+import { generateRecraftImage, resolveStyleIdDetailed } from '@/lib/recraft'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { getUserTier } from '@/lib/tier'
 import { postprocessLogo } from '@/lib/logo-postprocess'
@@ -32,19 +32,35 @@ async function generateWithRecraft(
   logoType: LogoType,
   modifier?: IterationModifier,
 ) {
+  // Variation 0-1 use the trained style for aesthetic consistency with the
+  // brand's reference look. Variation 2 deliberately skips the trained style
+  // and runs on the named `vector_illustration` style — this guarantees at
+  // least one result that respects the structural prompt (wordmark /
+  // symbol-text / emblem), which trained styles tend to steamroll. Users
+  // see two brand-flavored takes plus one "textbook correct" take per
+  // generation, widening the taste-space from a 5-image training set.
+  const STRUCTURAL_ESCAPE_INDEX = 2
+
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
-      // Resolve a per-logo-type trained style when the user configures one.
-      // Falls through to the generic RECRAFT_STYLE_ID[S] env, then to the
-      // named `vector_illustration` style. Passing logoType is the lever
-      // that makes wordmark / symbol-text / emblem actually look distinct
-      // under trained styles — prompt-level structural directives alone
-      // can't override a dominant trained aesthetic.
-      const styleId = resolveStyleId(i, undefined, logoType)
+
+      const useTrained = i !== STRUCTURAL_ESCAPE_INDEX
+      const resolved = useTrained
+        ? resolveStyleIdDetailed(i, undefined, logoType, brandInput.stylePack)
+        : undefined
+
+      console.log('[logo/generate]', {
+        type: logoType,
+        variation: i,
+        stylePack: brandInput.stylePack ?? null,
+        styleId: resolved?.styleId ?? null,
+        source: resolved?.source ?? 'named:vector_illustration',
+      })
+
       const raw = await generateRecraftImage(prompt, {
         style: 'vector_illustration',
-        styleId,
+        styleId: resolved?.styleId,
         variationIndex: i,
       })
       const processed = await postprocessLogo(raw)

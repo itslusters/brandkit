@@ -29,6 +29,7 @@ vi.mock('@/lib/gemini', () => ({
 vi.mock('@/lib/recraft', () => ({
   generateRecraftImage: vi.fn(),
   resolveStyleId: vi.fn(() => undefined),
+  resolveStyleIdDetailed: vi.fn(() => undefined),
 }))
 
 import { generateRecraftImage } from '@/lib/recraft'

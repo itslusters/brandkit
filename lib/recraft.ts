@@ -53,31 +53,30 @@ export function resolveMoodStyleId(variationIndex = 0, override?: string): strin
 }
 
 /**
- * Resolves which trained style to use for a given variation and (optionally)
- * logo type.
+ * Resolves which trained style to use for a given variation, logo type,
+ * and (optionally) style pack. Returns both the UUID and the env key that
+ * matched so callers can log the decision.
  *
- * Recraft's trained styles are aesthetically dominant — prompt-level
- * directives ("pure typography", "enclosed badge") can't reliably override
- * the visual training set. The way to keep structural differentiation
- * between wordmark / symbol-text / emblem while still benefiting from a
- * custom trained style is to train a SEPARATE style per logo type and
- * route each one to its own env var.
+ * Recraft caps training at 5 images per style, so one universal style
+ * can't cover every aesthetic a brand might want. The lookup cascades from
+ * most to least specific so users can layer styles as their library grows:
  *
- * Lookup priority per call:
- *   1. explicit `override` argument (wins — used by e.g. mood boards)
- *   2. Per-type envs for the provided logoType (most specific)
- *        RECRAFT_STYLE_IDS_WORDMARK / RECRAFT_STYLE_ID_WORDMARK
- *        RECRAFT_STYLE_IDS_SYMBOL_TEXT / RECRAFT_STYLE_ID_SYMBOL_TEXT
- *        RECRAFT_STYLE_IDS_EMBLEM / RECRAFT_STYLE_ID_EMBLEM
- *   3. Generic fallbacks — used when no per-type style is configured
- *        RECRAFT_STYLE_IDS / RECRAFT_STYLE_ID
- *   4. undefined → named style like `vector_illustration`
+ *   1. explicit `override` argument                           (caller-controlled)
+ *   2. RECRAFT_STYLE_ID[S]_{TYPE}_{STYLEPACK}                 (type × pack)
+ *   3. RECRAFT_STYLE_ID[S]_{TYPE}                             (type only)
+ *   4. RECRAFT_STYLE_ID[S]_{STYLEPACK}                        (pack only)
+ *   5. RECRAFT_STYLE_ID[S]                                    (generic)
+ *   6. undefined → caller falls back to `vector_illustration` (prompt-driven)
  *
- * The `_IDS` (plural) variants are comma/whitespace-separated UUIDs, rotated
- * by variationIndex so the 3 variations within a single logo type come out
- * slightly different. Train up to 5 images per style in Recraft, create 3
- * styles per type, list all 3 UUIDs in the IDS env — variations then span
- * the full training range.
+ * The `_IDS` (plural) variants are comma/whitespace-separated UUIDs,
+ * rotated by variationIndex. Stylepacks: editorial, geometric, organic,
+ * bold, tech. Types: WORDMARK, SYMBOL_TEXT, EMBLEM.
+ *
+ * Example env keys — most specific to least:
+ *   RECRAFT_STYLE_IDS_WORDMARK_EDITORIAL  — serif-forward wordmarks
+ *   RECRAFT_STYLE_IDS_WORDMARK_TECH       — monospace/tech wordmarks
+ *   RECRAFT_STYLE_IDS_WORDMARK            — fallback for other packs
+ *   RECRAFT_STYLE_ID                      — fallback for any type/pack
  */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -87,6 +86,13 @@ const TYPE_TO_ENV_SUFFIX: Record<LogoStyleType, string> = {
   'wordmark': 'WORDMARK',
   'symbol-text': 'SYMBOL_TEXT',
   'emblem': 'EMBLEM',
+}
+
+const VALID_STYLEPACK_SUFFIXES = new Set(['EDITORIAL', 'GEOMETRIC', 'ORGANIC', 'BOLD', 'TECH'])
+
+export interface ResolvedStyle {
+  styleId: string
+  source: string
 }
 
 function pickFromList(raw: string | undefined, envName: string, variationIndex: number): string | undefined {
@@ -108,24 +114,70 @@ function pickSingle(raw: string | undefined, envName: string): string | undefine
   return undefined
 }
 
+/**
+ * Try a list-then-single pair for the given env root. Returns both the UUID
+ * and which exact env key matched, so the caller can log the resolution.
+ */
+function tryEnv(envRoot: string, variationIndex: number): ResolvedStyle | undefined {
+  const listName = `RECRAFT_STYLE_IDS_${envRoot}`
+  const singleName = `RECRAFT_STYLE_ID_${envRoot}`
+  const fromList = pickFromList(process.env[listName]?.trim(), listName, variationIndex)
+  if (fromList) return { styleId: fromList, source: listName }
+  const fromSingle = pickSingle(process.env[singleName]?.trim(), singleName)
+  if (fromSingle) return { styleId: fromSingle, source: singleName }
+  return undefined
+}
+
+function tryGenericEnv(variationIndex: number): ResolvedStyle | undefined {
+  const fromList = pickFromList(process.env.RECRAFT_STYLE_IDS?.trim(), 'RECRAFT_STYLE_IDS', variationIndex)
+  if (fromList) return { styleId: fromList, source: 'RECRAFT_STYLE_IDS' }
+  const fromSingle = pickSingle(process.env.RECRAFT_STYLE_ID?.trim(), 'RECRAFT_STYLE_ID')
+  if (fromSingle) return { styleId: fromSingle, source: 'RECRAFT_STYLE_ID' }
+  return undefined
+}
+
+export function resolveStyleIdDetailed(
+  variationIndex = 0,
+  override?: string,
+  logoType?: LogoStyleType,
+  stylePack?: string,
+): ResolvedStyle | undefined {
+  if (override) return { styleId: override, source: 'override' }
+
+  const typeSuffix = logoType ? TYPE_TO_ENV_SUFFIX[logoType] : undefined
+  const packSuffix = stylePack ? stylePack.toUpperCase() : undefined
+  const packValid = !!packSuffix && VALID_STYLEPACK_SUFFIXES.has(packSuffix)
+
+  // 1. Type × pack — most specific.
+  if (typeSuffix && packValid) {
+    const hit = tryEnv(`${typeSuffix}_${packSuffix}`, variationIndex)
+    if (hit) return hit
+  }
+
+  // 2. Type only.
+  if (typeSuffix) {
+    const hit = tryEnv(typeSuffix, variationIndex)
+    if (hit) return hit
+  }
+
+  // 3. Pack only.
+  if (packValid && packSuffix) {
+    const hit = tryEnv(packSuffix, variationIndex)
+    if (hit) return hit
+  }
+
+  // 4. Generic fallback.
+  return tryGenericEnv(variationIndex)
+}
+
+/** Backward-compatible wrapper — returns just the UUID string. */
 export function resolveStyleId(
   variationIndex = 0,
   override?: string,
   logoType?: LogoStyleType,
+  stylePack?: string,
 ): string | undefined {
-  if (override) return override
-
-  // Per-type lookup — checks plural list first, then single.
-  if (logoType) {
-    const suffix = TYPE_TO_ENV_SUFFIX[logoType]
-    const typed = pickFromList(process.env[`RECRAFT_STYLE_IDS_${suffix}`]?.trim(), `RECRAFT_STYLE_IDS_${suffix}`, variationIndex)
-      ?? pickSingle(process.env[`RECRAFT_STYLE_ID_${suffix}`]?.trim(), `RECRAFT_STYLE_ID_${suffix}`)
-    if (typed) return typed
-  }
-
-  // Generic fallback — shared across all logo types when per-type envs aren't set.
-  return pickFromList(process.env.RECRAFT_STYLE_IDS?.trim(), 'RECRAFT_STYLE_IDS', variationIndex)
-    ?? pickSingle(process.env.RECRAFT_STYLE_ID?.trim(), 'RECRAFT_STYLE_ID')
+  return resolveStyleIdDetailed(variationIndex, override, logoType, stylePack)?.styleId
 }
 
 export async function generateRecraftImage(
