@@ -354,25 +354,42 @@ body:has([data-clerk-modal-backdrop]) {
   max-width: min(420px, calc(100vw - 2rem)) !important;
   width: 100% !important;
   margin-inline: auto !important;
+  max-height: calc(100dvh - 2rem) !important;
+  overflow-y: auto !important;
 }
-/* The overlay itself — add padding so the card floats nicely on phones */
+/* The overlay itself — flex-center the card so it stays vertically centered
+   on all viewport heights, no leftover whitespace above or below. */
 .cl-modalBackdrop,
 [data-clerk-modal-backdrop] {
   padding: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   background-color: rgba(9, 9, 11, 0.75) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
 }
 
-/* Clerk card — match Atriium's surface language */
+/* Clerk card — match Atriium's surface language. Trim the stock 2rem+ inner
+   padding down so the modal reads compact instead of airy. */
 .cl-card {
   background-color: rgba(24, 24, 27, 0.92) !important;
   border: 1px solid rgba(63, 63, 70, 0.6) !important;
   border-radius: var(--radius-xl) !important;
+  padding: 1.5rem !important;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.03),
     0 20px 40px rgba(0, 0, 0, 0.5) !important;
   backdrop-filter: blur(16px);
+}
+.cl-card > * + * { margin-top: 1rem !important; }
+.cl-main { gap: 0.75rem !important; }
+.cl-footer { padding-top: 0.75rem !important; margin-top: 0 !important; }
+/* Clerk's built-in "Secured by Clerk" branding — hide it on our modal */
+.cl-internal-1rpdi70,
+.cl-footerPages,
+.cl-badge {
+  display: none !important;
 }
 
 /* Clerk headings — brand type scale */
@@ -435,6 +452,17 @@ body:has([data-clerk-modal-backdrop]) {
 .cl-socialButtonsBlockButton:hover {
   background: rgba(39, 39, 42, 0.7) !important;
   border-color: rgba(82, 82, 91, 0.8) !important;
+}
+
+/* Inside the Capacitor iOS shell, Google OAuth breaks because Google blocks
+   WebView auth (per their 2021 policy) and we haven't wired
+   ASWebAuthenticationSession yet. Hide OAuth rows entirely on native so
+   users don't tap a button that silently abandons them on accounts.google.com
+   and never returns. Email / password still works. */
+html.capacitor-native .cl-socialButtons,
+html.capacitor-native .cl-socialButtonsBlockButton,
+html.capacitor-native .cl-dividerRow {
+  display: none !important;
 }
 
 /* Footer links (sign-in/sign-up toggles, forgot password) */

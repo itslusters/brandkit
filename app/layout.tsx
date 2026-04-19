@@ -4,6 +4,8 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { GlassHeader } from '@/components/ui/GlassHeader'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { RefCapture } from '@/components/RefCapture'
+import { Footer } from '@/components/Footer'
+import { ClerkModalLock } from '@/components/ClerkModalLock'
 import { ToastProvider } from '@/components/ui/Toast'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -71,19 +73,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <link rel="preconnect" href="https://clerk.com" crossOrigin="" />
           <link rel="dns-prefetch" href="https://clerk.com" />
         </head>
-        <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-clip`}>
+        <body className={`${inter.className} min-h-[100dvh] flex flex-col bg-zinc-950 text-white overflow-x-clip`}>
           <ToastProvider>
             <a href="#main-content" className="skip-link">Skip to content</a>
             <GlassHeader />
             <main
               id="main-content"
               tabIndex={-1}
-              className="mx-auto max-w-md md:max-w-3xl min-h-screen px-4 py-8 focus:outline-none"
+              className="mx-auto w-full max-w-md md:max-w-3xl flex-1 px-4 py-8 focus:outline-none"
             >
               {children}
             </main>
+            <Footer />
             <InstallPrompt />
             <RefCapture />
+            <ClerkModalLock />
           </ToastProvider>
           <Analytics />
         </body>

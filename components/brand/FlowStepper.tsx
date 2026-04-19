@@ -1,29 +1,23 @@
 'use client'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Check } from 'lucide-react'
 
 /**
- * Multi-step progress indicator for the brand-creation flow.
- *
- * Visual model: a floating glass capsule that hosts all seven steps. The
- * active step is the hero — filled white chip with its label visible — while
- * past steps collapse into small solid check dots and future steps into
- * hollow outlines. The rail between them fills as progress accumulates.
- *
- * Interaction: past steps are tappable and route back to their respective
- * page; future steps are inert. All state changes animate with a spring so
- * the transition from "building" to "complete" feels tactile.
+ * Number-based progress rail for the brand-creation flow. Seven small dots,
+ * one per step. Active is a filled white chip with its step number; past
+ * steps are solid zinc and tappable (routes back); future steps are a
+ * ghosted outline. We dropped labels because the expanding active pill was
+ * colliding with the other numbers on phones narrower than ~360px.
  */
 
 const STEPS = [
-  { id: 'new', label: 'Info', path: '/brand/new' },
-  { id: 'processing', label: 'AI', path: '/brand/processing' },
-  { id: 'naming', label: 'Name', path: '/brand/naming' },
-  { id: 'brief', label: 'Brief', path: '/brand/brief' },
-  { id: 'logo-type', label: 'Type', path: '/brand/logo/type' },
-  { id: 'logo-studio', label: 'Logo', path: '/brand/logo/studio' },
-  { id: 'mockup', label: 'Mockup', path: '/brand/mockup' },
+  { id: 'new', path: '/brand/new' },
+  { id: 'processing', path: '/brand/processing' },
+  { id: 'naming', path: '/brand/naming' },
+  { id: 'brief', path: '/brand/brief' },
+  { id: 'logo-type', path: '/brand/logo/type' },
+  { id: 'logo-studio', path: '/brand/logo/studio' },
+  { id: 'mockup', path: '/brand/mockup' },
 ]
 
 interface Props {
@@ -34,12 +28,10 @@ export function FlowStepper({ currentStep }: Props) {
   const router = useRouter()
   const currentIdx = STEPS.findIndex((s) => s.id === currentStep)
   const progress = currentIdx < 0 ? 0 : currentIdx / (STEPS.length - 1)
-  const activeStep = STEPS[currentIdx]
 
   return (
     <div className="mb-8">
       <div className="relative rounded-2xl border border-zinc-800/70 bg-zinc-900/50 backdrop-blur-sm px-3 py-3 overflow-hidden">
-        {/* Background progress fill — subtle tint that grows with progress */}
         <motion.div
           initial={false}
           animate={{ width: `${progress * 100}%` }}
@@ -51,23 +43,15 @@ export function FlowStepper({ currentStep }: Props) {
           {STEPS.map((step, i) => {
             const isPast = i < currentIdx
             const isCurrent = i === currentIdx
-            const isFuture = i > currentIdx
-
             return (
               <div key={step.id} className="flex items-center gap-1.5 flex-1 last:flex-none min-w-0">
-                <motion.button
+                <button
                   type="button"
                   disabled={!isPast}
                   onClick={() => isPast && router.push(step.path)}
-                  aria-label={`${step.label}${isPast ? ' — go back' : isCurrent ? ' — current step' : ''}`}
-                  initial={false}
-                  animate={{
-                    width: isCurrent ? 'auto' : 24,
-                    paddingLeft: isCurrent ? 10 : 0,
-                    paddingRight: isCurrent ? 12 : 0,
-                  }}
-                  transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-                  className={`relative h-6 rounded-full flex items-center justify-center gap-1.5 shrink-0 overflow-hidden ${
+                  aria-label={`Step ${i + 1}${isPast ? ' — go back' : isCurrent ? ' — current' : ''}`}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  className={`relative h-6 w-6 shrink-0 rounded-full flex items-center justify-center text-[10px] font-semibold tabular-nums transition-colors ${
                     isCurrent
                       ? 'bg-white text-zinc-950 shadow-lg shadow-white/10'
                       : isPast
@@ -75,20 +59,8 @@ export function FlowStepper({ currentStep }: Props) {
                         : 'bg-transparent border border-zinc-700 text-zinc-600 cursor-default'
                   }`}
                 >
-                  {isPast && <Check size={11} strokeWidth={3} />}
-                  {isCurrent && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -4 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-[11px] font-semibold whitespace-nowrap"
-                    >
-                      {step.label}
-                    </motion.span>
-                  )}
-                  {isFuture && (
-                    <span className="text-[9px] font-semibold tabular-nums">{i + 1}</span>
-                  )}
-                </motion.button>
+                  {i + 1}
+                </button>
 
                 {i < STEPS.length - 1 && (
                   <div className="flex-1 min-w-[8px] relative h-px">
@@ -106,12 +78,9 @@ export function FlowStepper({ currentStep }: Props) {
           })}
         </div>
       </div>
-      {/* Step counter — gives a literal "3 of 7" anchor beneath the capsule */}
-      {activeStep && (
-        <p className="mt-2 text-[11px] text-zinc-500 tabular-nums">
-          Step {currentIdx + 1} of {STEPS.length} · {activeStep.label}
-        </p>
-      )}
+      <p className="mt-2 text-[11px] text-zinc-500 tabular-nums">
+        Step {currentIdx + 1} of {STEPS.length}
+      </p>
     </div>
   )
 }

@@ -174,9 +174,31 @@ export default function LogoStudioPage() {
     document.body.removeChild(a)
   }
 
+  function downloadAllVariants() {
+    const name = (getSession<string>('selectedName') ?? 'logo').replace(/[^a-zA-Z0-9가-힣\- _]/g, '')
+    const available = cards
+      .map((c, i) => ({ dataUrl: c.dataUrl, i }))
+      .filter((c): c is { dataUrl: string; i: number } => typeof c.dataUrl === 'string' && c.dataUrl.length > 0)
+    if (available.length === 0) return
+    haptic('success')
+    // Stagger the clicks so Safari / Chrome actually fire three downloads
+    // instead of coalescing into one. 150ms is short enough to feel batched.
+    available.forEach((c, idx) => {
+      setTimeout(() => {
+        const a = document.createElement('a')
+        a.href = c.dataUrl
+        a.download = `${name}-logo-${c.i + 1}.png`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }, idx * 150)
+    })
+  }
+
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined
   const iterationsLeft = ITERATIONS_MAX - iterationsUsed
   const canIterate = isDone && !hasError && iterationsLeft > 0
+  const hasAnyResult = cards.some((c) => typeof c.dataUrl === 'string' && c.dataUrl.length > 0)
 
   return (
     <div className="pt-4 pb-12">
@@ -334,6 +356,14 @@ export default function LogoStudioPage() {
             className="btn btn-secondary btn-full"
           >
             <Download size={15} /> Download logo PNG
+          </button>
+          <button
+            type="button"
+            onClick={downloadAllVariants}
+            disabled={!hasAnyResult}
+            className="btn btn-secondary btn-full"
+          >
+            <Download size={15} /> Download all 3 variants
           </button>
         </div>
       )}

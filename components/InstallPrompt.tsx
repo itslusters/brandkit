@@ -101,8 +101,9 @@ export function InstallPrompt() {
             </button>
 
             <div className="relative flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-black text-lg font-black shadow-lg shadow-black/30">
-                K
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-950 border border-zinc-800 shadow-lg shadow-black/30 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/atriium-symbol.svg" alt="Atriium" className="h-7 w-7 object-contain" />
               </div>
               <div className="flex-1 min-w-0 pr-6">
                 <p className="eyebrow mb-1">Install Atriium</p>

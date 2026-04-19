@@ -31,8 +31,9 @@ const WORDMARK_ASPECT = 902 / 143
 
 async function iconAt(size: number, name: string) {
   const svg = readFileSync(SYMBOL_PATH)
-  // Square symbol looks right at ~62% of canvas width, centered.
-  const markSize = Math.round(size * 0.62)
+  // iOS home-screen icons look undersized below ~75% fill. 82% matches Apple's
+  // reference apps and makes the mark read at a glance in the dock.
+  const markSize = Math.round(size * 0.82)
   const mark = await sharp(svg).resize(markSize, markSize, { fit: 'contain' }).png().toBuffer()
   const canvas = await sharp({
     create: { width: size, height: size, channels: 4, background: BG },

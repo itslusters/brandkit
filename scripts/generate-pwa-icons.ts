@@ -12,15 +12,16 @@ const BG = '#09090b' // matches manifest theme_color
 const SYMBOL_PATH = path.join(process.cwd(), 'public', 'atriium-symbol.svg')
 
 /**
- * Compose the symbol at ~62% of canvas width, centered, on the brand-dark
- * canvas. `safeAreaPadding` leaves extra headroom for platform masks that
- * crop to a rounded square / circle (Android adaptive, Samsung).
+ * Compose the symbol at ~82% of canvas width, centered, on the brand-dark
+ * canvas. iOS home-screen icons look undersized below ~75% fill; 82% matches
+ * Apple's reference apps. `safeAreaPadding` leaves extra headroom for
+ * platform masks that crop to a rounded square / circle (Android adaptive).
  */
 async function write(name: string, size: number, safeAreaPadding = 0) {
   const rawSymbol = readFileSync(SYMBOL_PATH)
   const pad = Math.round(size * safeAreaPadding)
   const box = size - pad * 2
-  const markSize = Math.round(box * 0.62)
+  const markSize = Math.round(box * 0.82)
 
   const mark = await sharp(rawSymbol).resize(markSize, markSize, { fit: 'contain' }).png().toBuffer()
   const canvas = await sharp({

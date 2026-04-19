@@ -89,7 +89,7 @@ export default async function Home() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
+      <div className="relative -mt-8 -mb-8 -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
         <FeedGallery items={allItems} initialBrandCount={publicBrands.length} />
         <FeedGate totalCount={totalCount} />
       </div>

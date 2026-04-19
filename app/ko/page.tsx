@@ -59,7 +59,7 @@ export default async function KoreanHome() {
   }
 
   return (
-    <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
+    <div className="relative -mt-8 -mb-8 -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
       <FeedGallery items={allItems} initialBrandCount={publicBrands.length} />
       <KoreanFeedGate totalCount={totalCount} />
     </div>

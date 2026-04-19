@@ -1,7 +1,5 @@
 'use client'
-import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
 
 export interface FeedItem {
   id: string
@@ -13,43 +11,20 @@ export interface FeedItem {
 
 interface Props {
   items: FeedItem[]
-  /** How many brand-derived items the server initially rendered. Pagination
-   *  resumes from this offset. */
+  /** Retained for backwards compatibility with page.tsx; unused since we ship
+   *  the full gallery inline. */
   initialBrandCount?: number
 }
 
-const LOAD_MORE_LIMIT = 40
-
 /**
- * Pinterest-style masonry feed with a "Load more" button at the bottom.
- * Filter chips were removed — they read as purpose-built for a larger
- * catalog than currently exists, and filtered grids fragmented the feed.
+ * Pinterest-style masonry feed. Server renders the entire public gallery
+ * plus a curated showcase set. No pagination — scrolling IS the browse.
  */
-export function FeedGallery({ items, initialBrandCount = 40 }: Props) {
-  const [loaded, setLoaded] = useState<FeedItem[]>([])
-  const [nextOffset, setNextOffset] = useState<number | null>(initialBrandCount)
-  const [busy, setBusy] = useState(false)
-
-  const combined = [...items, ...loaded]
-
-  async function loadMore() {
-    if (busy || nextOffset === null) return
-    setBusy(true)
-    try {
-      const res = await fetch(`/api/public/brands/page?offset=${nextOffset}&limit=${LOAD_MORE_LIMIT}`)
-      if (!res.ok) return
-      const data = (await res.json()) as { items: FeedItem[]; nextOffset: number | null }
-      setLoaded((prev) => [...prev, ...data.items])
-      setNextOffset(data.nextOffset)
-    } finally {
-      setBusy(false)
-    }
-  }
-
+export function FeedGallery({ items }: Props) {
   return (
     <div className="pt-2">
       <div className="px-1 columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-1.5">
-        {combined.map((item, i) => (
+        {items.map((item, i) => (
           <motion.a
             key={item.id}
             href={item.brandId ? `/share/${item.brandId}` : '/brand/new'}
@@ -73,19 +48,6 @@ export function FeedGallery({ items, initialBrandCount = 40 }: Props) {
           </motion.a>
         ))}
       </div>
-
-      {nextOffset !== null && (
-        <div className="flex justify-center py-8">
-          <button
-            type="button"
-            onClick={loadMore}
-            disabled={busy}
-            className="btn btn-secondary"
-          >
-            {busy ? <><Loader2 size={14} className="animate-spin" /> Loading…</> : 'Load more'}
-          </button>
-        </div>
-      )}
     </div>
   )
 }
