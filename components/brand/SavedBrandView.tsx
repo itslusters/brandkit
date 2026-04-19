@@ -1,9 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { Download, FileText, Package, Copy, Sparkles } from 'lucide-react'
-import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
+import { BrandArtifact } from './BrandArtifact'
 import { ShareToggle } from './ShareToggle'
 import type { SavedBrand } from '@/lib/brands'
 
@@ -33,12 +32,8 @@ export function SavedBrandView({ brand }: Props) {
     setBusy(kind)
     setError('')
     try {
-      // Convert Blob URLs back to data URLs for the existing API routes
       const selectedLogoDataUrl = await urlToDataUrl(brand.selectedLogoUrl)
-
-      // Re-fetch mockups so the routes can recompose if needed (route signature uses templateIds)
       const mockupTemplateIds = brand.mockupUrls.map((m) => m.templateId)
-
       const apiPath = kind === 'pdf' ? '/api/brand/guide/generate' : '/api/brand/assets/generate'
       const filename = kind === 'pdf' ? `${brand.name}-brand-guide.pdf` : `${brand.name}-brand-kit.zip`
 
@@ -92,125 +87,91 @@ export function SavedBrandView({ brand }: Props) {
     }
   }
 
+  async function downloadDnaCard() {
+    const res = await fetch('/api/brand/dna-card', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brandName: brand.name, brandResult: brand.brandResult }),
+    })
+    if (!res.ok) return
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${brand.name}-dna-card.png`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   return (
-    <div className="pt-4 pb-12">
-      <div className="mb-6">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Saved brand</p>
-        <h1 className="text-3xl font-bold tracking-tight text-white">{brand.name}</h1>
-      </div>
+    <BrandArtifact
+      brand={brand}
+      eyebrow="Saved brand"
+      actions={
+        <div className="space-y-6">
+          <ShareToggle brandId={brand.id} initialPublic={brand.public ?? false} />
 
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="rounded-2xl bg-white p-8 mb-6 flex items-center justify-center"
-      >
-        <img src={brand.selectedLogoUrl} alt={brand.name} className="max-h-32 object-contain" />
-      </motion.div>
-
-      <StyleBriefDisplay brief={brand.brandResult.styleBrief} />
-
-      {/* User-captured inspiration — only present when attached during creation */}
-      {brand.referencePhotoUrl && (
-        <section className="mt-8">
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Your inspiration</p>
-          <div className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={brand.referencePhotoUrl} alt="Inspiration reference" className="w-full object-cover max-h-80" />
-          </div>
-        </section>
-      )}
-
-      {/* Mockups */}
-      {brand.mockupUrls.length > 0 && (
-        <section className="mt-8">
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Mockups</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {brand.mockupUrls.map((m) => (
+          <div>
+            <p className="eyebrow mb-4">Downloads</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => downloadAsset('pdf')}
+                disabled={busy !== null}
+                className="btn btn-primary btn-full"
+              >
+                <FileText size={16} />
+                {busy === 'pdf' ? 'Generating…' : 'Brand Guide (PDF)'}
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadAsset('zip')}
+                disabled={busy !== null}
+                className="btn btn-secondary btn-full"
+              >
+                <Package size={16} />
+                {busy === 'zip' ? 'Packaging…' : 'Asset Pack (ZIP)'}
+              </button>
               <a
-                key={m.templateId}
-                href={m.url}
+                href={brand.selectedLogoUrl}
+                download={`${brand.name}-logo.png`}
                 target="_blank"
                 rel="noreferrer"
-                className="block aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-colors"
+                className="btn btn-secondary btn-full"
               >
-                <img src={m.url} alt={m.templateId} className="w-full h-full object-contain" />
+                <Download size={16} />
+                Logo PNG
               </a>
-            ))}
+              <button
+                type="button"
+                onClick={downloadDnaCard}
+                className="btn btn-secondary btn-full"
+              >
+                <Sparkles size={16} />
+                DNA Card
+              </button>
+            </div>
           </div>
-        </section>
-      )}
 
-      <div className="mt-8">
-        <ShareToggle brandId={brand.id} initialPublic={brand.public ?? false} />
-      </div>
+          <div className="pt-4 border-t border-zinc-800/60">
+            <button
+              type="button"
+              onClick={duplicate}
+              disabled={duplicating}
+              className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+            >
+              <Copy size={14} />
+              {duplicating ? 'Duplicating…' : 'Duplicate this brand'}
+            </button>
+          </div>
 
-      {/* Re-download actions */}
-      <div className="mt-8 space-y-3">
-        <button
-          type="button"
-          onClick={() => downloadAsset('pdf')}
-          disabled={busy !== null}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40"
-        >
-          <FileText size={16} />
-          {busy === 'pdf' ? 'Generating…' : 'Download Brand Guide (PDF)'}
-        </button>
-        <button
-          type="button"
-          onClick={() => downloadAsset('zip')}
-          disabled={busy !== null}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-700 text-zinc-200 font-semibold text-sm disabled:opacity-40"
-        >
-          <Package size={16} />
-          {busy === 'zip' ? 'Packaging…' : 'Download Asset Pack (ZIP)'}
-        </button>
-        <a
-          href={brand.selectedLogoUrl}
-          download={`${brand.name}-logo.png`}
-          target="_blank"
-          rel="noreferrer"
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors"
-        >
-          <Download size={16} />
-          Logo PNG
-        </a>
-        <button
-          type="button"
-          onClick={duplicate}
-          disabled={duplicating}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors disabled:opacity-40"
-        >
-          <Copy size={16} />
-          {duplicating ? 'Duplicating…' : 'Duplicate brand'}
-        </button>
-        <button
-          type="button"
-          onClick={async () => {
-            const res = await fetch('/api/brand/dna-card', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ brandName: brand.name, brandResult: brand.brandResult }),
-            })
-            if (!res.ok) return
-            const blob = await res.blob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `${brand.name}-dna-card.png`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-          }}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 text-zinc-400 font-medium text-sm hover:text-zinc-200 hover:border-zinc-600 transition-colors"
-        >
-          <Sparkles size={16} />
-          Download DNA Card (1080×1080)
-        </button>
-        {duplicateError && <p className="text-xs text-red-400">{duplicateError}</p>}
-        {error && <p className="text-xs text-red-400">{error}</p>}
-      </div>
-    </div>
+          {(error || duplicateError) && (
+            <p className="text-xs text-red-400">{error || duplicateError}</p>
+          )}
+        </div>
+      }
+    />
   )
 }

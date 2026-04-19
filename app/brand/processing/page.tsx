@@ -1,6 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 import { StreamingDashboard } from '@/components/ui/StreamingDashboard'
 import { INITIAL_STREAM_TASKS } from '@/lib/constants'
 import { getSession, setSession } from '@/lib/session'
@@ -14,15 +16,23 @@ type SSEEvent =
   | { type: 'done'; result: BrandResult }
   | { type: 'error'; message: string }
 
+// Narrative headlines per stream section. These run as display-2 above the
+// streaming dashboard and swap as the AI moves through stages — turns the
+// wait from a spinner into a short act. Keep phrasing close-lipped and
+// declarative so it doesn't read like marketing copy.
+const NARRATIVES: Record<string, string> = {
+  idle: 'Reading your brief.',
+  industry: 'Placing you in the market.',
+  naming: 'Drafting names.',
+  brief: 'Defining the visual language.',
+  done: 'Your brand is ready.',
+  error: 'Something got in the way.',
+}
+
 export default function ProcessingPage() {
   const router = useRouter()
-  // If user supplied their own brand name, the server skips the naming section
-  // entirely and never emits `section_done` for it — so we drop that task from
-  // the UI to avoid a stuck-pending indicator.
   const [tasks, setTasks] = useState<StreamTask[]>(() => {
-    const stored = typeof window !== 'undefined'
-      ? getSession<BrandInput>('brandInput')
-      : null
+    const stored = typeof window !== 'undefined' ? getSession<BrandInput>('brandInput') : null
     const skipNaming = !!stored?.existingName?.trim()
     return INITIAL_STREAM_TASKS
       .filter(t => !skipNaming || t.id !== 'naming')
@@ -35,19 +45,31 @@ export default function ProcessingPage() {
   const [retryCount, setRetryCount] = useState(0)
   const ESTIMATED = 20
 
-  // Session guard
+  const narrativeKey = useMemo<keyof typeof NARRATIVES>(() => {
+    if (hasError) return 'error'
+    if (isDone) return 'done'
+    const active = tasks.find(t => t.status === 'active')
+    if (active) return active.id
+    // If nothing is active yet but something is done, we're between sections.
+    const anyDone = tasks.find(t => t.status === 'done')
+    if (anyDone) {
+      // Report the next pending section as the current activity.
+      const next = tasks.find(t => t.status === 'pending')
+      if (next) return next.id
+    }
+    return 'idle'
+  }, [tasks, isDone, hasError])
+
   useEffect(() => {
     if (!getSession('brandInput')) router.replace('/brand/new')
   }, [router])
 
-  // Elapsed timer
   useEffect(() => {
     if (isDone || hasError) return
     const tick = setInterval(() => setElapsed(s => s + 1), 1000)
     return () => clearInterval(tick)
   }, [isDone, hasError])
 
-  // SSE stream — re-runs on retry
   useEffect(() => {
     const input = getSession<BrandInput>('brandInput')
     if (!input) return
@@ -103,7 +125,6 @@ export default function ProcessingPage() {
         ))
       } else if (event.type === 'done') {
         setSession('brandResult', event.result)
-        // If the user provided their own brand name, skip naming and jump straight to brief
         const stored = getSession<BrandInput>('brandInput')
         if (stored?.existingName?.trim()) {
           setSession('selectedName', stored.existingName.trim())
@@ -117,7 +138,7 @@ export default function ProcessingPage() {
 
     run()
     return () => { aborted = true; controller.abort() }
-  }, [retryCount]) // retryCount acts as a manual trigger; incrementing it re-runs the stream
+  }, [retryCount])
 
   function retry() {
     if (retryCount >= RETRY_CAP) return
@@ -135,20 +156,47 @@ export default function ProcessingPage() {
     setRetryCount(c => c + 1)
   }
 
+  const liveBadgeState = isDone ? 'done' : hasError ? 'error' : 'live'
+
   return (
     <div className="pt-4 pb-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Building your brand</h1>
-        <p className="text-zinc-500 text-sm mt-1 inline-flex items-center gap-2">
-          {!isDone && !hasError && <span className="live-dot" />}
-          {isDone ? 'Complete.' : hasError ? 'Error encountered.' : 'AI is analyzing your inputs.'}
+      {/* Cinematic narrative — rotates as the stream advances */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          {liveBadgeState === 'live' && <span className="live-dot" />}
+          <p className="eyebrow">
+            {liveBadgeState === 'live' && 'Building your brand'}
+            {liveBadgeState === 'done' && 'Complete'}
+            {liveBadgeState === 'error' && 'Interrupted'}
+          </p>
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.h1
+            key={narrativeKey}
+            initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -10, filter: 'blur(6px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="display-2 text-white"
+          >
+            {NARRATIVES[narrativeKey]}
+          </motion.h1>
+        </AnimatePresence>
+        <p className="text-sm text-zinc-500 mt-3 max-w-md leading-relaxed">
+          {hasError
+            ? 'We couldn\'t finish the stream. You can try again below.'
+            : isDone
+              ? 'Every piece of the brief is written and parsed. Ready to view.'
+              : 'Streaming from Claude — nothing is pre-generated, so this is your brand being made in real time.'}
         </p>
       </div>
+
       <StreamingDashboard
         tasks={tasks}
         estimatedSeconds={ESTIMATED}
         elapsedSeconds={elapsed}
       />
+
       {isDone && (() => {
         const stored = getSession<BrandInput>('brandInput')
         const skipNaming = !!stored?.existingName?.trim()
@@ -157,21 +205,19 @@ export default function ProcessingPage() {
             onClick={() => router.push(skipNaming ? '/brand/brief' : '/brand/naming')}
             className="btn btn-primary btn-full btn-lg mt-10"
           >
-            {skipNaming ? 'View brand brief →' : 'Choose a name →'}
+            {skipNaming ? 'View brand brief' : 'Choose a name'}
+            <ArrowRight size={16} />
           </button>
         )
       })()}
+
       {hasError && (
-        <div className="mt-8 text-center">
-          <p className="text-zinc-500 text-sm mb-2">Something went wrong.</p>
+        <div className="mt-10 text-center">
           {errorMessage && (
-            <p className="text-zinc-600 text-xs mb-4 font-mono">{errorMessage}</p>
+            <p className="text-zinc-600 text-xs mb-4 font-mono break-all px-4">{errorMessage}</p>
           )}
           {retryCount < RETRY_CAP ? (
-            <button
-              onClick={retry}
-              className="px-6 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300"
-            >
+            <button type="button" onClick={retry} className="btn btn-secondary">
               Try again
             </button>
           ) : (

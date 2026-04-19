@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { Sparkles, ArrowRight } from 'lucide-react'
 import { getPublicBrand } from '@/lib/brands'
-import { StyleBriefDisplay } from '@/components/brand/StyleBriefDisplay'
+import { BrandArtifact } from '@/components/brand/BrandArtifact'
 
 interface Params { params: { id: string } }
 
@@ -23,50 +24,57 @@ export default async function SharedBrandPage({ params }: Params) {
   const brand = await getPublicBrand(params.id)
   if (!brand) notFound()
 
+  const remixHref = `/brand/new?remix=${brand.id}&industry=${encodeURIComponent(brand.industry)}&tones=${encodeURIComponent(brand.brandInput.tones.join(','))}&stylePack=${brand.brandInput.stylePack ?? ''}`
+
   return (
-    <div className="pt-4 pb-12">
-      <div className="mb-6">
-        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Shared brand</p>
-        <h1 className="text-3xl font-bold tracking-tight text-white">{brand.name}</h1>
-      </div>
+    <BrandArtifact
+      brand={brand}
+      eyebrow="Shared brand"
+      ribbon={
+        <a
+          href="/"
+          className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm rounded-full px-3 py-1.5"
+        >
+          Made with <span className="text-white">Kiln</span>
+        </a>
+      }
+      actions={
+        <div className="space-y-8">
+          {/* Conversion block — the whole point of the share page */}
+          <div className="relative rounded-3xl border border-zinc-800/70 bg-zinc-900/40 overflow-hidden p-6 md:p-8">
+            <div className="aurora-glow w-[500px] h-[300px] bg-blue-600/15 top-[-80px] left-[-80px]" style={{ animationDelay: '0s' }} />
+            <div className="aurora-glow w-[400px] h-[300px] bg-violet-600/10 bottom-[-80px] right-[-80px]" style={{ animationDelay: '2s' }} />
 
-      <div className="rounded-2xl bg-white p-8 mb-6 flex items-center justify-center">
-        <img src={brand.selectedLogoUrl} alt={brand.name} className="max-h-32 object-contain" />
-      </div>
+            <div className="relative">
+              <p className="eyebrow mb-3">Your turn</p>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight mb-2">
+                Ten minutes, and your brand is here too.
+              </h2>
+              <p className="text-sm text-zinc-400 max-w-md leading-relaxed">
+                Kiln remembers your brand — colors, type, tone — so every future asset builds on the same DNA. Start free.
+              </p>
 
-      <StyleBriefDisplay brief={brand.brandResult.styleBrief} />
-
-      {brand.mockupUrls.length > 0 && (
-        <section className="mt-8">
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Mockups</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {brand.mockupUrls.map((m) => (
-              <div
-                key={m.templateId}
-                className="aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800"
-              >
-                <img src={m.url} alt={m.templateId} className="w-full h-full object-contain" />
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <a href={remixHref} className="btn btn-primary">
+                  <Sparkles size={15} /> Remix this one
+                </a>
+                <a href="/brand/new" className="btn btn-secondary">
+                  Start from scratch <ArrowRight size={15} />
+                </a>
               </div>
-            ))}
+            </div>
           </div>
-        </section>
-      )}
 
-      <div className="mt-10 pt-6 border-t border-zinc-800 space-y-3">
-        {/* Remix — fork this brand's settings into a new generation */}
-        <a
-          href={`/brand/new?remix=${brand.id}&industry=${encodeURIComponent(brand.industry)}&tones=${encodeURIComponent(brand.brandInput.tones.join(','))}&stylePack=${brand.brandInput.stylePack ?? ''}`}
-          className="w-full inline-flex items-center justify-center gap-2 bg-white text-zinc-950 px-5 py-3 rounded-full font-semibold hover:bg-zinc-200 transition-colors"
-        >
-          ✨ Remix this brand
-        </a>
-        <a
-          href="/brand/new"
-          className="w-full inline-flex items-center justify-center gap-2 border border-zinc-700 text-zinc-300 px-5 py-3 rounded-full font-medium hover:border-zinc-500 transition-colors"
-        >
-          Start from scratch
-        </a>
-      </div>
-    </div>
+          {/* Lightweight nav — user may want to see more */}
+          <div className="flex items-center justify-center gap-6 text-xs text-zinc-500">
+            <a href="/" className="hover:text-zinc-200 transition-colors">More brands</a>
+            <span className="text-zinc-800">·</span>
+            <a href="/pricing" className="hover:text-zinc-200 transition-colors">Pricing</a>
+            <span className="text-zinc-800">·</span>
+            <a href="/company" className="hover:text-zinc-200 transition-colors">About Kiln</a>
+          </div>
+        </div>
+      }
+    />
   )
 }
