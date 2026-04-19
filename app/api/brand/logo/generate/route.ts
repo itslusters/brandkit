@@ -33,11 +33,13 @@ async function generateWithRecraft(
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
-      // Opt into the trained style for logos. The helper returns undefined if
-      // no env is set → caller falls back to `vector_illustration` inside
-      // generateRecraftImage. Rotating by variationIndex spreads the trained
-      // styles across the 3 variations when multiple are configured.
-      const styleId = resolveStyleId(i)
+      // Resolve a per-logo-type trained style when the user configures one.
+      // Falls through to the generic RECRAFT_STYLE_ID[S] env, then to the
+      // named `vector_illustration` style. Passing logoType is the lever
+      // that makes wordmark / symbol-text / emblem actually look distinct
+      // under trained styles — prompt-level structural directives alone
+      // can't override a dominant trained aesthetic.
+      const styleId = resolveStyleId(i, undefined, logoType)
       const raw = await generateRecraftImage(prompt, {
         style: 'vector_illustration',
         styleId,

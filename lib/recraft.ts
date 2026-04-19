@@ -53,43 +53,79 @@ export function resolveMoodStyleId(variationIndex = 0, override?: string): strin
 }
 
 /**
- * Resolves which trained style to use for a given variation.
+ * Resolves which trained style to use for a given variation and (optionally)
+ * logo type.
  *
- * Rotation priority:
- *   1. explicit `styleId` argument (wins)
- *   2. `RECRAFT_STYLE_IDS` env (comma-separated) — rotates by variationIndex
- *   3. `RECRAFT_STYLE_ID` env (single) — used for all variations
- *   4. undefined — fall back to named style like `vector_illustration`
+ * Recraft's trained styles are aesthetically dominant — prompt-level
+ * directives ("pure typography", "enclosed badge") can't reliably override
+ * the visual training set. The way to keep structural differentiation
+ * between wordmark / symbol-text / emblem while still benefiting from a
+ * custom trained style is to train a SEPARATE style per logo type and
+ * route each one to its own env var.
  *
- * Recraft caps training uploads at 5 images per style, so users with larger
- * reference sets split them across multiple styles; rotating through them
- * uses every trained style AND makes the 3 variations more distinct.
+ * Lookup priority per call:
+ *   1. explicit `override` argument (wins — used by e.g. mood boards)
+ *   2. Per-type envs for the provided logoType (most specific)
+ *        RECRAFT_STYLE_IDS_WORDMARK / RECRAFT_STYLE_ID_WORDMARK
+ *        RECRAFT_STYLE_IDS_SYMBOL_TEXT / RECRAFT_STYLE_ID_SYMBOL_TEXT
+ *        RECRAFT_STYLE_IDS_EMBLEM / RECRAFT_STYLE_ID_EMBLEM
+ *   3. Generic fallbacks — used when no per-type style is configured
+ *        RECRAFT_STYLE_IDS / RECRAFT_STYLE_ID
+ *   4. undefined → named style like `vector_illustration`
  *
- * NOTE 2026-04-19: The logo-generation path no longer consumes this; a
- * trained style was flattening the structural differences between wordmark,
- * symbol-text, and emblem. Kept for mood boards (see `resolveMoodStyleId`)
- * and for future per-surface opt-in.
+ * The `_IDS` (plural) variants are comma/whitespace-separated UUIDs, rotated
+ * by variationIndex so the 3 variations within a single logo type come out
+ * slightly different. Train up to 5 images per style in Recraft, create 3
+ * styles per type, list all 3 UUIDs in the IDS env — variations then span
+ * the full training range.
  */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export function resolveStyleId(variationIndex = 0, override?: string): string | undefined {
-  if (override) return override
-  // Permissive split — handles comma, newline, whitespace, or mixed delimiters.
-  // Each candidate must be a well-formed UUID; malformed entries are dropped with a warn.
-  const raw = process.env.RECRAFT_STYLE_IDS?.trim()
-  if (raw) {
-    const candidates = raw.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean)
-    const list = candidates.filter((id) => {
-      if (UUID_RE.test(id)) return true
-      console.warn(`[recraft] dropping invalid RECRAFT_STYLE_IDS entry (not a UUID): "${id.slice(0, 40)}..."`)
-      return false
-    })
-    if (list.length > 0) return list[variationIndex % list.length]
-  }
-  const single = process.env.RECRAFT_STYLE_ID?.trim()
-  if (single && UUID_RE.test(single)) return single
-  if (single) console.warn(`[recraft] RECRAFT_STYLE_ID is not a valid UUID, falling back to named style`)
+type LogoStyleType = 'wordmark' | 'symbol-text' | 'emblem'
+
+const TYPE_TO_ENV_SUFFIX: Record<LogoStyleType, string> = {
+  'wordmark': 'WORDMARK',
+  'symbol-text': 'SYMBOL_TEXT',
+  'emblem': 'EMBLEM',
+}
+
+function pickFromList(raw: string | undefined, envName: string, variationIndex: number): string | undefined {
+  if (!raw) return undefined
+  const candidates = raw.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean)
+  const list = candidates.filter((id) => {
+    if (UUID_RE.test(id)) return true
+    console.warn(`[recraft] dropping invalid ${envName} entry (not a UUID): "${id.slice(0, 40)}..."`)
+    return false
+  })
+  if (list.length === 0) return undefined
+  return list[variationIndex % list.length]
+}
+
+function pickSingle(raw: string | undefined, envName: string): string | undefined {
+  if (!raw) return undefined
+  if (UUID_RE.test(raw)) return raw
+  console.warn(`[recraft] ${envName} is not a valid UUID, ignoring`)
   return undefined
+}
+
+export function resolveStyleId(
+  variationIndex = 0,
+  override?: string,
+  logoType?: LogoStyleType,
+): string | undefined {
+  if (override) return override
+
+  // Per-type lookup — checks plural list first, then single.
+  if (logoType) {
+    const suffix = TYPE_TO_ENV_SUFFIX[logoType]
+    const typed = pickFromList(process.env[`RECRAFT_STYLE_IDS_${suffix}`]?.trim(), `RECRAFT_STYLE_IDS_${suffix}`, variationIndex)
+      ?? pickSingle(process.env[`RECRAFT_STYLE_ID_${suffix}`]?.trim(), `RECRAFT_STYLE_ID_${suffix}`)
+    if (typed) return typed
+  }
+
+  // Generic fallback — shared across all logo types when per-type envs aren't set.
+  return pickFromList(process.env.RECRAFT_STYLE_IDS?.trim(), 'RECRAFT_STYLE_IDS', variationIndex)
+    ?? pickSingle(process.env.RECRAFT_STYLE_ID?.trim(), 'RECRAFT_STYLE_ID')
 }
 
 export async function generateRecraftImage(
