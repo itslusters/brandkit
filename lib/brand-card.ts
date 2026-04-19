@@ -90,7 +90,7 @@ function buildCardJsx(args: CardArgs): React.ReactElement {
         children: [
           { type: 'div', key: 'name', props: { style: { display: 'flex', fontSize: 72, fontWeight: 800, color: textColor, letterSpacing: '-0.03em', lineHeight: 1 }, children: brandName } },
           { type: 'div', key: 'dot', props: { style: { display: 'flex', width: 12, height: 12, borderRadius: 6, backgroundColor: a, marginTop: '24px' } } },
-          { type: 'div', key: 'made', props: { style: { display: 'flex', fontSize: 14, color: textColor, opacity: 0.5, marginTop: '16px' }, children: 'Made with BrandKit' } },
+          { type: 'div', key: 'made', props: { style: { display: 'flex', fontSize: 14, color: textColor, opacity: 0.5, marginTop: '16px' }, children: 'Made with Kiln' } },
         ],
       },
     } as unknown as React.ReactElement
@@ -126,7 +126,7 @@ function buildCardJsx(args: CardArgs): React.ReactElement {
                 { type: 'div', key: 'c3', props: { style: { display: 'flex', width: 48, height: 48, borderRadius: 8, backgroundColor: a } } },
               ],
             }},
-            { type: 'div', key: 'credit', props: { style: { display: 'flex', fontSize: 12, color: '#a1a1aa' }, children: 'BrandKit' } },
+            { type: 'div', key: 'credit', props: { style: { display: 'flex', fontSize: 12, color: '#a1a1aa' }, children: 'Kiln' } },
           ],
         }},
       ],
@@ -185,7 +185,7 @@ export async function renderDNACard(args: {
             }},
           ],
         }},
-        // Bottom: palette + typography + brandkit watermark
+        // Bottom: palette + typography + kiln watermark
         { type: 'div', key: 'bottom', props: {
           style: { display: 'flex', flexDirection: 'column', gap: '20px' },
           children: [
@@ -208,7 +208,7 @@ export async function renderDNACard(args: {
             // Watermark
             { type: 'div', key: 'wm', props: {
               style: { display: 'flex', fontSize: 11, color: '#3f3f46' },
-              children: 'brandkit.com',
+              children: 'kiln.app',
             }},
           ],
         }},

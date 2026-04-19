@@ -12,7 +12,6 @@ const result: BrandResult = {
     colorPalette: ['#18181b', '#ffffff', '#f59e0b'],
     typography: ['Inter', 'Playfair Display'],
     avoidList: ['neon colors'],
-    moodImages: ['minimal-tech-1'],
     recommendedMockups: ['business-card', 'app-icon', 'social-post'],
   },
 }

@@ -16,9 +16,18 @@ type SSEEvent =
 
 export default function ProcessingPage() {
   const router = useRouter()
-  const [tasks, setTasks] = useState<StreamTask[]>(() =>
-    INITIAL_STREAM_TASKS.map(t => ({ ...t }))
-  )
+  // If user supplied their own brand name, the server skips the naming section
+  // entirely and never emits `section_done` for it — so we drop that task from
+  // the UI to avoid a stuck-pending indicator.
+  const [tasks, setTasks] = useState<StreamTask[]>(() => {
+    const stored = typeof window !== 'undefined'
+      ? getSession<BrandInput>('brandInput')
+      : null
+    const skipNaming = !!stored?.existingName?.trim()
+    return INITIAL_STREAM_TASKS
+      .filter(t => !skipNaming || t.id !== 'naming')
+      .map(t => ({ ...t }))
+  })
   const [elapsed, setElapsed] = useState(0)
   const [isDone, setIsDone] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -112,11 +121,17 @@ export default function ProcessingPage() {
 
   function retry() {
     if (retryCount >= RETRY_CAP) return
+    const stored = getSession<BrandInput>('brandInput')
+    const skipNaming = !!stored?.existingName?.trim()
     setHasError(false)
     setErrorMessage('')
     setIsDone(false)
     setElapsed(0)
-    setTasks(INITIAL_STREAM_TASKS.map(t => ({ ...t })))
+    setTasks(
+      INITIAL_STREAM_TASKS
+        .filter(t => !skipNaming || t.id !== 'naming')
+        .map(t => ({ ...t }))
+    )
     setRetryCount(c => c + 1)
   }
 

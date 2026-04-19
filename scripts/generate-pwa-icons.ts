@@ -19,7 +19,7 @@ function markSvg(size: number, safeAreaPadding = 0): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
     <rect width="${size}" height="${size}" fill="${BG}"/>
     <circle cx="${size - pad - Math.round(box * 0.18)}" cy="${pad + Math.round(box * 0.18)}" r="${Math.round(box * 0.06)}" fill="${ACCENT}"/>
-    <text x="50%" y="${cy}" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="${fontSize}" fill="${FG}" letter-spacing="-0.06em">B</text>
+    <text x="50%" y="${cy}" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="${fontSize}" fill="${FG}" letter-spacing="-0.06em">K</text>
   </svg>`
 }
 

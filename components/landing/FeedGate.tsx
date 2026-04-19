@@ -94,12 +94,14 @@ export function FeedGate({ totalCount }: Props) {
         {/* Footer */}
         <div className="relative border-t border-zinc-800/40 py-6 px-6">
           <div className="max-w-md mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-600">
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
               <a href="/company" className="hover:text-zinc-300 transition-colors">About</a>
               <a href="/pricing" className="hover:text-zinc-300 transition-colors">Pricing</a>
+              <a href="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</a>
+              <a href="/terms" className="hover:text-zinc-300 transition-colors">Terms</a>
               <a href="mailto:we.lusters@gmail.com" className="hover:text-zinc-300 transition-colors">Contact</a>
             </div>
-            <span>© 2026 BrandKit</span>
+            <span>© 2026 Kiln</span>
           </div>
         </div>
       </div>

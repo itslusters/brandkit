@@ -7,7 +7,6 @@ const brief: StyleBrief = {
   colorPalette: ['#18181b', '#ffffff', '#f59e0b'],
   typography: ['Inter — primary', 'Playfair Display — accent'],
   avoidList: ['그라디언트 남용', '네온 컬러', '둥근 캐릭터 일러스트'],
-  moodImages: ['minimal-tech-1', 'minimal-tech-2', 'minimal-tech-3'],
   recommendedMockups: ['business-card', 'app-icon', 'social-post'],
 }
 
@@ -31,15 +30,5 @@ describe('StyleBriefDisplay', () => {
   })
 
   // Avoid section removed from UI (moved to PDF guide only)
-
-  it('renders 3 mood images', () => {
-    render(<StyleBriefDisplay brief={brief} />)
-    expect(document.querySelectorAll('img')).toHaveLength(3)
-  })
-
-  it('mood image src includes correct id', () => {
-    render(<StyleBriefDisplay brief={brief} />)
-    const imgs = document.querySelectorAll('img') as NodeListOf<HTMLImageElement>
-    expect(imgs[0].getAttribute('src')).toContain('minimal-tech-1')
-  })
+  // Mood image strip removed from UI entirely
 })

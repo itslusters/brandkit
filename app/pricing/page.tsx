@@ -28,7 +28,7 @@ export default function PricingPage() {
           name="Free"
           price="$0"
           priceSuffix=""
-          features={['AI brand brief', '1 logo set', 'Watermarked PNG previews', '9 mockup templates']}
+          features={['AI brand brief', 'Logo generation', '9 mockup previews', 'Watermarked PNG previews']}
           ctaLabel="Get started"
           onCtaClick={() => router.push('/brand/new')}
           highlighted={false}

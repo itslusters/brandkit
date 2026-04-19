@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const poll = await getPoll(params.id)
   if (!poll) return { title: 'Poll not found' }
   return {
-    title: `${poll.optionA.name} vs ${poll.optionB.name} — BrandKit Poll`,
+    title: `${poll.optionA.name} vs ${poll.optionB.name} — Kiln Poll`,
     description: poll.title,
   }
 }

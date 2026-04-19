@@ -32,8 +32,8 @@ export function GlassHeader() {
             : 'bg-transparent border-b border-transparent'
         }`}
       >
-        <a href="/" className="text-sm font-bold text-white tracking-tight">
-          BrandKit
+        <a href="/" aria-label="Kiln — home" className="flex items-center">
+          <img src="/kiln.svg" alt="Kiln" className="h-5 w-auto" />
         </a>
 
         {/* Desktop nav */}

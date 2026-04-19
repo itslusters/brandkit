@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { LogoResultCard } from '@/components/brand/LogoResultCard'
 import { getSession, setSession } from '@/lib/session'
+import { haptic } from '@/lib/native'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
 const RETRY_CAP = 2
@@ -18,11 +19,12 @@ const ITERATION_CHIPS: { id: IterationModifier; label: string }[] = [
   { id: 'playful', label: 'More playful' },
 ]
 
-type CardState = 'skeleton' | 'result'
+type CardState = 'skeleton' | 'result' | 'error'
 
 interface LogoCard {
   state: CardState
   dataUrl?: string
+  errorMessage?: string
 }
 
 type SSEEvent =
@@ -113,8 +115,13 @@ export default function LogoStudioPage() {
         setCards(prev => prev.map((card, i) =>
           i === event.index ? { state: 'result', dataUrl: event.dataUrl } : card
         ))
+      } else if (event.type === 'image_error') {
+        setCards(prev => prev.map((card, i) =>
+          i === event.index ? { state: 'error', errorMessage: event.message } : card
+        ))
       } else if (event.type === 'done') {
         setIsDone(true)
+        haptic('success')
       } else if (event.type === 'error') {
         setErrorMessage(event.message)
         setHasError(true)
@@ -150,7 +157,7 @@ export default function LogoStudioPage() {
   function continueToMockups() {
     if (selected === null || !cards[selected]?.dataUrl) return
     setSession('selectedLogoDataUrl', cards[selected].dataUrl!)
-    router.push('/brand/mockup')
+    router.push('/brand/mood')
   }
 
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined
@@ -183,12 +190,15 @@ export default function LogoStudioPage() {
             <LogoResultCard
               state={card.state}
               dataUrl={card.dataUrl}
+              errorMessage={card.errorMessage}
+              recommended={i === 0}
               selected={selected === i}
               dimmed={selected !== null && selected !== i}
               onSelect={() => {
                 if (selected === i && card.dataUrl) {
                   setEnlargedDataUrl(card.dataUrl)
                 } else {
+                  haptic('selection')
                   setSelected(i)
                 }
               }}
@@ -293,7 +303,7 @@ export default function LogoStudioPage() {
           disabled={selected === null || !selectedDataUrl}
           className="mt-8 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Continue to mockups →
+          Continue to brand mood →
         </button>
       )}
     </div>

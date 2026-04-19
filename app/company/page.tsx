@@ -26,7 +26,7 @@ export default function CompanyPage() {
   return (
     <div className="space-y-16 pb-16">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">About BrandKit</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">About Kiln</h1>
         <p className="text-zinc-400 text-base">AI-powered brand identity, from company info to a complete kit in minutes.</p>
       </div>
 
@@ -76,12 +76,14 @@ export default function CompanyPage() {
       </ScrollReveal>
 
       <footer className="pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500">
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
           <a href="/sign-in" className="hover:text-white transition-colors">Sign in</a>
+          <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+          <a href="/terms" className="hover:text-white transition-colors">Terms</a>
           <a href="mailto:we.lusters@gmail.com" className="hover:text-white transition-colors">Contact</a>
         </div>
-        <div>© 2026 BrandKit</div>
+        <div>© 2026 Kiln</div>
       </footer>
     </div>
   )

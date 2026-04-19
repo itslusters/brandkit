@@ -31,15 +31,6 @@ function ColorDot({ hex }: { hex: string }) {
 export function StyleBriefDisplay({ brief }: Props) {
   return (
     <div className="relative rounded-2xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden card-elevated dot-grid-card">
-      {/* Mood strip at top */}
-      <div className="flex h-24">
-        {brief.moodImages.map((id) => (
-          <div key={id} className="flex-1 overflow-hidden">
-            <img src={`/mood/${id}.jpg`} alt="" className="w-full h-full object-cover" />
-          </div>
-        ))}
-      </div>
-
       <div className="p-5 space-y-5">
         {/* Style */}
         <div>

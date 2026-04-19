@@ -1,21 +1,25 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import { ClerkProvider } from '@clerk/nextjs'
 import { GlassHeader } from '@/components/ui/GlassHeader'
 import { InstallPrompt } from '@/components/InstallPrompt'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], display: 'swap' })
+const inter = localFont({
+  src: '../public/fonts/Inter-var.ttf',
+  display: 'swap',
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
-  title: { default: 'BrandKit — AI Brand Kit Generator', template: '%s · BrandKit' },
-  description: 'Get a complete brand identity in minutes — naming, logos, mockups, and brand guide PDF. AI-powered, designer-polished tier available.',
-  keywords: ['AI logo generator', 'brand kit', 'AI branding', 'startup branding', 'brand identity'],
-  applicationName: 'BrandKit',
+  title: { default: 'Kiln — Brand identity, forged in minutes', template: '%s · Kiln' },
+  description: 'Where ideas become brands. AI naming, logos, mockups, and a brand guide PDF — crafted in minutes, refined to ship.',
+  keywords: ['AI logo generator', 'brand identity', 'AI branding', 'startup branding', 'Kiln'],
+  applicationName: 'Kiln',
   appleWebApp: {
     capable: true,
-    title: 'BrandKit',
+    title: 'Kiln',
     statusBarStyle: 'black-translucent',
   },
   formatDetection: { telephone: false },
@@ -27,14 +31,14 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
-    title: 'BrandKit — AI Brand Kit Generator',
-    description: 'Get a complete brand identity in minutes — naming, logos, mockups, brand guide.',
+    title: 'Kiln — Brand identity, forged in minutes',
+    description: 'Where ideas become brands — naming, logos, mockups, brand guide.',
     type: 'website',
     url: 'https://brandkit-wheat.vercel.app',
-    siteName: 'BrandKit',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'BrandKit' }],
+    siteName: 'Kiln',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Kiln' }],
   },
-  twitter: { card: 'summary_large_image', title: 'BrandKit', description: 'AI brand kit generator', images: ['/og.png'] },
+  twitter: { card: 'summary_large_image', title: 'Kiln', description: 'Brand identity, forged in minutes', images: ['/og.png'] },
   metadataBase: new URL('https://brandkit-wheat.vercel.app'),
 }
 

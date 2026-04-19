@@ -37,10 +37,13 @@ async function generateWordmarks(
       const dataUrl = `data:image/png;base64,${png.toString('base64')}`
       controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl }))
     } catch (err) {
+      // Include font name in error — key signal when satori fails on specific fonts (often variable-font parsing issues).
+      const baseMsg = err instanceof Error ? err.message : 'Wordmark render failed'
+      console.error(`[wordmark] render failed for font=${font.family} (${font.file}):`, err)
       controller.enqueue(sse({
         type: 'image_error',
         index: i,
-        message: err instanceof Error ? err.message : 'Wordmark render failed',
+        message: `${font.family}: ${baseMsg}`,
       }))
     }
   })
@@ -63,7 +66,7 @@ async function generateWithRecraft(
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
-      const raw = await generateRecraftImage(prompt, { style: 'vector_illustration' })
+      const raw = await generateRecraftImage(prompt, { style: 'vector_illustration', variationIndex: i })
       const processed = await postprocessLogo(raw)
       controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl: `data:image/png;base64,${processed.toString('base64')}` }))
     } catch (err) {
@@ -79,13 +82,17 @@ async function generateWithRecraft(
 }
 
 export async function POST(req: Request) {
-  const ip = getIp(req)
-  const { success } = await logoLimiter.limit(ip)
-  if (!success) {
-    return new Response(
-      JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),
-      { status: 429, headers: { 'Content-Type': 'application/json' } }
-    )
+  // Skip rate limiting in development for unconstrained local testing.
+  // Production/preview continue to enforce the per-IP daily cap.
+  if (process.env.NODE_ENV !== 'development') {
+    const ip = getIp(req)
+    const { success } = await logoLimiter.limit(ip)
+    if (!success) {
+      return new Response(
+        JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
   }
 
   const { brandInput, brandResult, selectedName, logoType, iterationModifier }: RequestBody = await req.json()

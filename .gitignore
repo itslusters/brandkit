@@ -37,8 +37,20 @@ next-env.d.ts
 
 # Brainstorm session files
 .superpowers/
+/docs/superpowers/
 
 # Serwist generated service worker
 /public/sw.js
 /public/sw.js.map
 /public/swe-worker-*.js
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+# Capacitor iOS — generated Pods/DerivedData; keep the Xcode project checked in
+/ios/App/Pods/
+/ios/App/App/public/
+/ios/DerivedData/
+/ios/App/build/
+/ios/App/App/capacitor.config.json
+/ios/App/App/config.xml

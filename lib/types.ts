@@ -7,7 +7,6 @@ export interface BrandInput {
   existingName?: string  // if set, naming step is skipped — Claude generates only the brief
   customTone?: string    // free-text tone description — appended to picker tones in prompt
   stylePack?: string     // style pack ID — injects aesthetic directive into prompts
-  moodImageDataUrl?: string  // 'data:image/jpeg;base64,...' — visual reference passed to Claude vision
 }
 
 export interface StyleBrief {
@@ -15,7 +14,6 @@ export interface StyleBrief {
   colorPalette: string[] // 3 hex values e.g. ['#0A0A0A', '#F5F5F0', '#C8A96E']
   typography: string[]   // 2 pairings e.g. ['Inter + Playfair Display']
   avoidList: string[]    // 3 items
-  moodImages: string[]   // 3 public image paths
   recommendedMockups: string[]
 }
 

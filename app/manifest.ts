@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'BrandKit — AI Brand Kit Generator',
-    short_name: 'BrandKit',
-    description: 'Get a complete brand identity in minutes.',
+    name: 'Kiln — Brand identity, forged in minutes',
+    short_name: 'Kiln',
+    description: 'Where ideas become brands.',
     start_url: '/',
     display: 'standalone',
     background_color: '#09090b',

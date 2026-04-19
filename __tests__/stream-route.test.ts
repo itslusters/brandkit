@@ -25,7 +25,6 @@ vi.mock('@/lib/claude', () => ({
     colorPalette: ['#000', '#fff', '#f00'],
     typography: ['Inter', 'Playfair'],
     avoidList: ['그라디언트'],
-    moodImages: ['minimal-tech-1'],
     recommendedMockups: ['business-card', 'app-icon', 'social-post'],
   })),
 }))
@@ -69,7 +68,7 @@ describe('POST /api/brand/stream', () => {
         '[NAMING_START]\n',
         'Nexio|테스트 이름\n',
         '[BRIEF_START]\n',
-        '{"recommendedStyle":"Minimal","colorPalette":["#000","#fff","#f00"],"typography":["Inter","Playfair"],"avoidList":["그라디언트"],"moodImages":["minimal-tech-1"]}',
+        '{"recommendedStyle":"Minimal","colorPalette":["#000","#fff","#f00"],"typography":["Inter","Playfair"],"avoidList":["그라디언트"]}',
       ]) as any
     )
   })

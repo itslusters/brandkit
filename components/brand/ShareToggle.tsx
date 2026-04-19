@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Copy, Check, Globe, Lock } from 'lucide-react'
+import { Copy, Check, Globe, Lock, Share2 } from 'lucide-react'
+import { share as nativeShare, isNative, haptic } from '@/lib/native'
 
 interface Props {
   brandId: string
@@ -50,6 +51,16 @@ export function ShareToggle({ brandId, initialPublic }: Props) {
     }
   }
 
+  async function openShareSheet() {
+    haptic('light')
+    await nativeShare({
+      title: 'My brand — Kiln',
+      text: 'Check out the brand identity I made on Kiln.',
+      url: shareUrl,
+      dialogTitle: 'Share brand',
+    })
+  }
+
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
       <div className="flex items-center justify-between gap-3">
@@ -96,14 +107,25 @@ export function ShareToggle({ brandId, initialPublic }: Props) {
                 onClick={(e) => (e.target as HTMLInputElement).select()}
                 className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 truncate font-mono"
               />
-              <motion.button
-                type="button"
-                onClick={copyLink}
-                whileTap={{ scale: 0.95 }}
-                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-emerald-500 text-white' : 'bg-white text-zinc-950 hover:bg-zinc-200'}`}
-              >
-                {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
-              </motion.button>
+              {isNative() || (typeof navigator !== 'undefined' && 'share' in navigator) ? (
+                <motion.button
+                  type="button"
+                  onClick={openShareSheet}
+                  whileTap={{ scale: 0.95 }}
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-white text-zinc-950 hover:bg-zinc-200"
+                >
+                  <Share2 size={12} /> Share
+                </motion.button>
+              ) : (
+                <motion.button
+                  type="button"
+                  onClick={copyLink}
+                  whileTap={{ scale: 0.95 }}
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${copied ? 'bg-emerald-500 text-white' : 'bg-white text-zinc-950 hover:bg-zinc-200'}`}
+                >
+                  {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
+                </motion.button>
+              )}
             </div>
           </motion.div>
         )}

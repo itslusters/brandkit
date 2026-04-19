@@ -6,7 +6,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-const DISMISSED_KEY = 'brandkit:pwa-install-dismissed'
+const DISMISSED_KEY = 'kiln:pwa-install-dismissed'
 const DISMISS_DAYS = 7
 const SHOW_DELAY_MS = 15_000
 
@@ -83,9 +83,9 @@ export function InstallPrompt() {
     <div className="fixed inset-x-3 bottom-3 z-50 md:left-auto md:right-6 md:bottom-6 md:max-w-sm">
       <div className="rounded-2xl border border-zinc-700/80 bg-zinc-900/95 backdrop-blur-xl p-4 shadow-2xl shadow-black/40">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-lg font-black">B</div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-lg font-black">K</div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white">Install BrandKit</p>
+            <p className="text-sm font-semibold text-white">Install Kiln</p>
             {mode === 'android' ? (
               <p className="mt-1 text-xs text-zinc-400">Add to your home screen for instant access and offline-ready brand kits.</p>
             ) : (

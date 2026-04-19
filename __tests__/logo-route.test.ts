@@ -39,7 +39,6 @@ const mockBrandResult: BrandResult = {
     colorPalette: ['#18181b', '#ffffff', '#f59e0b'],
     typography: ['Inter', 'Playfair'],
     avoidList: ['그라디언트'],
-    moodImages: ['minimal-tech-1'],
     recommendedMockups: ['business-card', 'app-icon', 'social-post'],
   },
 }

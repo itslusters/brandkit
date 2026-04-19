@@ -17,7 +17,6 @@ export interface SavedBrand {
   selectedLogoUrl: string       // Vercel Blob URL
   selectedLogoType: LogoType
   mockupUrls: { templateId: string; url: string }[]
-  moodImageUrls?: string[]       // satori-generated abstract brand mood images
   createdAt: number
   updatedAt: number
   public?: boolean
@@ -32,7 +31,6 @@ interface CreateArgs {
   selectedLogoUrl: string
   selectedLogoType: LogoType
   mockupUrls: { templateId: string; url: string }[]
-  moodImageUrls?: string[]
 }
 
 const brandKey = (userId: string, brandId: string) => `brand:${userId}:${brandId}`

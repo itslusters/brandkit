@@ -50,7 +50,6 @@ export async function POST(req: Request) {
       selectedLogoUrl,
       selectedLogoType: body.selectedLogoType,
       mockupUrls: [],
-      moodImageUrls: [],
     })
 
     return Response.json({ brand: saved })

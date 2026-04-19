@@ -10,7 +10,7 @@ interface Params { params: { id: string } }
 
 export default async function Image({ params }: Params) {
   const brand = await getPublicBrand(params.id)
-  const name = brand?.name ?? 'BrandKit'
+  const name = brand?.name ?? 'Kiln'
   const style = brand?.brandResult.styleBrief.recommendedStyle ?? 'AI-generated brand kit'
   const logoUrl = brand?.selectedLogoUrl
 
@@ -43,7 +43,7 @@ export default async function Image({ params }: Params) {
           {style}
         </div>
         <div style={{ position: 'absolute', bottom: 40, right: 60, fontSize: 20, color: '#71717a', display: 'flex' }}>
-          Made with BrandKit
+          Made with Kiln
         </div>
       </div>
     ),
