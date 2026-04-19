@@ -20,11 +20,6 @@ body {
   overscroll-behavior: none;
 }
 
-/* Required for min-h-screen in Safari; overscroll-behavior handles bounce */
-html, body {
-  height: 100%;
-}
-
 /* AI-flavored 1px gradient border — color sweep rotates around fixed perimeter.
    Uses @property to animate the conic-gradient angle (not transform), so the
    ring stays perfectly aligned with the card's rounded corners while colors
