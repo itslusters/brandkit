@@ -1,5 +1,7 @@
+import { auth } from '@clerk/nextjs/server'
 import { anthropic, buildBrandPrompt, parseNamingCandidates, parseStyleBrief } from '@/lib/claude'
-import { briefLimiter, getIp } from '@/lib/ratelimit'
+import { getBriefLimiter } from '@/lib/ratelimit'
+import { getUserTier } from '@/lib/tier'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
 type Section = 'industry' | 'naming' | 'brief'
@@ -9,13 +11,23 @@ function sse(data: object): Uint8Array {
 }
 
 export async function POST(req: Request) {
-  const ip = getIp(req)
-  const { success } = await briefLimiter.limit(ip)
-  if (!success) {
+  const { userId } = await auth()
+  if (!userId) {
     return new Response(
-      `data: ${JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' })}\n\n`,
-      { status: 429, headers: { 'Content-Type': 'text/event-stream' } }
+      `data: ${JSON.stringify({ type: 'error', message: 'Sign in required.' })}\n\n`,
+      { status: 401, headers: { 'Content-Type': 'text/event-stream' } }
     )
+  }
+
+  if (process.env.NODE_ENV !== 'development') {
+    const tier = await getUserTier()
+    const { success } = await getBriefLimiter(tier).limit(userId)
+    if (!success) {
+      return new Response(
+        `data: ${JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' })}\n\n`,
+        { status: 429, headers: { 'Content-Type': 'text/event-stream' } }
+      )
+    }
   }
 
   const input: BrandInput = await req.json()

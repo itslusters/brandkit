@@ -1,6 +1,8 @@
+import { auth } from '@clerk/nextjs/server'
 import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
 import { generateRecraftImage, resolveStyleId } from '@/lib/recraft'
-import { logoLimiter, getIp } from '@/lib/ratelimit'
+import { getLogoLimiter } from '@/lib/ratelimit'
+import { getUserTier } from '@/lib/tier'
 import { postprocessLogo } from '@/lib/logo-postprocess'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
@@ -60,11 +62,20 @@ async function generateWithRecraft(
 }
 
 export async function POST(req: Request) {
-  // Skip rate limiting in development for unconstrained local testing.
-  // Production/preview continue to enforce the per-IP daily cap.
+  const { userId } = await auth()
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ type: 'error', message: 'Sign in required.' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Tier-aware, per-user 24h rate limit. Skipped in local dev so unit
+  // testing doesn't burn through the quota. Paid tiers get markedly
+  // higher limits; see LOGO_PER_TIER in lib/ratelimit.ts.
   if (process.env.NODE_ENV !== 'development') {
-    const ip = getIp(req)
-    const { success } = await logoLimiter.limit(ip)
+    const tier = await getUserTier()
+    const { success } = await getLogoLimiter(tier).limit(userId)
     if (!success) {
       return new Response(
         JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),

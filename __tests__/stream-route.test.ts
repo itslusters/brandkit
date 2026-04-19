@@ -1,8 +1,19 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: vi.fn().mockResolvedValue({ userId: 'u_test', sessionClaims: { publicMetadata: { tier: 'free' } } }),
+}))
+
+vi.mock('@/lib/tier', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/tier')>('@/lib/tier')
+  return { ...actual, getUserTier: vi.fn().mockResolvedValue('free') }
+})
+
 // Mock rate limiter so tests don't hit Upstash
 vi.mock('@/lib/ratelimit', () => ({
+  getBriefLimiter: () => ({ limit: vi.fn().mockResolvedValue({ success: true }) }),
+  getLogoLimiter: () => ({ limit: vi.fn().mockResolvedValue({ success: true }) }),
   briefLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
   logoLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
   emailLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },

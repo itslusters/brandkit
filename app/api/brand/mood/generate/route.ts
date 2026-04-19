@@ -1,4 +1,5 @@
-import { logoLimiter, getIp } from '@/lib/ratelimit'
+import { auth } from '@clerk/nextjs/server'
+import { getLogoLimiter } from '@/lib/ratelimit'
 import { MOOD_TEMPLATES, MOOD_FREE_COUNT, buildMoodPrompt, getMoodById } from '@/lib/mood-templates'
 import { generateMoodImage } from '@/lib/recraft'
 import { getUserTier } from '@/lib/tier'
@@ -15,9 +16,17 @@ function sse(data: object): Uint8Array {
 }
 
 export async function POST(req: Request) {
+  const { userId } = await auth()
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ type: 'error', message: 'Sign in required.' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
   if (process.env.NODE_ENV !== 'development') {
-    const ip = getIp(req)
-    const { success } = await logoLimiter.limit(ip)
+    const tier = await getUserTier()
+    const { success } = await getLogoLimiter(tier).limit(userId)
     if (!success) {
       return new Response(
         JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),
