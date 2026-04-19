@@ -8,6 +8,7 @@ import { WaitlistModal } from '@/components/WaitlistModal'
 import { StaggerChildren, StaggerItem } from '@/components/ui/StaggerChildren'
 import { isNative } from '@/lib/native'
 import { startIapPurchase } from '@/lib/iap'
+import { trackEvent } from '@/lib/analytics'
 import type { PaidPlan } from '@/lib/tier'
 
 export default function PricingPage() {
@@ -40,6 +41,7 @@ function PricingPageInner() {
     }
     if (!user?.id) { setError('Sign-in required.'); return }
     setBusyPlan(plan)
+    trackEvent('paid_checkout_start', { plan, surface: 'ios' })
     try {
       const ok = await startIapPurchase(plan, user.id)
       if (ok) router.push(`/account?upgrade=success&plan=${plan}`)

@@ -11,6 +11,7 @@ import { WaitlistModal } from '@/components/WaitlistModal'
 import { MOCKUP_TEMPLATES, getTemplateById } from '@/lib/mockups'
 import { getSession, setSession } from '@/lib/session'
 import { SavedBadge } from '@/components/brand/SavedBadge'
+import { trackEvent } from '@/lib/analytics'
 import type { BrandInput, BrandResult, MockupResult, LogoType } from '@/lib/types'
 
 export default function MockupPage() {
@@ -97,6 +98,7 @@ export default function MockupPage() {
       .then(async (res) => {
         if (res.ok) {
           setSaveState('saved')
+          trackEvent('brand_save_success', { tier: userTier, mockup_count: mockupUrls.length })
           import('canvas-confetti').then(({ default: confetti }) => {
             confetti({ particleCount: 80, spread: 70, origin: { y: 0.7 }, colors: ['#ffffff', '#a1a1aa', '#3b82f6'] })
           })
@@ -113,14 +115,17 @@ export default function MockupPage() {
         if (res.status === 402) {
           setSaveMessage(detail || 'Free tier limit reached')
           setSaveState('limit')
+          trackEvent('brand_save_fail', { reason: 'limit_reached', status: res.status })
           return
         }
         setSaveMessage(detail || `Save failed (${res.status})`)
         setSaveState('error')
+        trackEvent('brand_save_fail', { reason: 'server_error', status: res.status })
       })
       .catch((err) => {
         setSaveMessage(err instanceof Error ? err.message : 'Network error')
         setSaveState('error')
+        trackEvent('brand_save_fail', { reason: 'network_error' })
       })
   }, [user, results, saveState, ready, isFreeTier])
 

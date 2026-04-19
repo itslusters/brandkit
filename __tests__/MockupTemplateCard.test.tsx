@@ -38,9 +38,10 @@ describe('MockupTemplateCard', () => {
   })
 
   it('shows check indicator when selected', () => {
-    const { container } = render(
+    render(
       <MockupTemplateCard template={template} selected={true} recommended={false} onToggle={vi.fn()} />
     )
-    expect(container.querySelector('.border-white')).toBeInTheDocument()
+    // Card signals selection via aria-pressed on the root button.
+    expect(screen.getByRole('button', { pressed: true })).toBeInTheDocument()
   })
 })

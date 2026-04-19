@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Check, ArrowRight } from 'lucide-react'
 import { BottomSheet } from '@/components/ui/BottomSheet'
+import { trackEvent } from '@/lib/analytics'
 
 interface Props {
   open: boolean
@@ -45,6 +46,7 @@ export function WaitlistModal({ open, plan, prefilledEmail, onClose }: Props) {
         }
         return
       }
+      trackEvent('waitlist_signup', { locale: 'en', plan })
       setDone(true)
     } catch {
       setError('Network error. Try again.')
