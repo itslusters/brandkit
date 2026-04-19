@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Loader2 } from 'lucide-react'
 
 export interface FeedItem {
   id: string
@@ -13,6 +14,9 @@ export interface FeedItem {
 
 interface Props {
   items: FeedItem[]
+  /** How many brand-derived items the server initially rendered. The "Load
+   *  more" button resumes fetching from this offset. */
+  initialBrandCount?: number
 }
 
 const FILTERS: { id: string; label: string }[] = [
@@ -24,19 +28,41 @@ const FILTERS: { id: string; label: string }[] = [
   { id: 'tech', label: 'Tech' },
 ]
 
+const LOAD_MORE_LIMIT = 40
+
 /**
  * Savee/Pinterest-style 2–4 column masonry feed with a horizontal-scroll
  * filter row pinned to the top. Filter chips narrow to brands tagged with
  * the matching style pack — showcase images (no stylePack) always appear
- * so the grid never empties out.
+ * so the grid never empties out. Below-the-fold pagination via a "Load
+ * more" button that hits /api/public/brands/page.
  */
-export function FeedGallery({ items }: Props) {
+export function FeedGallery({ items, initialBrandCount = 40 }: Props) {
   const [filter, setFilter] = useState<string>('all')
+  const [loaded, setLoaded] = useState<FeedItem[]>([])
+  const [nextOffset, setNextOffset] = useState<number | null>(initialBrandCount)
+  const [busy, setBusy] = useState(false)
+
+  const combined = useMemo(() => [...items, ...loaded], [items, loaded])
 
   const filtered = useMemo(() => {
-    if (filter === 'all') return items
-    return items.filter((item) => !item.stylePack || item.stylePack === filter)
-  }, [items, filter])
+    if (filter === 'all') return combined
+    return combined.filter((item) => !item.stylePack || item.stylePack === filter)
+  }, [combined, filter])
+
+  async function loadMore() {
+    if (busy || nextOffset === null) return
+    setBusy(true)
+    try {
+      const res = await fetch(`/api/public/brands/page?offset=${nextOffset}&limit=${LOAD_MORE_LIMIT}`)
+      if (!res.ok) return
+      const data = (await res.json()) as { items: FeedItem[]; nextOffset: number | null }
+      setLoaded((prev) => [...prev, ...data.items])
+      setNextOffset(data.nextOffset)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
     <div className="pt-2">
@@ -53,6 +79,7 @@ export function FeedGallery({ items }: Props) {
                   ? 'bg-white text-zinc-950 shadow-lg shadow-white/10'
                   : 'bg-zinc-900/70 text-zinc-400 border border-zinc-800/70 backdrop-blur-sm hover:text-white hover:border-zinc-600'
               }`}
+              aria-pressed={filter === f.id}
             >
               {f.label}
             </button>
@@ -89,6 +116,19 @@ export function FeedGallery({ items }: Props) {
           ))}
         </AnimatePresence>
       </div>
+
+      {nextOffset !== null && filter === 'all' && (
+        <div className="flex justify-center py-8">
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={busy}
+            className="btn btn-secondary"
+          >
+            {busy ? <><Loader2 size={14} className="animate-spin" /> Loading…</> : 'Load more brands'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

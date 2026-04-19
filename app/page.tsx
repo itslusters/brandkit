@@ -90,7 +90,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
-        <FeedGallery items={allItems} />
+        <FeedGallery items={allItems} initialBrandCount={publicBrands.length} />
         <FeedGate totalCount={totalCount} />
       </div>
     </>

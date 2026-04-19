@@ -99,8 +99,10 @@ export async function setPublicBrand(userId: string, brandId: string, isPublic: 
   return updated
 }
 
-export async function listPublicBrands(limit = 20): Promise<SavedBrand[]> {
-  const ids = await redis.zrange<string[]>('public:all', 0, limit - 1, { rev: true })
+export async function listPublicBrands(limit = 20, offset = 0): Promise<SavedBrand[]> {
+  const start = Math.max(0, offset)
+  const stop = start + Math.max(1, limit) - 1
+  const ids = await redis.zrange<string[]>('public:all', start, stop, { rev: true })
   if (!ids.length) return []
   const brands = await Promise.all(ids.map((id) => getPublicBrand(id)))
   return brands.filter((b): b is SavedBrand => b !== null)
