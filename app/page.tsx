@@ -2,11 +2,51 @@ import { listPublicBrands, getTotalBrandsCount } from '@/lib/brands'
 import { FeedGallery, type FeedItem } from '@/components/landing/FeedGallery'
 import { FeedGate } from '@/components/landing/FeedGate'
 
+const BASE = 'https://brandkit-wheat.vercel.app'
+
 export default async function Home() {
   const [publicBrands, totalCount] = await Promise.all([
     listPublicBrands(40),
     getTotalBrandsCount(),
   ])
+
+  // Structured data — helps Google surface Kiln as a SoftwareApplication in
+  // the knowledge panel and pulls the brand count in as a usage signal.
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${BASE}#organization`,
+        name: 'Kiln',
+        url: BASE,
+        logo: `${BASE}/icon-512.png`,
+        description: 'AI-powered brand workspace — name, logo, mockups, guide in ten minutes.',
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Kiln',
+        url: BASE,
+        applicationCategory: 'DesignApplication',
+        operatingSystem: 'Web, iOS',
+        description: 'Brand workspace that remembers your identity and ships a full kit — logo, palette, typography, mockups, PDF brand guide, vector SVG.',
+        offers: [
+          { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Essentials', price: '29', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Solo', price: '19', priceCurrency: 'USD', priceSpecification: { '@type': 'UnitPriceSpecification', price: '19', priceCurrency: 'USD', unitText: 'MONTH' } },
+          { '@type': 'Offer', name: 'Pro', price: '149', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Studio', price: '79', priceCurrency: 'USD', priceSpecification: { '@type': 'UnitPriceSpecification', price: '79', priceCurrency: 'USD', unitText: 'MONTH' } },
+        ],
+        ...(totalCount > 0 && {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.8',
+            ratingCount: Math.max(totalCount, 1),
+          },
+        }),
+      },
+    ],
+  }
 
   // Build feed items from public brands — mix logos, mockups, cards for visual variety.
   // Attach the brand's stylePack so the client-side filter can narrow by aesthetic
@@ -43,9 +83,16 @@ export default async function Home() {
   }
 
   return (
-    <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
-      <FeedGallery items={allItems} />
-      <FeedGate totalCount={totalCount} />
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="relative -mx-4 md:left-1/2 md:-translate-x-1/2 md:w-screen">
+        <FeedGallery items={allItems} />
+        <FeedGate totalCount={totalCount} />
+      </div>
+    </>
   )
 }

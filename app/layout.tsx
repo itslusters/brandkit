@@ -54,6 +54,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en" className="dark">
+        <head>
+          {/* Preconnect to blob storage + Clerk so the first image / auth
+              handshake doesn't pay the DNS+TLS cost in the critical path. */}
+          <link rel="preconnect" href="https://public.blob.vercel-storage.com" />
+          <link rel="dns-prefetch" href="https://public.blob.vercel-storage.com" />
+          <link rel="preconnect" href="https://clerk.com" crossOrigin="" />
+          <link rel="dns-prefetch" href="https://clerk.com" />
+        </head>
         <body className={`${inter.className} min-h-screen bg-zinc-950 text-white overflow-x-clip`}>
           <ToastProvider>
             <GlassHeader />

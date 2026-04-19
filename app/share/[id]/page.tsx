@@ -26,7 +26,26 @@ export default async function SharedBrandPage({ params }: Params) {
 
   const remixHref = `/brand/new?remix=${brand.id}&industry=${encodeURIComponent(brand.industry)}&tones=${encodeURIComponent(brand.brandInput.tones.join(','))}&stylePack=${brand.brandInput.stylePack ?? ''}`
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: brand.name,
+    description: brand.brandResult.styleBrief.recommendedStyle,
+    image: brand.selectedLogoUrl,
+    dateCreated: new Date(brand.createdAt).toISOString(),
+    dateModified: new Date(brand.updatedAt).toISOString(),
+    creator: { '@type': 'Organization', name: 'Kiln', url: 'https://brandkit-wheat.vercel.app' },
+    genre: brand.industry,
+    keywords: brand.brandInput.tones.join(', '),
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <BrandArtifact
       brand={brand}
       eyebrow="Shared brand"
@@ -76,5 +95,6 @@ export default async function SharedBrandPage({ params }: Params) {
         </div>
       }
     />
+    </>
   )
 }
