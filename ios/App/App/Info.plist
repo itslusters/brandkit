@@ -47,5 +47,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos of inspiration — packaging, scenery, color palettes — to attach to your brand kit.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pick reference images from your photo library to attach to your brand kit.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save your generated logo and brand assets to your photo library.</string>
 </dict>
 </plist>

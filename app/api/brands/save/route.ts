@@ -41,15 +41,25 @@ export async function POST(req: Request) {
     // when viewing the saved brand. This keeps save fast and reliable.
     const selectedLogoUrl = await uploadDataUrl(body.selectedLogoDataUrl, `brands/${userId}/logo.png`)
 
+    let referencePhotoUrl: string | undefined
+    const refData = body.brandInput.referencePhotoDataUrl
+    if (refData && refData.startsWith('data:image/')) {
+      referencePhotoUrl = await uploadDataUrl(refData, `brands/${userId}/reference.jpg`)
+    }
+
+    // Strip transient base64 from the persisted input — the URL replaces it.
+    const { referencePhotoDataUrl: _ref, ...persistedInput } = body.brandInput
+
     const saved = await saveBrand({
       userId,
       name: body.name,
       industry: body.brandInput.industry,
-      brandInput: body.brandInput,
+      brandInput: persistedInput,
       brandResult: body.brandResult,
       selectedLogoUrl,
       selectedLogoType: body.selectedLogoType,
       mockupUrls: [],
+      referencePhotoUrl,
     })
 
     return Response.json({ brand: saved })

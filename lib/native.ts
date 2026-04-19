@@ -98,6 +98,87 @@ export async function share(options: ShareOptions): Promise<boolean> {
   return false
 }
 
+/* -------------------------------- CAMERA -------------------------------- */
+
+export type PhotoSource = 'camera' | 'photos' | 'prompt'
+
+export interface TakePhotoResult {
+  /** data URL form, i.e. `data:image/jpeg;base64,...` — consistent with other image helpers in the app */
+  dataUrl: string
+  format: 'jpeg' | 'png' | 'webp'
+}
+
+/**
+ * Captures a photo from camera (or library) on iOS, falls back to a standard
+ * `<input type="file" accept="image/*" capture>` on web. This is the native
+ * capability that differentiates the iOS build from a plain web wrapper — it
+ * gives users a one-tap way to snap inspiration for the brand reference.
+ *
+ * Returns null if the user cancels or the capture fails.
+ */
+export async function takePhoto(source: PhotoSource = 'prompt'): Promise<TakePhotoResult | null> {
+  if (isNative()) {
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+      const sourceMap = {
+        camera: CameraSource.Camera,
+        photos: CameraSource.Photos,
+        prompt: CameraSource.Prompt,
+      }
+      const photo = await Camera.getPhoto({
+        quality: 75,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: sourceMap[source],
+        correctOrientation: true,
+        // Cap dimensions so sessionStorage (~5MB) and API payloads stay small.
+        width: 1600,
+        height: 1600,
+      })
+      if (!photo.dataUrl) return null
+      const format = (photo.format === 'png' || photo.format === 'webp' ? photo.format : 'jpeg') as 'jpeg' | 'png' | 'webp'
+      return { dataUrl: photo.dataUrl, format }
+    } catch {
+      return null
+    }
+  }
+  // Web fallback: transient <input type="file"> click.
+  if (typeof document === 'undefined') return null
+  return new Promise<TakePhotoResult | null>((resolve) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    if (source === 'camera') input.setAttribute('capture', 'environment')
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) { resolve(null); return }
+      try {
+        const dataUrl = await downscaleToDataUrl(file, 1600, 0.75)
+        resolve(dataUrl ? { dataUrl, format: 'jpeg' } : null)
+      } catch {
+        resolve(null)
+      }
+    }
+    input.oncancel = () => resolve(null)
+    input.click()
+  })
+}
+
+async function downscaleToDataUrl(file: File, maxEdge: number, quality: number): Promise<string | null> {
+  const bitmap = await createImageBitmap(file).catch(() => null)
+  if (!bitmap) return null
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height))
+  const w = Math.round(bitmap.width * scale)
+  const h = Math.round(bitmap.height * scale)
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+  ctx.drawImage(bitmap, 0, 0, w, h)
+  return canvas.toDataURL('image/jpeg', quality)
+}
+
 /* ----------------------------- FILE SAVE -------------------------------- */
 
 /**

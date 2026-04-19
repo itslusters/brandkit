@@ -3,8 +3,14 @@ import { getUserTier } from '@/lib/tier'
 import { getWaitlistFor } from '@/lib/waitlist'
 import { redirect } from 'next/navigation'
 import { StaggerChildren, StaggerItem } from '@/components/ui/StaggerChildren'
+import { RestorePurchasesButton } from '@/components/RestorePurchasesButton'
 
-export default async function AccountPage() {
+interface SearchParams {
+  upgrade?: string
+  plan?: string
+}
+
+export default async function AccountPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
@@ -12,6 +18,8 @@ export default async function AccountPage() {
   const email = user?.primaryEmailAddress?.emailAddress ?? ''
   const tier = await getUserTier()
   const waitlists = email ? await getWaitlistFor(email) : []
+  const sp = await searchParams
+  const upgradeSuccess = sp.upgrade === 'success' && (sp.plan === 'essentials' || sp.plan === 'pro')
 
   return (
     <StaggerChildren className="pt-4 pb-12">
@@ -20,6 +28,17 @@ export default async function AccountPage() {
           <h1 className="text-2xl font-bold tracking-tight text-white">Account</h1>
         </div>
       </StaggerItem>
+
+      {upgradeSuccess && (
+        <StaggerItem>
+          <div className="mb-6 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+            <p className="text-sm font-medium text-emerald-400">Payment received. Your {sp.plan} upgrade is being activated.</p>
+            <p className="text-xs text-zinc-500 mt-1">
+              If you don&apos;t see the new plan reflected below within a minute, refresh the page — the entitlement webhook runs asynchronously.
+            </p>
+          </div>
+        </StaggerItem>
+      )}
 
       <StaggerItem>
         <section className="mb-6">
@@ -45,6 +64,10 @@ export default async function AccountPage() {
             Your saved brands →
           </a>
         </section>
+      </StaggerItem>
+
+      <StaggerItem>
+        <RestorePurchasesButton />
       </StaggerItem>
 
       <StaggerItem>

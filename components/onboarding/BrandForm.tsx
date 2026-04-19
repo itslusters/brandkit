@@ -5,6 +5,7 @@ import { ArrowRight, ChevronDown, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ToneSelector } from './ToneSelector'
 import { StylePackSelector } from './StylePackSelector'
+import { InspirationPhotoPicker } from './InspirationPhotoPicker'
 import { INDUSTRIES } from '@/lib/constants'
 import { setSession, clearBrandSession } from '@/lib/session'
 import type { BrandInput } from '@/lib/types'
@@ -26,6 +27,7 @@ export function BrandForm() {
   const [selectedPack, setSelectedPack] = useState<string | null>(null)
   const [customTone, setCustomTone] = useState('')
   const [showMore, setShowMore] = useState(false)
+  const [referencePhoto, setReferencePhoto] = useState<string | undefined>(undefined)
 
   // Pre-fill from remix query params (from /share/[id] "Remix" button)
   useEffect(() => {
@@ -58,6 +60,7 @@ export function BrandForm() {
       ...(hasBrandName ? { existingName: form.companyName.trim() } : {}),
       ...(customTone.trim() ? { customTone: customTone.trim() } : {}),
       ...(selectedPack ? { stylePack: selectedPack } : {}),
+      ...(referencePhoto ? { referencePhotoDataUrl: referencePhoto } : {}),
     }
     clearBrandSession()
     setSession('brandInput', payload)
@@ -197,6 +200,11 @@ export function BrandForm() {
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
               />
             </div>
+
+            <InspirationPhotoPicker
+              dataUrl={referencePhoto}
+              onChange={setReferencePhoto}
+            />
 
           </motion.div>
         )}

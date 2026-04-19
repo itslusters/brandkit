@@ -7,6 +7,7 @@ export interface BrandInput {
   existingName?: string  // if set, naming step is skipped — Claude generates only the brief
   customTone?: string    // free-text tone description — appended to picker tones in prompt
   stylePack?: string     // style pack ID — injects aesthetic directive into prompts
+  referencePhotoDataUrl?: string  // optional inspiration photo (base64 data URL) — uploaded on save, not used for generation
 }
 
 export interface StyleBrief {

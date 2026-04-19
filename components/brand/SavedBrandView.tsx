@@ -110,6 +110,17 @@ export function SavedBrandView({ brand }: Props) {
 
       <StyleBriefDisplay brief={brand.brandResult.styleBrief} />
 
+      {/* User-captured inspiration — only present when attached during creation */}
+      {brand.referencePhotoUrl && (
+        <section className="mt-8">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Your inspiration</p>
+          <div className="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={brand.referencePhotoUrl} alt="Inspiration reference" className="w-full object-cover max-h-80" />
+          </div>
+        </section>
+      )}
+
       {/* Mockups */}
       {brand.mockupUrls.length > 0 && (
         <section className="mt-8">

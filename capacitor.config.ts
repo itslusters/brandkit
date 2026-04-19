@@ -37,6 +37,12 @@ const config: CapacitorConfig = {
     // Disable scroll bounce so the app feels more native.
     scrollEnabled: true,
   },
+  plugins: {
+    Camera: {
+      // Usage strings live in Info.plist (NSCameraUsageDescription etc).
+      // Keeping the plugin key here so cap sync picks it up for iOS.
+    },
+  },
 }
 
 export default config
