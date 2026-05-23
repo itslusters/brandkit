@@ -5,7 +5,9 @@ import type { BrandInput, BrandResult, LogoType } from './types'
 
 const redis = Redis.fromEnv()
 
-export const FREE_TIER_BRAND_LIMIT = 3
+// 2 = one real attempt + one mulligan. Tighter than 3 to cap our blob/storage
+// cost per free user; loose enough that a first-try miss doesn't lock them out.
+export const FREE_TIER_BRAND_LIMIT = 2
 
 export interface SavedBrand {
   id: string

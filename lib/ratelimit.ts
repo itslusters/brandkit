@@ -34,7 +34,10 @@ export const publicBrandLimiter = new Ratelimit({
 // One 24h counter per (limiter, tier, userId). Changing this bumps the
 // prefix and resets everyone's counter — useful when loosening limits.
 const LOGO_PER_TIER: Record<UserTier, number> = {
-  free: 30,
+  // Free is abuse-resistant rather than trial-friendly — 3 calls = 9 logos
+  // generated per day, which is enough for a real trial but blocks scripted
+  // farming. Paid tiers stay generous since they're paying for the headroom.
+  free: 3,
   essentials: 80,
   solo: 250,
   pro: 250,
@@ -53,7 +56,7 @@ const BRIEF_PER_TIER: Record<UserTier, number> = {
 // one brand run consumes both buckets. Separated so a heavy mood session
 // doesn't lock out logo iteration and vice versa.
 const MOOD_PER_TIER: Record<UserTier, number> = {
-  free: 30,
+  free: 3,
   essentials: 80,
   solo: 250,
   pro: 250,

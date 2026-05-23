@@ -3,7 +3,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Download } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
 import { LogoResultCard } from '@/components/brand/LogoResultCard'
+import { UpgradeModal } from '@/components/UpgradeModal'
+import { WaitlistModal } from '@/components/WaitlistModal'
 import { getSession, setSession } from '@/lib/session'
 import { haptic } from '@/lib/native'
 import { saveDataUrls } from '@/lib/download'
@@ -49,6 +52,12 @@ export default function LogoStudioPage() {
   const [iterationsUsed, setIterationsUsed] = useState(0)
   const [modifier, setModifier] = useState<IterationModifier | null>(null)
   const [enlargedDataUrl, setEnlargedDataUrl] = useState<string | null>(null)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)
+
+  const { user } = useUser()
+  const userTier = ((user?.publicMetadata as { tier?: 'free' | 'essentials' | 'solo' | 'pro' | 'studio' } | undefined)?.tier) ?? 'free'
+  const isFreeTier = userTier === 'free'
 
   // Session guard
   useEffect(() => {
@@ -165,6 +174,7 @@ export default function LogoStudioPage() {
     if (selected === null) return
     const dataUrl = cards[selected]?.dataUrl
     if (!dataUrl) return
+    if (isFreeTier) { setUpgradeOpen(true); return }
     const name = (getSession<string>('selectedName') ?? 'logo').replace(/[^a-zA-Z0-9가-힣\- _]/g, '')
     haptic('success')
     await saveDataUrls([{ dataUrl, filename: `${name}-logo.png` }])
@@ -176,6 +186,7 @@ export default function LogoStudioPage() {
       .map((c, i) => ({ dataUrl: c.dataUrl, i }))
       .filter((c): c is { dataUrl: string; i: number } => typeof c.dataUrl === 'string' && c.dataUrl.length > 0)
     if (available.length === 0) return
+    if (isFreeTier) { setUpgradeOpen(true); return }
     haptic('success')
     await saveDataUrls(available.map((c) => ({ dataUrl: c.dataUrl, filename: `${name}-logo-${c.i + 1}.png` })))
   }
@@ -352,6 +363,19 @@ export default function LogoStudioPage() {
           </button>
         </div>
       )}
+
+      <UpgradeModal
+        open={upgradeOpen}
+        reason="High-res logo downloads are part of Essentials and above. You'll get the PNG, the vector SVG, the full brand guide PDF, and the asset pack — everything sized and ready to ship."
+        onClose={() => setUpgradeOpen(false)}
+        onChoosePlan={(plan) => { setUpgradeOpen(false); setWaitlistPlan(plan) }}
+      />
+      <WaitlistModal
+        open={waitlistPlan !== null}
+        plan={waitlistPlan ?? 'essentials'}
+        prefilledEmail={user?.primaryEmailAddress?.emailAddress ?? ''}
+        onClose={() => setWaitlistPlan(null)}
+      />
     </div>
   )
 }
