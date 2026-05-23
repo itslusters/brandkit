@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { getLogoLimiter } from '@/lib/ratelimit'
+import { getMoodLimiter } from '@/lib/ratelimit'
 import { MOOD_TEMPLATES, MOOD_FREE_COUNT, buildMoodPrompt, getMoodById, pickMoodStyle } from '@/lib/mood-templates'
 import { generateMoodImage } from '@/lib/recraft'
 import { getUserTier } from '@/lib/tier'
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
   if (process.env.NODE_ENV !== 'development') {
     const tier = await getUserTier()
-    const { success } = await getLogoLimiter(tier).limit(userId)
+    const { success } = await getMoodLimiter(tier).limit(userId)
     if (!success) {
       return new Response(
         JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),

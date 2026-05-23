@@ -12,6 +12,7 @@ import { MOCKUP_TEMPLATES, getTemplateById } from '@/lib/mockups'
 import { getSession, setSession } from '@/lib/session'
 import { SavedBadge } from '@/components/brand/SavedBadge'
 import { trackEvent } from '@/lib/analytics'
+import { saveBlob, saveDataUrls } from '@/lib/download'
 import type { BrandInput, BrandResult, MockupResult, LogoType } from '@/lib/types'
 
 export default function MockupPage() {
@@ -196,14 +197,7 @@ export default function MockupPage() {
       return
     }
     const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    await saveBlob(blob, filename)
   }
 
   async function downloadPdf() {
@@ -216,14 +210,9 @@ export default function MockupPage() {
     await downloadBlob('/api/brand/assets/generate', `${brandName}-brand-kit.zip`)
   }
 
-  function downloadSingleMockup(r: MockupResult) {
+  async function downloadSingleMockup(r: MockupResult) {
     if (!r.dataUrl) return
-    const a = document.createElement('a')
-    a.href = r.dataUrl
-    a.download = `${r.templateId}.png`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    await saveDataUrls([{ dataUrl: r.dataUrl, filename: `${r.templateId}.png` }])
   }
 
   if (!ready) return null
@@ -379,14 +368,7 @@ export default function MockupPage() {
                   })
                   if (!res.ok) return
                   const blob = await res.blob()
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `${brandName}-dna-card.png`
-                  document.body.appendChild(a)
-                  a.click()
-                  document.body.removeChild(a)
-                  URL.revokeObjectURL(url)
+                  await saveBlob(blob, `${brandName}-dna-card.png`)
                 }}
                 className="btn btn-primary"
               >

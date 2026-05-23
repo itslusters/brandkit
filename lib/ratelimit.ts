@@ -49,6 +49,17 @@ const BRIEF_PER_TIER: Record<UserTier, number> = {
   studio: 1000,
 }
 
+// Mood gen used to share the logo limiter, which double-charged users since
+// one brand run consumes both buckets. Separated so a heavy mood session
+// doesn't lock out logo iteration and vice versa.
+const MOOD_PER_TIER: Record<UserTier, number> = {
+  free: 30,
+  essentials: 80,
+  solo: 250,
+  pro: 250,
+  studio: 800,
+}
+
 const limiterCache = new Map<string, Ratelimit>()
 
 function getOrCreate(prefix: string, max: number): Ratelimit {
@@ -66,11 +77,17 @@ function getOrCreate(prefix: string, max: number): Ratelimit {
 }
 
 export function getLogoLimiter(tier: UserTier): Ratelimit {
-  return getOrCreate(`rl:logo:v2:${tier}`, LOGO_PER_TIER[tier])
+  // Bumped v2→v3 when mood was split out of this bucket — without the bump
+  // any user mid-cycle keeps the doubled-up count and stays locked out.
+  return getOrCreate(`rl:logo:v3:${tier}`, LOGO_PER_TIER[tier])
 }
 
 export function getBriefLimiter(tier: UserTier): Ratelimit {
   return getOrCreate(`rl:brief:v2:${tier}`, BRIEF_PER_TIER[tier])
+}
+
+export function getMoodLimiter(tier: UserTier): Ratelimit {
+  return getOrCreate(`rl:mood:v1:${tier}`, MOOD_PER_TIER[tier])
 }
 
 /* --- Legacy named exports — kept so test mocks and any remaining callers
