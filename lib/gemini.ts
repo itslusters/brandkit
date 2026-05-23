@@ -1,14 +1,13 @@
 import 'server-only'
-import { GoogleGenAI } from '@google/genai'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from './types'
 import { getStylePack } from './style-packs'
 
 import { hexToColorName } from './colors'
 export { hexToColorName }
 
-export const genai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-})
+// Note: GoogleGenAI used to be instantiated here, but nothing in the app
+// runtime calls it. Gemini still ships as a dependency because the one-off
+// scripts in `scripts/generate-*.ts` use it directly with GEMINI_API_KEY.
 
 // Each description leads with what the output IS (positive ONLY-clauses) rather
 // than what it isn't — Recraft V3 follows positive instructions far more
