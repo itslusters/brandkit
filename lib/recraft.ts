@@ -21,19 +21,22 @@ interface RecraftResponse {
 }
 
 /**
- * Generate a brand mood image. Uses `RECRAFT_MOOD_STYLE_ID` (singular, one UUID)
- * or `RECRAFT_MOOD_STYLE_IDS` (plural, comma/whitespace-separated, rotated by
- * variationIndex) when set. Falls back to the `realistic_image` preset for
- * photorealistic output when no valid trained style is configured.
+ * Generate a brand mood image. Callers should pass a `style` derived from the
+ * brand brief (see pickMoodStyle in lib/mood-templates.ts) so a vector brand
+ * gets vector mood images, an illustrated brand gets illustrated ones, etc.
+ *
+ * `RECRAFT_MOOD_STYLE_ID(S)` env still works as a per-deployment override —
+ * when set it forces a trained style and ignores `options.style`. Default
+ * setup leaves it empty so brief-driven style picking wins.
  */
 export async function generateMoodImage(
   prompt: string,
-  options: { size?: string; styleId?: string; variationIndex?: number } = {},
+  options: { size?: string; styleId?: string; variationIndex?: number; style?: RecraftStyle } = {},
 ): Promise<Buffer> {
   const styleId = resolveMoodStyleId(options.variationIndex ?? 0, options.styleId)
   return generateRecraftImage(prompt, {
     styleId,
-    style: styleId ? undefined : 'realistic_image',
+    style: styleId ? undefined : (options.style ?? 'realistic_image'),
     size: options.size ?? '1024x1024',
   })
 }

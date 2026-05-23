@@ -2,12 +2,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const authMock = vi.fn()
+const currentUserMock = vi.fn()
 vi.mock('@clerk/nextjs/server', () => ({
   auth: () => authMock(),
+  currentUser: () => currentUserMock(),
 }))
 
 describe('getUserTier', () => {
-  beforeEach(() => { authMock.mockReset() })
+  beforeEach(() => {
+    authMock.mockReset()
+    currentUserMock.mockReset()
+    currentUserMock.mockResolvedValue(null)
+  })
 
   it('returns free when no userId', async () => {
     authMock.mockResolvedValue({ userId: null, sessionClaims: null })
@@ -38,10 +44,21 @@ describe('getUserTier', () => {
     const { getUserTier } = await import('@/lib/tier')
     expect(await getUserTier()).toBe('free')
   })
+
+  it('reads from currentUser() when session token lacks publicMetadata', async () => {
+    authMock.mockResolvedValue({ userId: 'u_1', sessionClaims: {} })
+    currentUserMock.mockResolvedValue({ publicMetadata: { tier: 'studio' } })
+    const { getUserTier } = await import('@/lib/tier')
+    expect(await getUserTier()).toBe('studio')
+  })
 })
 
 describe('requireTier', () => {
-  beforeEach(() => { authMock.mockReset() })
+  beforeEach(() => {
+    authMock.mockReset()
+    currentUserMock.mockReset()
+    currentUserMock.mockResolvedValue(null)
+  })
 
   it('ok=true when tier meets minimum', async () => {
     authMock.mockResolvedValue({ userId: 'u_1', sessionClaims: { publicMetadata: { tier: 'pro' } } })

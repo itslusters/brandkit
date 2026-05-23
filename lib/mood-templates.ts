@@ -45,6 +45,27 @@ export function getMoodById(id: string): MoodTemplate | undefined {
   return MOOD_TEMPLATES.find((t) => t.id === id)
 }
 
+/**
+ * Map the LLM-generated styleBrief.recommendedStyle string to one of Recraft's
+ * built-in style presets. A minimal-vector brand should get vector_illustration
+ * mood images, an illustrated brand should get digital_illustration ones, and
+ * everything else defaults to photographic realistic_image — which is what the
+ * mood pipeline was hard-locked to before (a problem when the brief clearly
+ * wanted vector or illustration aesthetics).
+ */
+export function pickMoodStyle(
+  recommendedStyle: string,
+): 'vector_illustration' | 'digital_illustration' | 'realistic_image' {
+  const s = recommendedStyle.toLowerCase()
+  if (/\b(vector|flat\s*2?d?|geometric|minimal|clean\s*line|iconographic|isometric|graphic\s*mark|svg)\b/.test(s)) {
+    return 'vector_illustration'
+  }
+  if (/\b(illustrat|hand[-\s]?drawn|painted|watercolor|gouache|sketch|cartoon|whimsical|playful)\b/.test(s)) {
+    return 'digital_illustration'
+  }
+  return 'realistic_image'
+}
+
 export const MOOD_FREE_COUNT = 3
 export const MOOD_PROMPT_LIMIT = 1000
 

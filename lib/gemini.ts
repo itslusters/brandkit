@@ -10,21 +10,46 @@ export const genai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 })
 
-// Each description is written as a hard structural contract — not a hint. When a
-// trained Recraft style is applied, it will pull every variation toward the
-// reference aesthetic; these descriptions have to fight that by explicitly
-// naming what must and must not appear in the frame so the three logo types
-// remain visually distinguishable even under a dominant trained style.
+// Each description leads with what the output IS (positive ONLY-clauses) rather
+// than what it isn't — Recraft V3 follows positive instructions far more
+// reliably than negative ones. The same type constraint is restated as a short
+// end-cap (LOGO_TYPE_END_CAP) so the model sees it at both prompt boundaries,
+// which empirically helps it distinguish wordmark from symbol-text from emblem.
 const LOGO_TYPE_DESCRIPTIONS: Record<LogoType, string> = {
-  'wordmark': 'PURE TYPOGRAPHY WORDMARK. Only the brand name rendered as stylized lettering. No icons, no symbols, no graphic marks, no enclosing shapes, no borders, no badges — nothing but the letterforms themselves, arranged as a single refined typographic composition on a clean background.',
-  'symbol-text': 'COMBINATION MARK. A single distinct abstract icon or symbol as the primary graphic element, positioned adjacent to the brand name set in clean supporting type. Icon and wordmark are clearly separate — not fused, not overlapping. The icon carries the visual idea; the type identifies the brand.',
-  'emblem': 'ENCLOSED EMBLEM LOGO. The brand name fully contained inside one defined outer shape — circle, shield, hexagon, rounded rectangle, or heraldic crest. The enclosing container is a load-bearing structural element, visible and continuous. All text and decoration lives inside that shape. Heritage badge energy.',
+  'wordmark': 'WORDMARK ONLY — pure typography logo. The entire output is the brand name rendered as stylized lettering filling the frame. The letterforms ARE the whole composition. NO accompanying icon, NO symbol next to the type, NO enclosing shape around the text.',
+  'symbol-text': 'COMBINATION MARK — two visible parts working as a lockup: (1) a single distinct abstract icon or symbol, (2) the brand name as separate typography next to it. Icon and text are adjacent, not fused. Both elements equally crafted.',
+  'emblem': 'EMBLEM badge logo — the brand name is fully enclosed inside ONE continuous outer container shape (circle, shield, hexagon, badge border, or heraldic crest). The outer shape wraps around all the text and is the dominant load-bearing visual element. Heritage badge composition.',
 }
 
-const VARIATION_HINTS = [
-  'bold asymmetric composition with dramatic negative space',
-  'ultra-minimal, single defining gesture, maximum restraint',
-  'editorial-leaning layout, unconventional spacing, expressive scale',
+const LOGO_TYPE_END_CAP: Record<LogoType, string> = {
+  'wordmark': 'Reconfirm: typography only — zero icons, zero symbols, zero enclosing shapes.',
+  'symbol-text': 'Reconfirm: icon and wordmark visible side by side as separate elements.',
+  'emblem': 'Reconfirm: every text element sits inside one continuous outer container.',
+}
+
+// Each variant pulls a different lever — composition, typography, palette
+// emphasis — so three generations of the same brand land in noticeably
+// different territory instead of three near-duplicates with the same hue mix.
+const VARIATION_AXES: Array<{
+  composition: string
+  typography: string
+  palette: (colors: string[]) => string
+}> = [
+  {
+    composition: 'bold asymmetric composition with dramatic negative space, off-center anchor',
+    typography: 'serif typography, condensed and heavy, magazine-headline presence',
+    palette: (c) => `primary ${c[0]}, accents in ${c.slice(1).filter(Boolean).join(' and ') || c[0]}`,
+  },
+  {
+    composition: 'ultra-minimal layout, single defining gesture, maximum restraint, generous whitespace',
+    typography: 'geometric sans-serif, low contrast, modern engineered proportions',
+    palette: (c) => `monochrome — only ${c[0]} on a clean ground, no other hues`,
+  },
+  {
+    composition: 'editorial-leaning layout, unconventional spacing, expressive scale shifts',
+    typography: 'display type, expressive and unusual, signature character',
+    palette: (c) => `inverted — ${c[1] ?? c[0]} as the ground with ${c[0]} marks${c[2] ? `, ${c[2]} accent` : ''}`,
+  },
 ]
 
 // Atriium house aesthetic — injected silently into every logo prompt.
@@ -59,20 +84,23 @@ export function buildLogoPrompt(
   const { colorPalette, avoidList, recommendedStyle } = result.styleBrief
   const colors = colorPalette.slice(0, 3).map(hexToColorName)
   const packDirective = input.stylePack ? getStylePack(input.stylePack)?.promptDirective ?? '' : ''
+  const variant = VARIATION_AXES[variationIndex] ?? VARIATION_AXES[0]
 
-  // Compact prompt — Recraft V3 has a 1000-char limit and its vector_illustration
-  // style already enforces the brand-quality aesthetic (doubly so when a custom
-  // trained style_id is used). HOUSE_AESTHETIC/HOUSE_AVOID constants above are
-  // kept only as reference documentation; they're no longer injected.
+  // Type constraint is bookended (start + end-cap) so it survives the middle
+  // brand-context block. Recraft V3 has a 1000-char limit; descriptions are
+  // sized to leave room for the brand-specific middle.
   const parts = [
-    `Brand logo for "${selectedName}". ${LOGO_TYPE_DESCRIPTIONS[logoType]}.`,
-    `Style: ${recommendedStyle}.`,
+    LOGO_TYPE_DESCRIPTIONS[logoType],
+    `Brand: "${selectedName}".`,
+    `Typography: ${variant.typography}.`,
+    `Composition: ${variant.composition}.`,
+    `Palette: ${variant.palette(colors)}.`,
+    `Aesthetic: ${recommendedStyle}.`,
     packDirective ? `Mood: ${packDirective}` : '',
-    `Colors: ${colors.join(', ')} only.`,
-    `Layout: ${VARIATION_HINTS[variationIndex]}.`,
     iterationModifier ? ITERATION_MODIFIERS[iterationModifier] : '',
-    `Only text is "${selectedName}". No other text, watermarks, captions, hex codes, or annotations.`,
+    `Only word visible: "${selectedName}". No other text, watermarks, captions, hex codes, or annotations.`,
     avoidList.length > 0 ? `Avoid: ${avoidList.slice(0, 5).join(', ')}.` : '',
+    LOGO_TYPE_END_CAP[logoType],
     'Flat 2D vector, white background, crisp edges, print-ready.',
   ].filter(Boolean)
 

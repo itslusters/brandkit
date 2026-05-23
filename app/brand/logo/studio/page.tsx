@@ -6,6 +6,7 @@ import { Sparkles, Download } from 'lucide-react'
 import { LogoResultCard } from '@/components/brand/LogoResultCard'
 import { getSession, setSession } from '@/lib/session'
 import { haptic } from '@/lib/native'
+import { saveDataUrls } from '@/lib/download'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
 const RETRY_CAP = 2
@@ -160,39 +161,23 @@ export default function LogoStudioPage() {
     router.push('/brand/mood')
   }
 
-  function downloadSelectedLogo() {
+  async function downloadSelectedLogo() {
     if (selected === null) return
     const dataUrl = cards[selected]?.dataUrl
     if (!dataUrl) return
     const name = (getSession<string>('selectedName') ?? 'logo').replace(/[^a-zA-Z0-9가-힣\- _]/g, '')
     haptic('success')
-    const a = document.createElement('a')
-    a.href = dataUrl
-    a.download = `${name}-logo.png`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    await saveDataUrls([{ dataUrl, filename: `${name}-logo.png` }])
   }
 
-  function downloadAllVariants() {
+  async function downloadAllVariants() {
     const name = (getSession<string>('selectedName') ?? 'logo').replace(/[^a-zA-Z0-9가-힣\- _]/g, '')
     const available = cards
       .map((c, i) => ({ dataUrl: c.dataUrl, i }))
       .filter((c): c is { dataUrl: string; i: number } => typeof c.dataUrl === 'string' && c.dataUrl.length > 0)
     if (available.length === 0) return
     haptic('success')
-    // Stagger the clicks so Safari / Chrome actually fire three downloads
-    // instead of coalescing into one. 150ms is short enough to feel batched.
-    available.forEach((c, idx) => {
-      setTimeout(() => {
-        const a = document.createElement('a')
-        a.href = c.dataUrl
-        a.download = `${name}-logo-${c.i + 1}.png`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-      }, idx * 150)
-    })
+    await saveDataUrls(available.map((c) => ({ dataUrl: c.dataUrl, filename: `${name}-logo-${c.i + 1}.png` })))
   }
 
   const selectedDataUrl = selected !== null ? cards[selected]?.dataUrl : undefined

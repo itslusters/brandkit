@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 
 export type UserTier = 'free' | 'essentials' | 'solo' | 'pro' | 'studio'
 export type OnetimeTier = 'essentials' | 'pro'
@@ -50,7 +50,17 @@ export function combineTiers(onetime: OnetimeTier | null, subscription: Subscrip
 export async function getUserTier(): Promise<UserTier> {
   const { userId, sessionClaims } = await auth()
   if (!userId) return 'free'
-  const raw = (sessionClaims?.publicMetadata as { tier?: string } | undefined)?.tier
+
+  // Fast path: session token customization includes publicMetadata
+  const fromClaims = (sessionClaims?.publicMetadata as { tier?: string } | undefined)?.tier
+  if (fromClaims && (VALID as string[]).includes(fromClaims)) {
+    return fromClaims as UserTier
+  }
+
+  // Fallback when the Clerk session token isn't configured to embed publicMetadata —
+  // one extra API roundtrip, but self-healing for fresh installs / un-customized projects.
+  const user = await currentUser()
+  const raw = (user?.publicMetadata as { tier?: string } | undefined)?.tier
   return raw && (VALID as string[]).includes(raw) ? (raw as UserTier) : 'free'
 }
 

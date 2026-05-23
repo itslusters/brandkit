@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { getLogoLimiter } from '@/lib/ratelimit'
-import { MOOD_TEMPLATES, MOOD_FREE_COUNT, buildMoodPrompt, getMoodById } from '@/lib/mood-templates'
+import { MOOD_TEMPLATES, MOOD_FREE_COUNT, buildMoodPrompt, getMoodById, pickMoodStyle } from '@/lib/mood-templates'
 import { generateMoodImage } from '@/lib/recraft'
 import { getUserTier } from '@/lib/tier'
 import type { BrandInput, BrandResult } from '@/lib/types'
@@ -51,12 +51,14 @@ export async function POST(req: Request) {
       const lockedIds = isFree ? requestedIds.slice(MOOD_FREE_COUNT) : []
       controller.enqueue(sse({ type: 'plan', generating: effectiveIds, locked: lockedIds, tier }))
 
+      const moodStyle = pickMoodStyle(brandResult.styleBrief.recommendedStyle)
+
       const tasks = effectiveIds.map(async (id, i) => {
         try {
           const tpl = getMoodById(id)
           if (!tpl) throw new Error(`Unknown mood template: ${id}`)
           const prompt = buildMoodPrompt(brandInput, brandResult, tpl)
-          const raw = await generateMoodImage(prompt, { size: tpl.size, variationIndex: i })
+          const raw = await generateMoodImage(prompt, { size: tpl.size, variationIndex: i, style: moodStyle })
           const dataUrl = `data:image/png;base64,${raw.toString('base64')}`
           controller.enqueue(sse({ type: 'image_ready', index: i, templateId: id, dataUrl }))
         } catch (err) {
