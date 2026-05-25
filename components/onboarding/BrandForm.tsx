@@ -5,7 +5,6 @@ import { ArrowRight, ChevronDown, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ToneSelector } from './ToneSelector'
 import { StylePackSelector } from './StylePackSelector'
-import { InspirationPhotoPicker } from './InspirationPhotoPicker'
 import { INDUSTRIES } from '@/lib/constants'
 import { setSession, clearBrandSession } from '@/lib/session'
 import type { BrandInput } from '@/lib/types'
@@ -23,13 +22,11 @@ export function BrandForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [form, setForm] = useState<BrandInput>(EMPTY)
-  const [hasBrandName, setHasBrandName] = useState(false)
   const [selectedPack, setSelectedPack] = useState<string | null>(null)
   const [customTone, setCustomTone] = useState('')
   // Keep "More options" collapsed by default on every breakpoint so the
   // first screen stays focused on the two required fields.
   const [showMore, setShowMore] = useState(false)
-  const [referencePhoto, setReferencePhoto] = useState<string | undefined>(undefined)
 
   // Pre-fill from remix query params (from /share/[id] "Remix" button)
   useEffect(() => {
@@ -55,14 +52,16 @@ export function BrandForm() {
     if (!isValid) return
     // Auto-fill tones if none selected (from style pack or default)
     const tones = form.tones.length >= 3 ? form.tones : ['modern', 'clean', 'professional']
+    const trimmedName = form.companyName.trim()
     const payload: BrandInput = {
       ...form,
+      companyName: trimmedName,
       tones,
       targetCustomer: form.targetCustomer.trim() || 'General audience',
-      ...(hasBrandName ? { existingName: form.companyName.trim() } : {}),
+      // User always supplies the brand name now; brief is generated, naming step is skipped.
+      existingName: trimmedName,
       ...(customTone.trim() ? { customTone: customTone.trim() } : {}),
       ...(selectedPack ? { stylePack: selectedPack } : {}),
-      ...(referencePhoto ? { referencePhotoDataUrl: referencePhoto } : {}),
     }
     clearBrandSession()
     setSession('brandInput', payload)
@@ -71,46 +70,19 @@ export function BrandForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Skip-naming toggle */}
-      <button
-        type="button"
-        onClick={() => setHasBrandName(v => !v)}
-        className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs transition-all ${
-          hasBrandName
-            ? 'border-white bg-white text-zinc-950'
-            : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'
-        }`}
-        aria-pressed={hasBrandName}
-      >
-        <span className={`inline-block w-1.5 h-1.5 rounded-full ${hasBrandName ? 'bg-zinc-950' : 'bg-zinc-600'}`} />
-        I already have a brand name
-      </button>
-
-      {/* 1. Brand/Company name */}
+      {/* 1. Brand name */}
       <div>
         <label htmlFor="companyName" className="block text-sm font-medium text-zinc-400 mb-1">
-          {hasBrandName ? 'Brand name' : 'Company name'}
+          Brand name
         </label>
         <input
           id="companyName"
           required
           value={form.companyName}
           onChange={e => set('companyName', e.target.value)}
-          placeholder={hasBrandName ? 'e.g. Granum' : 'e.g. Acme Corp'}
+          placeholder="e.g. Granum"
           className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
         />
-        <AnimatePresence>
-          {hasBrandName && (
-            <motion.p
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="text-xs text-zinc-500 mt-2 overflow-hidden"
-            >
-              We&apos;ll skip the naming step.
-            </motion.p>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* 2. Industry */}
@@ -202,11 +174,6 @@ export function BrandForm() {
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
               />
             </div>
-
-            <InspirationPhotoPicker
-              dataUrl={referencePhoto}
-              onChange={setReferencePhoto}
-            />
 
           </motion.div>
         )}

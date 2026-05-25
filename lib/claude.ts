@@ -81,8 +81,37 @@ export function parseNamingCandidates(raw: string): NamingCandidate[] {
 
 const VALID_MOCKUP_IDS = ['business-card', 'app-icon', 'social-post', 'envelope-small', 'envelope-large', 'letterhead', 'tshirt', 'mug', 'pen']
 
+// Extract the first balanced JSON object from a string. Haiku occasionally
+// wraps the brief in ``` fences or appends a stray closing token / explanatory
+// sentence — strict JSON.parse on the raw response then dies with "Unexpected
+// non-whitespace character after JSON". We walk braces (respecting strings and
+// escapes) to slice exactly one object out before parsing.
+function extractFirstJsonObject(raw: string): string {
+  const start = raw.indexOf('{')
+  if (start === -1) throw new Error('StyleBrief: no JSON object found in response')
+  let depth = 0
+  let inString = false
+  let escape = false
+  for (let i = start; i < raw.length; i++) {
+    const ch = raw[i]
+    if (escape) { escape = false; continue }
+    if (inString) {
+      if (ch === '\\') escape = true
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') { inString = true; continue }
+    if (ch === '{') depth++
+    else if (ch === '}') {
+      depth--
+      if (depth === 0) return raw.slice(start, i + 1)
+    }
+  }
+  throw new Error('StyleBrief: unterminated JSON object in response')
+}
+
 export function parseStyleBrief(raw: string): StyleBrief {
-  const parsed = JSON.parse(raw.trim())
+  const parsed = JSON.parse(extractFirstJsonObject(raw))
   const required: (keyof StyleBrief)[] = [
     'recommendedStyle', 'colorPalette', 'typography', 'avoidList', 'recommendedMockups'
   ]

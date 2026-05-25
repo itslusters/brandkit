@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation'
 const STEPS = [
   { id: 'new', path: '/brand/new' },
   { id: 'processing', path: '/brand/processing' },
-  { id: 'naming', path: '/brand/naming' },
   { id: 'brief', path: '/brand/brief' },
   { id: 'logo-type', path: '/brand/logo/type' },
   { id: 'logo-studio', path: '/brand/logo/studio' },

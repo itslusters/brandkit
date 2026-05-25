@@ -82,4 +82,20 @@ describe('parseStyleBrief', () => {
   it('throws on structurally incomplete JSON', () => {
     expect(() => parseStyleBrief(JSON.stringify({ recommendedStyle: 'x' }))).toThrow()
   })
+  it('extracts JSON from markdown fence', () => {
+    const raw = '```json\n' + JSON.stringify(validBrief) + '\n```'
+    expect(parseStyleBrief(raw)).toEqual(validBrief)
+  })
+  it('ignores trailing explanation after the JSON object', () => {
+    const raw = JSON.stringify(validBrief) + '\n\nThis brief positions the brand for…'
+    expect(parseStyleBrief(raw)).toEqual(validBrief)
+  })
+  it('ignores trailing stray punctuation/objects', () => {
+    const raw = JSON.stringify(validBrief) + '}\n{"foo":"bar"}'
+    expect(parseStyleBrief(raw)).toEqual(validBrief)
+  })
+  it('respects nested braces inside string values', () => {
+    const brief = { ...validBrief, recommendedStyle: 'use {curly} braces deliberately' }
+    expect(parseStyleBrief(JSON.stringify(brief))).toEqual(brief)
+  })
 })

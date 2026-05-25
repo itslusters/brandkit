@@ -57,6 +57,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  // Lock zoom: iOS WKWebView auto-zooms inputs <16px and the double-tap
+  // restore is inconsistent without an explicit cap. As a native-shell PWA
+  // we want browser-style pan/zoom off entirely.
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: 'cover',
   themeColor: '#09090b',
 }
