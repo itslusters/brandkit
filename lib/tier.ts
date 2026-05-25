@@ -47,6 +47,16 @@ export function combineTiers(onetime: OnetimeTier | null, subscription: Subscrip
   return TIER_RANK[a] >= TIER_RANK[b] ? a : b
 }
 
+// Dogfood owners — see "How to apply" below. Comma-separated emails accepted via
+// env so we don't hardcode personal addresses in the repo. Stays empty in fresh
+// installs (no behavior change).
+const DOGFOOD_STUDIO_EMAILS = new Set(
+  (process.env.DOGFOOD_STUDIO_EMAILS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean),
+)
+
 export async function getUserTier(): Promise<UserTier> {
   const { userId, sessionClaims } = await auth()
   if (!userId) return 'free'
@@ -61,7 +71,18 @@ export async function getUserTier(): Promise<UserTier> {
   // one extra API roundtrip, but self-healing for fresh installs / un-customized projects.
   const user = await currentUser()
   const raw = (user?.publicMetadata as { tier?: string } | undefined)?.tier
-  return raw && (VALID as string[]).includes(raw) ? (raw as UserTier) : 'free'
+  if (raw && (VALID as string[]).includes(raw)) return raw as UserTier
+
+  // Dogfood override: publicMetadata sync sometimes lags after grant-tier.ts,
+  // dropping the account owner into 'free' (3/day cap) during their own
+  // dogfood. When that happens we trust the email whitelist instead of
+  // silently degrading. No-op for any address not in DOGFOOD_STUDIO_EMAILS.
+  if (DOGFOOD_STUDIO_EMAILS.size > 0) {
+    const email = user?.emailAddresses?.[0]?.emailAddress?.toLowerCase()
+    if (email && DOGFOOD_STUDIO_EMAILS.has(email)) return 'studio'
+  }
+
+  return 'free'
 }
 
 export async function requireTier(min: UserTier): Promise<{ ok: true } | { ok: false; tier: UserTier }> {

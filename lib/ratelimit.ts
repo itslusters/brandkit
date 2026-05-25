@@ -80,9 +80,9 @@ function getOrCreate(prefix: string, max: number): Ratelimit {
 }
 
 export function getLogoLimiter(tier: UserTier): Ratelimit {
-  // Bumped v2→v3 when mood was split out of this bucket — without the bump
-  // any user mid-cycle keeps the doubled-up count and stays locked out.
-  return getOrCreate(`rl:logo:v3:${tier}`, LOGO_PER_TIER[tier])
+  // v3→v4: reset after a dogfood session where tier silently degraded to free
+  // and locked the owner out at the 3/day cap. Bumping resets every counter.
+  return getOrCreate(`rl:logo:v4:${tier}`, LOGO_PER_TIER[tier])
 }
 
 export function getBriefLimiter(tier: UserTier): Ratelimit {
