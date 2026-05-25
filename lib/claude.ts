@@ -62,6 +62,7 @@ Competitor reference: ${input.competitor || 'none'}${stylePackDirective}
 ${industryRule}
 ${namingSection}
 [BRIEF_START]
+recommendedStyle MUST visually fit the industry above. Reference cues: SaaS / B2B / tech → geometric, minimal, digital, monoline; food & beverage → warm, organic, appetite-driven; wellness / fitness → calm, breathing, restrained; finance → refined, serious, trustworthy; fashion / beauty → elegant, contemporary; publishing / literary → editorial, serif-forward. Do NOT default to editorial luxury, magazine, or Kinfolk/Monocle references unless the industry is publishing, luxury goods, or hospitality.
 Output valid JSON only — no markdown fences, no explanation. Use this exact schema:
 {"recommendedStyle":string (English, descriptive),"colorPalette":[3 hex strings],"typography":[2 English font stack strings],"avoidList":[3 ${avoidLang} strings],"recommendedMockups":[3 strings chosen only from: business-card, app-icon, social-post, envelope-small, envelope-large, letterhead, tshirt, mug, pen — pick based on industry and audience]}`
 }

@@ -75,4 +75,22 @@ describe('buildLogoPrompt', () => {
     const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 2)
     expect(prompt.toLowerCase()).toContain('editorial')
   })
+
+  it('threads industry into the prompt so logos differ across categories', () => {
+    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
+    expect(prompt).toContain('SaaS B2B')
+  })
+
+  it('threads brand tones into the prompt', () => {
+    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
+    expect(prompt.toLowerCase()).toContain('minimal')
+    expect(prompt.toLowerCase()).toContain('trusted')
+    expect(prompt.toLowerCase()).toContain('bold')
+  })
+
+  it('omits the brand voice line when tones are empty', () => {
+    const noToneInput: BrandInput = { ...input, tones: [] }
+    const prompt = buildLogoPrompt(noToneInput, result, 'Nexio', 'wordmark', 0)
+    expect(prompt).not.toContain('Brand voice:')
+  })
 })

@@ -84,13 +84,21 @@ export function buildLogoPrompt(
   const colors = colorPalette.slice(0, 3).map(hexToColorName)
   const packDirective = input.stylePack ? getStylePack(input.stylePack)?.promptDirective ?? '' : ''
   const variant = VARIATION_AXES[variationIndex] ?? VARIATION_AXES[0]
+  const toneLine = (input.tones ?? []).filter(Boolean).slice(0, 3).join(', ')
 
   // Type constraint is bookended (start + end-cap) so it survives the middle
   // brand-context block. Recraft V3 has a 1000-char limit; descriptions are
   // sized to leave room for the brand-specific middle.
+  //
+  // Industry + tones go in early so Recraft anchors on the category before
+  // it reads `recommendedStyle`. Without these the prompt depended on the
+  // brief alone, which made every brand land in the same aesthetic when
+  // Haiku's brief output didn't vary enough between industries.
   const parts = [
     LOGO_TYPE_DESCRIPTIONS[logoType],
     `Brand: "${selectedName}".`,
+    `Industry: ${input.industry}.`,
+    toneLine ? `Brand voice: ${toneLine}.` : '',
     `Typography: ${variant.typography}.`,
     `Composition: ${variant.composition}.`,
     `Palette: ${variant.palette(colors)}.`,
