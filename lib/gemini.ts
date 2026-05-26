@@ -1,7 +1,7 @@
 import 'server-only'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from './types'
 import { getStylePack } from './style-packs'
-import { industryAnchor } from './industry-anchor'
+import { industryAnchor, industryTypefaceHint } from './industry-anchor'
 
 import { hexToColorName } from './colors'
 export { hexToColorName }
@@ -56,14 +56,15 @@ const VARIATION_AXES: Array<{
   },
 ]
 
-// House polish + AI-cliche defense, compressed so anchor + avoid list survive
-// Recraft V3's 1000-char prompt cap. Earlier longer version was getting
-// truncated at the tail, dropping the avoid list entirely.
+// House polish + AI-cliche defense, sized to leave room for the avoid list
+// under Recraft V3's 1000-char prompt cap. Grade language pushes toward
+// type-designer caliber letterforms; the prior version only said "Pentagram
+// polish" without naming the letterform discipline explicitly.
 const HOUSE_AESTHETIC =
-  'Pentagram-grade polish. Type is the hero. Every element intentional.'
+  'Awwwards-caliber identity. Type-designer-perfect letterforms, optical alignment, deliberate kerning.'
 
 const HOUSE_AVOID =
-  'rainbow gradients, generic swooshes, 3D bevels, drop shadows, ornate scripts, busy compositions, clip-art, generic startup feel, illustrated human figures, vintage script lettering, hand-drawn mascots'
+  'illustrated human figures, hand-drawn mascots, vintage script lettering, garbled letterforms, ornate scripts, 3D bevels, drop shadows, clip-art, generic startup feel, AI-generic look'
 
 // industryAnchor moved to lib/industry-anchor.ts so the same logic drives
 // logo + mood + mockup prompts.
@@ -92,27 +93,35 @@ export function buildLogoPrompt(
   const variant = VARIATION_AXES[variationIndex] ?? VARIATION_AXES[0]
   const toneLine = (input.tones ?? []).filter(Boolean).slice(0, 3).join(', ')
   const anchor = industryAnchor(input.industry)
+  const typefaceHint = industryTypefaceHint(input.industry)
+  // Sonnet sometimes emits 200+ char recommendedStyle paragraphs. Clip so the
+  // brief signal doesn't push HOUSE_AVOID + END_CAP past Recraft's 1000-char cap.
+  const aestheticLine = recommendedStyle.length > 100
+    ? recommendedStyle.slice(0, 100).trimEnd() + '…'
+    : recommendedStyle
 
   // Type constraint is bookended (start + end-cap) so it survives the middle
   // brand-context block. Recraft V3 has a 1000-char limit; descriptions are
   // sized to leave room for the brand-specific middle.
   //
-  // Industry anchor goes in early so Recraft locks the category before it
-  // reads `recommendedStyle` — which Haiku tends to homogenize toward
-  // editorial luxury regardless of input. The avoid list is concatenated
-  // with HOUSE_AVOID so we always defend against generic AI cliches plus
-  // human figures / vintage scripts that have been leaking into every result.
+  // industryAnchor + industryTypefaceHint sit ahead of `recommendedStyle` so
+  // Recraft locks the category and the right letterform family before it
+  // reads the brief. The avoid list concatenates the brief's brand-specific
+  // avoids with HOUSE_AVOID so we always defend against generic AI cliches
+  // + the specific failure modes seen in dogfood (vintage scripts, human
+  // figures, garbled letterforms).
   const combinedAvoid = [...avoidList.slice(0, 2), HOUSE_AVOID].filter(Boolean).join(', ')
   const parts = [
     LOGO_TYPE_DESCRIPTIONS[logoType],
     anchor,
+    typefaceHint,
     `Brand: "${selectedName}".`,
     `Industry: ${input.industry}.`,
     toneLine ? `Brand voice: ${toneLine}.` : '',
-    `Typography: ${variant.typography}.`,
     `Composition: ${variant.composition}.`,
+    `Weight: ${variant.typography}.`,
     `Palette: ${variant.palette(colors)}.`,
-    `Aesthetic: ${recommendedStyle}.`,
+    `Aesthetic: ${aestheticLine}.`,
     packDirective ? `Surface treatment: ${packDirective}` : '',
     iterationModifier ? ITERATION_MODIFIERS[iterationModifier] : '',
     HOUSE_AESTHETIC,

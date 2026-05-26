@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
 import { generateRecraftImage } from '@/lib/recraft'
+import { pickLogoStyle } from '@/lib/industry-anchor'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { getUserTier } from '@/lib/tier'
 import { postprocessLogo } from '@/lib/logo-postprocess'
@@ -18,14 +19,15 @@ function sse(data: object): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`)
 }
 
-// Recraft V3 with the named `vector_illustration` style drives every logo.
+// Recraft V3 named styles drive every logo. Style is picked per-brand from
+// the brief's recommendedStyle + logoType via pickLogoStyle:
+//   - default → vector_illustration (works for the vast majority of brands)
+//   - brief reads as illustrated / hand-drawn → digital_illustration
+//   - explicit symbol mark request → icon
 // We intentionally DO NOT apply a trained style_id: five reference images
 // per trained style can't cover the aesthetic range of an arbitrary brand,
 // and empirically the trained style was flattening the structural
-// differences between wordmark / symbol-text / emblem. Prompt-driven named
-// style gives Recraft room to respond to per-brand cues (palette,
-// recommended style, style pack) + the structural contracts in
-// LOGO_TYPE_DESCRIPTIONS (lib/gemini.ts).
+// differences between wordmark / symbol-text / emblem.
 async function generateWithRecraft(
   controller: ReadableStreamDefaultController,
   brandInput: BrandInput,
@@ -34,11 +36,12 @@ async function generateWithRecraft(
   logoType: LogoType,
   modifier?: IterationModifier,
 ) {
+  const namedStyle = pickLogoStyle(brandResult.styleBrief.recommendedStyle, logoType)
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
       const raw = await generateRecraftImage(prompt, {
-        style: 'vector_illustration',
+        style: namedStyle,
         variationIndex: i,
       })
       const processed = await postprocessLogo(raw)

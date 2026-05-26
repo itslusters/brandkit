@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { industryAnchor, industryMockupSurface } from '@/lib/industry-anchor'
+import { industryAnchor, industryMockupSurface, industryTypefaceHint, pickLogoStyle } from '@/lib/industry-anchor'
 
 describe('industryAnchor', () => {
   it('returns a tech anchor for SaaS-family inputs', () => {
@@ -65,5 +65,43 @@ describe('industryMockupSurface', () => {
 
   it('returns empty for unmatched industries so callers keep the default prop', () => {
     expect(industryMockupSurface('Marine logistics')).toBe('')
+  })
+})
+
+describe('industryTypefaceHint', () => {
+  it('names geometric grotesks for tech brands so Recraft renders the right family', () => {
+    const t = industryTypefaceHint('SaaS B2B')
+    expect(t.toLowerCase()).toMatch(/inter|founders\s*grotesk|gt\s*america/i)
+  })
+  it('names humanist warmth for food brands', () => {
+    const t = industryTypefaceHint('Bakery & Cafe')
+    expect(t.toLowerCase()).toMatch(/söhne|tiempos|gt\s*walsheim/i)
+  })
+  it('names editorial serifs for publishing brands', () => {
+    const t = industryTypefaceHint('Literary newsletter')
+    expect(t.toLowerCase()).toMatch(/tiempos|source\s*serif|gt\s*sectra/i)
+  })
+  it('returns empty for unmatched industries', () => {
+    expect(industryTypefaceHint('Marine logistics')).toBe('')
+  })
+})
+
+describe('pickLogoStyle', () => {
+  it('defaults to vector_illustration', () => {
+    expect(pickLogoStyle('Geometric minimal grotesk', 'wordmark')).toBe('vector_illustration')
+    expect(pickLogoStyle('Restrained editorial', 'emblem')).toBe('vector_illustration')
+  })
+  it('routes illustrated / hand-drawn briefs to digital_illustration', () => {
+    expect(pickLogoStyle('hand-drawn whimsical illustration', 'wordmark')).toBe('digital_illustration')
+    expect(pickLogoStyle('artisan painted feel', 'wordmark')).toBe('digital_illustration')
+    expect(pickLogoStyle('cartoon playful style', 'symbol-text')).toBe('digital_illustration')
+  })
+  it('routes symbol-text + iconic briefs to icon', () => {
+    expect(pickLogoStyle('iconic abstract mark', 'symbol-text')).toBe('icon')
+    expect(pickLogoStyle('monogram-based symbol', 'symbol-text')).toBe('icon')
+  })
+  it('does not route to icon for non-symbol-text types even when brief says symbol', () => {
+    expect(pickLogoStyle('iconic abstract mark', 'wordmark')).toBe('vector_illustration')
+    expect(pickLogoStyle('iconic abstract mark', 'emblem')).toBe('vector_illustration')
   })
 })

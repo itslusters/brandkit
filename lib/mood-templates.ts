@@ -30,16 +30,22 @@ export interface MoodTemplate {
   concept: string
 }
 
+// Concept lines reframed so they describe craft + composition without baking
+// magazine framing into every category. The old "Editorial hero image, magazine
+// cover quality" + "real people moment" cues were pulling every brand into the
+// same publishing aesthetic regardless of industry. Each concept now reads as
+// art-director-directed studio craft, with the category-fitting subject left to
+// industryAnchor + the brief at build time.
 export const MOOD_TEMPLATES: MoodTemplate[] = [
-  { id: 'hero',        label: 'Hero',        description: 'Big editorial statement image',  size: '1365x1024', concept: 'Editorial hero image, magazine cover quality, dramatic composition, single strong subject, generous negative space' },
-  { id: 'product',     label: 'Product',     description: 'Clean product photography',      size: '1024x1024', concept: 'Studio product photography, crisp lighting, soft shadow, single hero object centered, premium catalog feel' },
-  { id: 'lifestyle',   label: 'Lifestyle',   description: 'Human moment, in-context',       size: '1365x1024', concept: 'Candid lifestyle scene, natural light, real people moment, documentary feel, authentic atmosphere' },
-  { id: 'texture',     label: 'Texture',     description: 'Atmospheric surface detail',     size: '1024x1024', concept: 'Close-up material texture, tactile surface, moody atmosphere, cinematic grain, macro detail' },
-  { id: 'still-life',  label: 'Still Life',  description: 'Curated flat-lay arrangement',   size: '1024x1024', concept: 'Top-down flat lay, curated object arrangement, intentional composition, editorial still life, balanced negative space' },
-  { id: 'environment', label: 'Environment', description: 'Location & atmosphere',          size: '1365x1024', concept: 'Environmental wide shot, location-driven, architectural or natural setting, establishing atmosphere, cinematic depth' },
-  { id: 'abstract',    label: 'Abstract',    description: 'Brand essence, non-literal',     size: '1024x1024', concept: 'Abstract visual essence, minimal graphic composition, brand feeling without literal subject, gallery art direction' },
-  { id: 'palette',     label: 'Palette',     description: 'Color story + materials',        size: '1024x1024', concept: 'Color palette study, material samples arranged, Pinterest mood board aesthetic, designer swatch composition' },
-  { id: 'editorial',   label: 'Editorial',   description: 'Type-forward layout',            size: '1024x1365', concept: 'Editorial spread, typographic emphasis, magazine layout, strong grid, considered whitespace' },
+  { id: 'hero',        label: 'Hero',        description: 'Big editorial statement image',  size: '1365x1024', concept: 'Award-winning hero image, dramatic single-subject composition, generous negative space, art-director-directed lighting' },
+  { id: 'product',     label: 'Product',     description: 'Clean product photography',      size: '1024x1024', concept: 'Studio masterclass product photography, considered light and shadow, single hero object centered, premium finish' },
+  { id: 'lifestyle',   label: 'Lifestyle',   description: 'Brand-in-use scene',             size: '1365x1024', concept: 'Brand-in-use scene appropriate to the industry, natural light, authentic atmosphere, considered styling' },
+  { id: 'texture',     label: 'Texture',     description: 'Atmospheric surface detail',     size: '1024x1024', concept: 'Macro material texture, tactile surface, cinematic grain, gallery-quality detail' },
+  { id: 'still-life',  label: 'Still Life',  description: 'Curated flat-lay arrangement',   size: '1024x1024', concept: 'Top-down curated flat lay, intentional balance, gallery-quality still life with deliberate negative space' },
+  { id: 'environment', label: 'Environment', description: 'Location & atmosphere',          size: '1365x1024', concept: 'Establishing wide shot, location-driven for the industry, considered depth and framing' },
+  { id: 'abstract',    label: 'Abstract',    description: 'Brand essence, non-literal',     size: '1024x1024', concept: 'Abstract visual essence of the brand, minimal graphic composition, gallery art direction' },
+  { id: 'palette',     label: 'Palette',     description: 'Color story + materials',        size: '1024x1024', concept: 'Color and material study, designer swatch composition, considered surfaces' },
+  { id: 'editorial',   label: 'Editorial',   description: 'Type-forward layout',            size: '1024x1365', concept: 'Type-forward layout, strong grid, considered whitespace and typographic emphasis' },
 ]
 
 export function getMoodById(id: string): MoodTemplate | undefined {
@@ -84,8 +90,8 @@ export function buildMoodPrompt(
   // Anchor sits ahead of `recommendedStyle` so the model locks the category
   // before reading the brief — without it a SaaS brand would land lifestyle
   // imagery full of cars and handbags when the brief drifted into editorial
-  // luxury. "High-end editorial photography" footer removed; it pulled every
-  // category toward magazine framing regardless of industry.
+  // luxury. Craft footer names the grade ("award-winning craft", "studio
+  // masterclass lighting") to push past the generic AI-photo look.
   const parts = [
     template.concept + '.',
     anchor,
@@ -94,7 +100,7 @@ export function buildMoodPrompt(
     `Aesthetic: ${recommendedStyle}.`,
     packDirective ? `Surface treatment: ${packDirective}` : '',
     `Color palette: ${colors.join(', ')}.`,
-    'No text, no logos, no watermarks. Professional product / scene photography.',
+    'No text, no logos, no watermarks. Award-winning craft, studio masterclass lighting, art-director composition, gallery-quality finish. No AI-photo look, no plastic skin, no warped geometry.',
   ].filter(Boolean)
 
   let prompt = parts.join(' ')

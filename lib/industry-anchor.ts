@@ -34,6 +34,64 @@ export function industryAnchor(industry: string): string {
   return ''
 }
 
+// Pick the Recraft V3 named style that best matches the brief. Logos were
+// previously hardcoded to vector_illustration regardless of brief — fine for a
+// SaaS brand, awkward for a brand whose brief recommends a hand-crafted or
+// illustrated identity. This routes to digital_illustration when the brief
+// reads as illustrated/hand-drawn, and to `icon` when the brief is explicitly
+// symbolic and the user asked for a symbol-only mark. Default stays
+// vector_illustration so unrecognized cues don't degrade the standard path.
+export type LogoNamedStyle = 'vector_illustration' | 'digital_illustration' | 'icon'
+
+export function pickLogoStyle(
+  recommendedStyle: string,
+  logoType: 'wordmark' | 'symbol-text' | 'emblem',
+): LogoNamedStyle {
+  const s = recommendedStyle.toLowerCase()
+  if (/\b(illustrat|hand[-\s]?drawn|painted|watercolor|sketch|cartoon|whimsical|playful|hand[-\s]?lettered|artisan)\b/.test(s)) {
+    return 'digital_illustration'
+  }
+  if (logoType === 'symbol-text' && /\b(iconic|symbol|glyph|monogram|abstract\s*mark)\b/.test(s)) {
+    return 'icon'
+  }
+  return 'vector_illustration'
+}
+
+// Specific typeface family signal — Recraft picks letterforms more reliably
+// when the prompt names real type-designer references than when it just sees
+// "geometric sans-serif". Names are stylistic anchors, not literal license
+// requirements; the model renders glyphs in their family rather than copying
+// the actual fonts. Returns empty for unmatched industries so callers keep
+// the brief's typography signal as the only family hint.
+export function industryTypefaceHint(industry: string): string {
+  const i = industry.toLowerCase()
+  if (/\b(saas|software|tech|fintech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
+    return 'Typefaces like Inter, Founders Grotesk, GT America (geometric grotesk).'
+  }
+  if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
+    return 'Typefaces like Söhne, Tiempos Text, GT Walsheim (humanist warmth).'
+  }
+  if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
+    return 'Typefaces like GT Sectra, Söhne Light, Tiempos Headline (refined, breathing).'
+  }
+  if (/\b(finance|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
+    return 'Typefaces like Söhne, GT America, Maison Neue (structural, serious).'
+  }
+  if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
+    return 'Typefaces like Tiempos Headline, GT Super, Romain Grotesque (elegant, high-contrast).'
+  }
+  if (/\b(publishing|magazine|media|newsletter|literary|book|editorial)\b/.test(i)) {
+    return 'Typefaces like Tiempos Text, Source Serif, GT Sectra (editorial serif).'
+  }
+  if (/\b(education|school|learning|tutor|academy|course)\b/.test(i)) {
+    return 'Typefaces like GT Walsheim, Söhne, Inter (friendly geometric grotesk).'
+  }
+  if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
+    return 'Typefaces like Söhne, GT America, Maison Neue (structural, restrained).'
+  }
+  return ''
+}
+
 // Short scene cue used by mockup prompts so the surface a brand sits on matches
 // the category. Photorealistic mockup scenes that ignore this end up putting
 // SaaS brands on bakery wooden tables and so on. Returns empty for unmatched
