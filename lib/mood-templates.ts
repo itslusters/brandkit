@@ -1,6 +1,7 @@
 import type { BrandInput, BrandResult } from './types'
 import { getStylePack } from './style-packs'
 import { hexToColorName } from './colors'
+import { industryAnchor } from './industry-anchor'
 
 /**
  * Brand mood images — editorial/lifestyle visuals that communicate brand feel.
@@ -78,15 +79,22 @@ export function buildMoodPrompt(
   const colors = colorPalette.slice(0, 3).map(hexToColorName)
   const packDirective = input.stylePack ? getStylePack(input.stylePack)?.promptDirective ?? '' : ''
   const tones = [...(input.tones ?? []), ...(input.customTone?.split(/[\s,]+/).filter(Boolean) ?? [])].slice(0, 4)
+  const anchor = industryAnchor(input.industry)
 
+  // Anchor sits ahead of `recommendedStyle` so the model locks the category
+  // before reading the brief — without it a SaaS brand would land lifestyle
+  // imagery full of cars and handbags when the brief drifted into editorial
+  // luxury. "High-end editorial photography" footer removed; it pulled every
+  // category toward magazine framing regardless of industry.
   const parts = [
     template.concept + '.',
+    anchor,
+    `Industry: ${input.industry}.`,
     `Brand mood: ${tones.join(', ')}.`,
     `Aesthetic: ${recommendedStyle}.`,
-    packDirective ? `Style: ${packDirective}` : '',
+    packDirective ? `Surface treatment: ${packDirective}` : '',
     `Color palette: ${colors.join(', ')}.`,
-    `Industry context: ${input.industry}.`,
-    'No text, no logos, no watermarks. High-end editorial photography quality.',
+    'No text, no logos, no watermarks. Professional product / scene photography.',
   ].filter(Boolean)
 
   let prompt = parts.join(' ')

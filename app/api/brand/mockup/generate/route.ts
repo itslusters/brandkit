@@ -6,12 +6,16 @@ import { nanoid } from 'nanoid'
 import { generateRecraftMockup } from '@/lib/mockups-recraft'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { requireTier, getUserTier } from '@/lib/tier'
-import type { BrandResult, MockupResult } from '@/lib/types'
+import type { BrandInput, BrandResult, MockupResult } from '@/lib/types'
 
 interface RequestBody {
   templateIds: string[]
   brandName: string
   brandResult: BrandResult
+  /** Optional — passes the original industry string straight through so the
+   *  mockup anchor uses the user input rather than the LLM's industry
+   *  archetype paraphrase, which sometimes drifts away from the keyword set. */
+  brandInput?: BrandInput
 }
 
 /**
@@ -52,7 +56,7 @@ export async function POST(req: Request) {
   let body: RequestBody
   try { body = await req.json() as RequestBody } catch { return Response.json({ error: 'invalid_json' }, { status: 400 }) }
 
-  const { templateIds, brandName, brandResult } = body
+  const { templateIds, brandName, brandResult, brandInput } = body
   if (!Array.isArray(templateIds) || templateIds.length === 0) {
     return Response.json({ error: 'no_templates' }, { status: 400 })
   }
@@ -64,7 +68,7 @@ export async function POST(req: Request) {
 
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
-      const raw = await generateRecraftMockup(id, brandName, brandResult)
+      const raw = await generateRecraftMockup(id, brandName, brandResult, brandInput)
       const { url } = await put(`mockups/u/${userId}/${batchId}/${id}.png`, raw, {
         access: 'public',
         contentType: 'image/png',

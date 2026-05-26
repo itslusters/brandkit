@@ -1,6 +1,7 @@
 import 'server-only'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from './types'
 import { getStylePack } from './style-packs'
+import { industryAnchor } from './industry-anchor'
 
 import { hexToColorName } from './colors'
 export { hexToColorName }
@@ -64,38 +65,8 @@ const HOUSE_AESTHETIC =
 const HOUSE_AVOID =
   'rainbow gradients, generic swooshes, 3D bevels, drop shadows, ornate scripts, busy compositions, clip-art, generic startup feel, illustrated human figures, vintage script lettering, hand-drawn mascots'
 
-// Map raw industry strings to a strong aesthetic anchor that Recraft can
-// read straight off the prompt. Without this the only category signal in
-// the logo prompt is the brief's recommendedStyle, which Haiku tends to
-// flatten into a generic editorial vibe regardless of input.
-function industryAnchor(industry: string): string {
-  const i = industry.toLowerCase()
-  if (/\b(saas|software|tech|fintech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
-    return 'TECH-PRODUCT IDENTITY: geometric, monoline, monochromatic, grid-based. No serifs, no magazine framing, no human figures.'
-  }
-  if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
-    return 'FOOD & BEVERAGE IDENTITY: warm, appetite-driven, hand-finished, organic curves. No sterile tech monoline.'
-  }
-  if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
-    return 'WELLNESS IDENTITY: calm, restrained, breathing, soft. No aggressive contrast.'
-  }
-  if (/\b(finance|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
-    return 'FINANCE IDENTITY: refined, serious, structural, trustworthy. No playful gestures.'
-  }
-  if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
-    return 'FASHION IDENTITY: elegant, contemporary, minimal, premium. No tech monoline.'
-  }
-  if (/\b(publishing|magazine|media|newsletter|literary|book|editorial)\b/.test(i)) {
-    return 'PUBLISHING IDENTITY: editorial, serif-forward, gallery feel.'
-  }
-  if (/\b(education|school|learning|tutor|academy|course)\b/.test(i)) {
-    return 'EDUCATION IDENTITY: approachable, structured, intelligent without austere.'
-  }
-  if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
-    return 'PROPERTY / ARCHITECTURE IDENTITY: structural, grounded, geometric, refined.'
-  }
-  return ''
-}
+// industryAnchor moved to lib/industry-anchor.ts so the same logic drives
+// logo + mood + mockup prompts.
 
 export const ITERATION_MODIFIERS: Record<IterationModifier, string> = {
   bolder: 'Make it noticeably bolder, heavier weight, more visual presence.',

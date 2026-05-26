@@ -137,6 +137,7 @@ export default function MockupPage() {
   async function generateMockups() {
     const brandName = getSession<string>('selectedName')
     const brandResult = getSession<BrandResult>('brandResult')
+    const brandInput = getSession<BrandInput>('brandInput')
     if (!brandName || !brandResult || selectedIds.length === 0) return
     setGenerating(true)
     setHasError(false)
@@ -146,7 +147,7 @@ export default function MockupPage() {
       const res = await fetch('/api/brand/mockup/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateIds: selectedIds, brandName, brandResult }),
+        body: JSON.stringify({ templateIds: selectedIds, brandName, brandResult, brandInput }),
       })
       if (!res.ok) {
         setErrorMessage(`Server error ${res.status}`)
