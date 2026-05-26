@@ -12,13 +12,19 @@ export interface StylePack {
   fontHint: string                 // displayed as sample text
 }
 
+// promptDirective is a typography/palette/composition HINT, not a complete
+// brand framing. The previous "Editorial luxury brand — think Monocle, Kinfolk,
+// Cereal" wording was strong enough to hijack the brief regardless of industry
+// (e.g. a SaaS app picking Editorial got a magazine identity, ignoring tech
+// signals entirely). We keep these directives narrowly scoped so the user's
+// industry stays the dominant axis and the style pack only colors the surface.
 export const STYLE_PACKS: StylePack[] = [
   {
     id: 'editorial',
     name: 'Editorial',
     description: 'Serif typography, muted palettes, magazine polish',
     tones: ['elegant', 'editorial', 'refined'],
-    promptDirective: 'Editorial luxury brand — think Monocle, Kinfolk, Cereal. Restrained serif-forward, muted earth tones, generous whitespace, high-end print feel.',
+    promptDirective: 'serif-forward, generous whitespace, muted palette (surface only).',
     accentColor: '#8B7355',
     fontHint: 'Aa',
   },
@@ -27,7 +33,7 @@ export const STYLE_PACKS: StylePack[] = [
     name: 'Geometric',
     description: 'Clean sans-serif, structured, mathematical',
     tones: ['modern', 'minimal', 'clean'],
-    promptDirective: 'Geometric minimal — think Apple, Linear, Vercel. Swiss-influenced, monochromatic, grid-based, sans-serif, precise negative space.',
+    promptDirective: 'geometric sans-serif, grid-based, precise negative space, monochromatic (surface).',
     accentColor: '#3B82F6',
     fontHint: 'Ag',
   },
@@ -36,7 +42,7 @@ export const STYLE_PACKS: StylePack[] = [
     name: 'Organic',
     description: 'Warm textures, earthy, handcrafted',
     tones: ['warm', 'organic', 'artisan'],
-    promptDirective: 'Organic artisan — think Aesop, local bakery, ceramics studio. Warm earth tones, tactile textures, serif or humanist sans, natural materials.',
+    promptDirective: 'humanist sans or warm serif, tactile, earth-tone palette (surface).',
     accentColor: '#92400E',
     fontHint: 'Ao',
   },
@@ -45,7 +51,7 @@ export const STYLE_PACKS: StylePack[] = [
     name: 'Bold',
     description: 'Heavy type, high contrast, confident',
     tones: ['bold', 'confident', 'strong'],
-    promptDirective: 'Bold statement — think Nike, Supreme, Off-White. Extra-heavy weight, high contrast B&W, minimal palette, maximum impact, brutalist edge.',
+    promptDirective: 'extra-heavy weight, high contrast (often B&W), maximum impact (surface).',
     accentColor: '#DC2626',
     fontHint: 'Ab',
   },
@@ -54,7 +60,7 @@ export const STYLE_PACKS: StylePack[] = [
     name: 'Tech',
     description: 'Monospace, dark mode, developer aesthetic',
     tones: ['tech', 'precise', 'modern'],
-    promptDirective: 'Tech/developer — think GitHub, Stripe, Raycast. Monospace accents, dark UI-native, systematic color tokens, engineering precision.',
+    promptDirective: 'monospace or technical sans-serif, systematic color tokens (surface).',
     accentColor: '#22C55E',
     fontHint: '01',
   },

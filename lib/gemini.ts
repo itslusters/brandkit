@@ -9,58 +9,93 @@ export { hexToColorName }
 // runtime calls it. Gemini still ships as a dependency because the one-off
 // scripts in `scripts/generate-*.ts` use it directly with GEMINI_API_KEY.
 
-// Each description leads with what the output IS (positive ONLY-clauses) rather
-// than what it isn't — Recraft V3 follows positive instructions far more
-// reliably than negative ones. The same type constraint is restated as a short
-// end-cap (LOGO_TYPE_END_CAP) so the model sees it at both prompt boundaries,
-// which empirically helps it distinguish wordmark from symbol-text from emblem.
+// Each description leads with what the output IS (positive ONLY-clauses) — Recraft
+// follows positive instructions more reliably than negative ones. Bookended with a
+// short end-cap so the type constraint survives the brand-context middle.
+// Compressed in this revision to leave room for industryAnchor + HOUSE signals
+// under Recraft V3's 1000-char prompt cap.
 const LOGO_TYPE_DESCRIPTIONS: Record<LogoType, string> = {
-  'wordmark': 'WORDMARK ONLY — pure typography logo. The entire output is the brand name rendered as stylized lettering filling the frame. The letterforms ARE the whole composition. NO accompanying icon, NO symbol next to the type, NO enclosing shape around the text.',
-  'symbol-text': 'COMBINATION MARK — two visible parts working as a lockup: (1) a single distinct abstract icon or symbol, (2) the brand name as separate typography next to it. Icon and text are adjacent, not fused. Both elements equally crafted.',
-  'emblem': 'EMBLEM badge logo — the brand name is fully enclosed inside ONE continuous outer container shape (circle, shield, hexagon, badge border, or heraldic crest). The outer shape wraps around all the text and is the dominant load-bearing visual element. Heritage badge composition.',
+  'wordmark': 'WORDMARK ONLY — pure typography logo. Brand name as stylized lettering fills the frame. NO icon, NO symbol, NO enclosing shape.',
+  'symbol-text': 'COMBINATION MARK — one distinct abstract icon or symbol plus the brand name as adjacent typography. Both equally crafted, not fused.',
+  'emblem': 'EMBLEM badge — brand name fully enclosed inside one continuous outer container shape (circle, shield, hexagon, badge border).',
 }
 
 const LOGO_TYPE_END_CAP: Record<LogoType, string> = {
-  'wordmark': 'Reconfirm: typography only — zero icons, zero symbols, zero enclosing shapes.',
-  'symbol-text': 'Reconfirm: icon and wordmark visible side by side as separate elements.',
-  'emblem': 'Reconfirm: every text element sits inside one continuous outer container.',
+  'wordmark': 'Reconfirm: typography only, zero icons.',
+  'symbol-text': 'Reconfirm: icon and wordmark side by side.',
+  'emblem': 'Reconfirm: all text inside one container.',
 }
 
-// Each variant pulls a different lever — composition, typography, palette
-// emphasis — so three generations of the same brand land in noticeably
-// different territory instead of three near-duplicates with the same hue mix.
+// Three industry-agnostic variant levers — weight, restraint, expressiveness
+// — so three generations land in different territory without prescribing a
+// typeface family. Family choice (serif vs sans, monospace, display) is left
+// to industryAnchor + brief so it actually fits the category. The earlier
+// version hard-coded "serif typography, condensed and heavy, magazine-headline"
+// in variant 0, which dragged every brand toward an editorial vibe regardless
+// of input.
 const VARIATION_AXES: Array<{
   composition: string
   typography: string
   palette: (colors: string[]) => string
 }> = [
   {
-    composition: 'bold asymmetric composition with dramatic negative space, off-center anchor',
-    typography: 'serif typography, condensed and heavy, magazine-headline presence',
+    composition: 'bold asymmetric, dramatic negative space, off-center anchor',
+    typography: 'extra-heavy weight, dominant scale, high contrast',
     palette: (c) => `primary ${c[0]}, accents in ${c.slice(1).filter(Boolean).join(' and ') || c[0]}`,
   },
   {
-    composition: 'ultra-minimal layout, single defining gesture, maximum restraint, generous whitespace',
-    typography: 'geometric sans-serif, low contrast, modern engineered proportions',
-    palette: (c) => `monochrome — only ${c[0]} on a clean ground, no other hues`,
+    composition: 'ultra-minimal, single defining gesture, generous whitespace',
+    typography: 'restrained weight, low contrast, modest scale',
+    palette: (c) => `monochrome — only ${c[0]} on a clean ground`,
   },
   {
-    composition: 'editorial-leaning layout, unconventional spacing, expressive scale shifts',
-    typography: 'display type, expressive and unusual, signature character',
-    palette: (c) => `inverted — ${c[1] ?? c[0]} as the ground with ${c[0]} marks${c[2] ? `, ${c[2]} accent` : ''}`,
+    composition: 'expressive layout, unconventional spacing, scale shifts',
+    typography: 'expressive weight rhythm, signature character',
+    palette: (c) => `inverted — ${c[1] ?? c[0]} ground, ${c[0]} marks${c[2] ? `, ${c[2]} accent` : ''}`,
   },
 ]
 
-// Atriium house aesthetic — injected silently into every logo prompt.
-// Job: force the model toward the polish bar of Pentagram / Apple / Linear
-// and away from the AI-image cliches that make vanilla Imagen outputs
-// read as "AI-generated": rainbow gradients, generic tech swoosh, chromatic
-// aberration, 3D renders, over-ornamented scripts, busy compositions.
+// House polish + AI-cliche defense, compressed so anchor + avoid list survive
+// Recraft V3's 1000-char prompt cap. Earlier longer version was getting
+// truncated at the tail, dropping the avoid list entirely.
 const HOUSE_AESTHETIC =
-  'World-class brand identity, Behance/Dribbble Featured level. Bold confident typography, purposeful negative space, strong color commitment (not timid pastels). Think: A24 title cards, Pentagram case studies, Collins identity systems, Apple keynote graphics. Every element is intentional. Composition reads as editorial, not templated. Type is the hero — large, decisive, expressive.'
+  'Pentagram-grade polish. Type is the hero. Every element intentional.'
 
 const HOUSE_AVOID =
-  'rainbow gradients, generic tech swooshes, abstract globes, cliche lightbulbs, chromatic aberration, 3D bevels, lens flares, metallic gloss, drop shadows, over-ornamented scripts, busy arrangements, clip-art styling, stock logo marketplace look, generic startup logo feel, safe boring layouts, centered-everything syndrome, thin wimpy type, watermark-ish transparency'
+  'rainbow gradients, generic swooshes, 3D bevels, drop shadows, ornate scripts, busy compositions, clip-art, generic startup feel, illustrated human figures, vintage script lettering, hand-drawn mascots'
+
+// Map raw industry strings to a strong aesthetic anchor that Recraft can
+// read straight off the prompt. Without this the only category signal in
+// the logo prompt is the brief's recommendedStyle, which Haiku tends to
+// flatten into a generic editorial vibe regardless of input.
+function industryAnchor(industry: string): string {
+  const i = industry.toLowerCase()
+  if (/\b(saas|software|tech|fintech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
+    return 'TECH-PRODUCT IDENTITY: geometric, monoline, monochromatic, grid-based. No serifs, no magazine framing, no human figures.'
+  }
+  if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
+    return 'FOOD & BEVERAGE IDENTITY: warm, appetite-driven, hand-finished, organic curves. No sterile tech monoline.'
+  }
+  if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
+    return 'WELLNESS IDENTITY: calm, restrained, breathing, soft. No aggressive contrast.'
+  }
+  if (/\b(finance|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
+    return 'FINANCE IDENTITY: refined, serious, structural, trustworthy. No playful gestures.'
+  }
+  if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
+    return 'FASHION IDENTITY: elegant, contemporary, minimal, premium. No tech monoline.'
+  }
+  if (/\b(publishing|magazine|media|newsletter|literary|book|editorial)\b/.test(i)) {
+    return 'PUBLISHING IDENTITY: editorial, serif-forward, gallery feel.'
+  }
+  if (/\b(education|school|learning|tutor|academy|course)\b/.test(i)) {
+    return 'EDUCATION IDENTITY: approachable, structured, intelligent without austere.'
+  }
+  if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
+    return 'PROPERTY / ARCHITECTURE IDENTITY: structural, grounded, geometric, refined.'
+  }
+  return ''
+}
 
 export const ITERATION_MODIFIERS: Record<IterationModifier, string> = {
   bolder: 'Make it noticeably bolder, heavier weight, more visual presence.',
@@ -85,17 +120,21 @@ export function buildLogoPrompt(
   const packDirective = input.stylePack ? getStylePack(input.stylePack)?.promptDirective ?? '' : ''
   const variant = VARIATION_AXES[variationIndex] ?? VARIATION_AXES[0]
   const toneLine = (input.tones ?? []).filter(Boolean).slice(0, 3).join(', ')
+  const anchor = industryAnchor(input.industry)
 
   // Type constraint is bookended (start + end-cap) so it survives the middle
   // brand-context block. Recraft V3 has a 1000-char limit; descriptions are
   // sized to leave room for the brand-specific middle.
   //
-  // Industry + tones go in early so Recraft anchors on the category before
-  // it reads `recommendedStyle`. Without these the prompt depended on the
-  // brief alone, which made every brand land in the same aesthetic when
-  // Haiku's brief output didn't vary enough between industries.
+  // Industry anchor goes in early so Recraft locks the category before it
+  // reads `recommendedStyle` — which Haiku tends to homogenize toward
+  // editorial luxury regardless of input. The avoid list is concatenated
+  // with HOUSE_AVOID so we always defend against generic AI cliches plus
+  // human figures / vintage scripts that have been leaking into every result.
+  const combinedAvoid = [...avoidList.slice(0, 2), HOUSE_AVOID].filter(Boolean).join(', ')
   const parts = [
     LOGO_TYPE_DESCRIPTIONS[logoType],
+    anchor,
     `Brand: "${selectedName}".`,
     `Industry: ${input.industry}.`,
     toneLine ? `Brand voice: ${toneLine}.` : '',
@@ -103,10 +142,11 @@ export function buildLogoPrompt(
     `Composition: ${variant.composition}.`,
     `Palette: ${variant.palette(colors)}.`,
     `Aesthetic: ${recommendedStyle}.`,
-    packDirective ? `Mood: ${packDirective}` : '',
+    packDirective ? `Surface treatment: ${packDirective}` : '',
     iterationModifier ? ITERATION_MODIFIERS[iterationModifier] : '',
+    HOUSE_AESTHETIC,
     `Only word visible: "${selectedName}". No other text, watermarks, captions, hex codes, or annotations.`,
-    avoidList.length > 0 ? `Avoid: ${avoidList.slice(0, 5).join(', ')}.` : '',
+    `Avoid: ${combinedAvoid}.`,
     LOGO_TYPE_END_CAP[logoType],
     'Flat 2D vector, white background, crisp edges, print-ready.',
   ].filter(Boolean)
