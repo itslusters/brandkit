@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { industryAnchor, industryMockupSurface, industryTypefaceHint, pickLogoStyle } from '@/lib/industry-anchor'
+import { industryAnchor, industryMockupSurface, industryRenderHint, industryTypefaceHint, pickLogoStyle } from '@/lib/industry-anchor'
 
 describe('industryAnchor', () => {
   it('returns a tech anchor for SaaS-family inputs', () => {
@@ -39,9 +39,20 @@ describe('industryAnchor', () => {
     expect(industryAnchor('Architecture firm')).toContain('PROPERTY / ARCHITECTURE IDENTITY')
   })
 
-  it('returns empty string for unmatched industries', () => {
+  it('returns empty string for unmatched free-text industries', () => {
     expect(industryAnchor('Marine logistics')).toBe('')
     expect(industryAnchor('')).toBe('')
+  })
+
+  it('covers every curated dropdown industry with a non-empty anchor', () => {
+    for (const ind of ['E-commerce / Retail', 'Travel & Hospitality', 'Agency / Consulting']) {
+      expect(industryAnchor(ind), ind).not.toBe('')
+    }
+  })
+
+  it('routes Finance & Fintech to FINANCE, not the generic TECH anchor', () => {
+    expect(industryAnchor('Finance & Fintech')).toContain('FINANCE IDENTITY')
+    expect(industryAnchor('fintech startup')).toContain('FINANCE IDENTITY')
   })
 
   it('SaaS anchor explicitly bans the failure modes seen in dogfood', () => {
@@ -66,6 +77,12 @@ describe('industryMockupSurface', () => {
   it('returns empty for unmatched industries so callers keep the default prop', () => {
     expect(industryMockupSurface('Marine logistics')).toBe('')
   })
+
+  it('covers every curated dropdown industry with a non-empty surface', () => {
+    for (const ind of ['E-commerce / Retail', 'Travel & Hospitality', 'Agency / Consulting']) {
+      expect(industryMockupSurface(ind), ind).not.toBe('')
+    }
+  })
 })
 
 describe('industryTypefaceHint', () => {
@@ -83,6 +100,28 @@ describe('industryTypefaceHint', () => {
   })
   it('returns empty for unmatched industries', () => {
     expect(industryTypefaceHint('Marine logistics')).toBe('')
+  })
+
+  it('covers every curated dropdown industry with a non-empty typeface hint', () => {
+    for (const ind of ['E-commerce / Retail', 'Travel & Hospitality', 'Agency / Consulting']) {
+      expect(industryTypefaceHint(ind), ind).not.toBe('')
+    }
+  })
+})
+
+describe('industryRenderHint', () => {
+  it('always returns a non-empty render directive that keeps logos flat vector on white', () => {
+    for (const ind of ['SaaS / Software', 'Food & Beverage', 'Fashion & Apparel', 'Finance & Fintech',
+      'E-commerce / Retail', 'Travel & Hospitality', 'Agency / Consulting', 'Other', 'Marine logistics', '']) {
+      const r = industryRenderHint(ind)
+      expect(r, ind).not.toBe('')
+      expect(r.toLowerCase(), ind).toContain('white background')
+    }
+  })
+  it('gives category-specific render character that differs across industries', () => {
+    expect(industryRenderHint('SaaS / Software').toLowerCase()).toContain('geometric')
+    expect(industryRenderHint('Food & Beverage').toLowerCase()).toMatch(/organic|warm/)
+    expect(industryRenderHint('SaaS / Software')).not.toBe(industryRenderHint('Food & Beverage'))
   })
 })
 

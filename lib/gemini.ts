@@ -1,7 +1,7 @@
 import 'server-only'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from './types'
 import { getStylePack } from './style-packs'
-import { industryAnchor, industryTypefaceHint } from './industry-anchor'
+import { industryAnchor, industryTypefaceHint, industryRenderHint } from './industry-anchor'
 
 import { hexToColorName } from './colors'
 export { hexToColorName }
@@ -128,7 +128,7 @@ export function buildLogoPrompt(
     `Only word visible: "${selectedName}". No other text, watermarks, captions, hex codes, or annotations.`,
     `Avoid: ${combinedAvoid}.`,
     LOGO_TYPE_END_CAP[logoType],
-    'Flat 2D vector, white background, crisp edges, print-ready.',
+    industryRenderHint(input.industry),
   ].filter(Boolean)
 
   let prompt = parts.join(' ')
