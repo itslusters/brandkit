@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react'
 import { StreamingDashboard } from '@/components/ui/StreamingDashboard'
 import { INITIAL_STREAM_TASKS } from '@/lib/constants'
 import { getSession, setSession } from '@/lib/session'
+import { genFetch } from '@/lib/anon'
 import type { StreamTask, BrandInput, BrandResult } from '@/lib/types'
 
 const RETRY_CAP = 1
@@ -79,7 +80,7 @@ export default function ProcessingPage() {
 
     async function run() {
       try {
-        const res = await fetch('/api/brand/stream', {
+        const res = await genFetch('/api/brand/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(input),

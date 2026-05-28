@@ -7,6 +7,7 @@ import { UpgradeModal } from '@/components/UpgradeModal'
 import { WaitlistModal } from '@/components/WaitlistModal'
 import { MOOD_TEMPLATES, MOOD_FREE_COUNT, getMoodById } from '@/lib/mood-templates'
 import { getSession } from '@/lib/session'
+import { genFetch } from '@/lib/anon'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
 type TileState = 'skeleton' | 'result' | 'error' | 'locked'
@@ -56,7 +57,7 @@ export default function MoodPage() {
 
     async function run() {
       try {
-        const res = await fetch('/api/brand/mood/generate', {
+        const res = await genFetch('/api/brand/mood/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ brandInput, brandResult }),

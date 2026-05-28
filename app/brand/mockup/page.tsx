@@ -13,6 +13,7 @@ import { getSession, setSession } from '@/lib/session'
 import { SavedBadge } from '@/components/brand/SavedBadge'
 import { trackEvent } from '@/lib/analytics'
 import { saveBlob, saveDataUrls } from '@/lib/download'
+import { genFetch } from '@/lib/anon'
 import type { BrandInput, BrandResult, MockupResult, LogoType } from '@/lib/types'
 
 export default function MockupPage() {
@@ -144,7 +145,7 @@ export default function MockupPage() {
     setErrorMessage('')
     setResults(selectedIds.map((id) => ({ templateId: id, dataUrl: '' })))
     try {
-      const res = await fetch('/api/brand/mockup/generate', {
+      const res = await genFetch('/api/brand/mockup/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateIds: selectedIds, brandName, brandResult, brandInput }),

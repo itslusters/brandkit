@@ -10,6 +10,7 @@ import { WaitlistModal } from '@/components/WaitlistModal'
 import { getSession, setSession } from '@/lib/session'
 import { haptic } from '@/lib/native'
 import { saveDataUrls } from '@/lib/download'
+import { genFetch } from '@/lib/anon'
 import type { BrandInput, BrandResult, LogoType, IterationModifier } from '@/lib/types'
 
 const RETRY_CAP = 2
@@ -81,7 +82,7 @@ export default function LogoStudioPage() {
 
     async function run() {
       try {
-        const res = await fetch('/api/brand/logo/generate', {
+        const res = await genFetch('/api/brand/logo/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
