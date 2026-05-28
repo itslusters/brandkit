@@ -26,13 +26,11 @@ vi.mock('@/lib/gemini', () => ({
   ITERATION_MODIFIERS: { bolder: 'x', minimal: 'x', geometric: 'x', organic: 'x', playful: 'x' },
 }))
 
-vi.mock('@/lib/recraft', () => ({
-  generateRecraftImage: vi.fn(),
-  resolveStyleId: vi.fn(() => undefined),
-  resolveStyleIdDetailed: vi.fn(() => undefined),
+vi.mock('@/lib/imagen', () => ({
+  generateImagenImage: vi.fn(),
 }))
 
-import { generateRecraftImage } from '@/lib/recraft'
+import { generateImagenImage } from '@/lib/imagen'
 import { POST } from '@/app/api/brand/logo/generate/route'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
@@ -78,7 +76,7 @@ function makeRequest() {
 
 describe('POST /api/brand/logo/generate', () => {
   beforeEach(() => {
-    vi.mocked(generateRecraftImage).mockResolvedValue(Buffer.from('mockimage'))
+    vi.mocked(generateImagenImage).mockResolvedValue(Buffer.from('mockimage'))
   })
 
   it('returns SSE content-type header', async () => {
@@ -109,12 +107,12 @@ describe('POST /api/brand/logo/generate', () => {
   })
 
   it('emits image_error per failed image (others still proceed)', async () => {
-    vi.mocked(generateRecraftImage).mockRejectedValue(new Error('Recraft failed'))
+    vi.mocked(generateImagenImage).mockRejectedValue(new Error('Imagen failed'))
     const res = await POST(makeRequest())
     const events = await collectSSE(res)
     const imageErrors = events.filter((e: any) => e.type === 'image_error')
     expect(imageErrors).toHaveLength(3)
-    expect((imageErrors[0] as any).message).toContain('Recraft failed')
+    expect((imageErrors[0] as any).message).toContain('Imagen failed')
     // done event still fires after all 3 settle
     expect(events.find((e: any) => e.type === 'done')).toBeDefined()
   })

@@ -1,7 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
-import { generateRecraftImage } from '@/lib/recraft'
-import { pickLogoStyle } from '@/lib/industry-anchor'
+import { generateImagenImage } from '@/lib/imagen'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { getUserTier } from '@/lib/tier'
 import { postprocessLogo } from '@/lib/logo-postprocess'
@@ -19,16 +18,12 @@ function sse(data: object): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`)
 }
 
-// Recraft V3 named styles drive every logo. Style is picked per-brand from
-// the brief's recommendedStyle + logoType via pickLogoStyle:
-//   - default → vector_illustration (works for the vast majority of brands)
-//   - brief reads as illustrated / hand-drawn → digital_illustration
-//   - explicit symbol mark request → icon
-// We intentionally DO NOT apply a trained style_id: five reference images
-// per trained style can't cover the aesthetic range of an arbitrary brand,
-// and empirically the trained style was flattening the structural
-// differences between wordmark / symbol-text / emblem.
-async function generateWithRecraft(
+// Imagen 4 drives every logo. Unlike Recraft's fixed `style: vector_illustration`
+// — which overrode the prompt, forced an illustrative look, and ignored the
+// "wordmark only, no figures" instruction (so every brand came out the same
+// illustrated style) — Imagen follows the natural-language prompt, so the
+// per-industry anchors in buildLogoPrompt actually shift the visual style.
+async function generateLogos(
   controller: ReadableStreamDefaultController,
   brandInput: BrandInput,
   brandResult: BrandResult,
@@ -36,14 +31,10 @@ async function generateWithRecraft(
   logoType: LogoType,
   modifier?: IterationModifier,
 ) {
-  const namedStyle = pickLogoStyle(brandResult.styleBrief.recommendedStyle, logoType)
   const tasks = [0, 1, 2].map(async (i) => {
     try {
       const prompt = buildLogoPrompt(brandInput, brandResult, selectedName, logoType, i, modifier)
-      const raw = await generateRecraftImage(prompt, {
-        style: namedStyle,
-        variationIndex: i,
-      })
+      const raw = await generateImagenImage(prompt, { aspectRatio: '1:1' })
       const processed = await postprocessLogo(raw)
       controller.enqueue(sse({ type: 'image_ready', index: i, dataUrl: `data:image/png;base64,${processed.toString('base64')}` }))
     } catch (err) {
@@ -86,7 +77,7 @@ export async function POST(req: Request) {
 
   const body = new ReadableStream({
     async start(controller) {
-      await generateWithRecraft(controller, brandInput, brandResult, selectedName, logoType, validModifier)
+      await generateLogos(controller, brandInput, brandResult, selectedName, logoType, validModifier)
       controller.enqueue(sse({ type: 'done' }))
       controller.close()
     },
