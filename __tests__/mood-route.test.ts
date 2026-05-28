@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('server-only', () => ({}))
 
-// vi.hoisted ensures mockLogoLimit is available inside vi.mock factories,
+// vi.hoisted ensures mockMoodLimit is available inside vi.mock factories,
 // which are hoisted to the top of the file before other variable declarations.
-const { mockLogoLimit } = vi.hoisted(() => ({
-  mockLogoLimit: vi.fn().mockResolvedValue({ success: true }),
+const { mockMoodLimit } = vi.hoisted(() => ({
+  mockMoodLimit: vi.fn().mockResolvedValue({ success: true }),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -20,27 +20,35 @@ vi.mock('@/lib/tier', async () => {
 
 vi.mock('@/lib/ratelimit', () => ({
   getBriefLimiter: () => ({ limit: vi.fn().mockResolvedValue({ success: true }) }),
-  getLogoLimiter: () => ({ limit: mockLogoLimit }),
+  getMoodLimiter: () => ({ limit: mockMoodLimit }),
+  getLogoLimiter: () => ({ limit: vi.fn().mockResolvedValue({ success: true }) }),
   briefLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
-  logoLimiter: { limit: mockLogoLimit },
+  moodLimiter: { limit: mockMoodLimit },
+  logoLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
   emailLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
   getIp: () => '127.0.0.1',
 }))
 
-vi.mock('@/lib/gemini', () => ({
-  buildLogoPrompt: vi.fn(() => 'mock logo prompt'),
-  ITERATION_MODIFIERS: { bolder: 'x', minimal: 'x', geometric: 'x', organic: 'x', playful: 'x' },
-}))
-
 vi.mock('@/lib/recraft', () => ({
+  generateMoodImage: vi.fn(),
   generateRecraftImage: vi.fn(),
   resolveStyleId: vi.fn(() => undefined),
-  resolveStyleIdDetailed: vi.fn(() => undefined),
+}))
+
+vi.mock('@/lib/mood-templates', () => ({
+  MOOD_TEMPLATES: [
+    { id: 'mood-1', size: '1024x1024' },
+    { id: 'mood-2', size: '1024x1024' },
+  ],
+  MOOD_FREE_COUNT: 1,
+  buildMoodPrompt: vi.fn(() => 'mock mood prompt'),
+  getMoodById: vi.fn((id: string) => ({ id, size: '1024x1024' })),
+  pickMoodStyle: vi.fn(() => 'natural'),
 }))
 
 import { auth } from '@clerk/nextjs/server'
-import { generateRecraftImage } from '@/lib/recraft'
-import { POST } from '@/app/api/brand/logo/generate/route'
+import { generateMoodImage } from '@/lib/recraft'
+import { POST } from '@/app/api/brand/mood/generate/route'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
 const mockInput: BrandInput = {
@@ -71,24 +79,19 @@ async function collectSSE(res: Response): Promise<object[]> {
     .map(msg => JSON.parse(msg.slice(6)))
 }
 
-function makeRequest() {
+function makeRequest(extra?: Record<string, unknown>) {
   return new Request('http://test', {
     method: 'POST',
-    body: JSON.stringify({
-      brandInput: mockInput,
-      brandResult: mockBrandResult,
-      selectedName: 'Nexio',
-      logoType: 'symbol-text',
-    }),
+    body: JSON.stringify({ brandInput: mockInput, brandResult: mockBrandResult, ...extra }),
   })
 }
 
-describe('POST /api/brand/logo/generate', () => {
+describe('POST /api/brand/mood/generate', () => {
   beforeEach(() => {
     // Reset to signed-in default
     vi.mocked(auth).mockResolvedValue({ userId: 'u_test', sessionClaims: { publicMetadata: { tier: 'free' } } } as any)
-    mockLogoLimit.mockResolvedValue({ success: true })
-    vi.mocked(generateRecraftImage).mockResolvedValue(Buffer.from('mockimage'))
+    mockMoodLimit.mockResolvedValue({ success: true })
+    vi.mocked(generateMoodImage).mockResolvedValue(Buffer.from('mockimage'))
   })
 
   it('returns SSE content-type header', async () => {
@@ -96,58 +99,33 @@ describe('POST /api/brand/logo/generate', () => {
     expect(res.headers.get('Content-Type')).toBe('text/event-stream')
   })
 
-  it('emits 3 image_ready events', async () => {
+  it('emits a plan event', async () => {
     const res = await POST(makeRequest())
     const events = await collectSSE(res)
-    const imageEvents = events.filter((e: any) => e.type === 'image_ready')
-    expect(imageEvents).toHaveLength(3)
+    const planEvent = events.find((e: any) => e.type === 'plan') as any
+    expect(planEvent).toBeDefined()
   })
 
-  it('image_ready events include index and dataUrl', async () => {
+  it('emits done event', async () => {
     const res = await POST(makeRequest())
     const events = await collectSSE(res)
-    const imageEvent = events.find((e: any) => e.type === 'image_ready') as any
-    expect(imageEvent).toHaveProperty('index')
-    expect(imageEvent.dataUrl).toMatch(/^data:image\/png;base64,/)
-  })
-
-  it('emits done event after all images', async () => {
-    const res = await POST(makeRequest())
-    const events = await collectSSE(res)
-    const doneEvent = events.find((e: any) => e.type === 'done')
-    expect(doneEvent).toBeDefined()
-  })
-
-  it('emits image_error per failed image (others still proceed)', async () => {
-    vi.mocked(generateRecraftImage).mockRejectedValue(new Error('Recraft failed'))
-    const res = await POST(makeRequest())
-    const events = await collectSSE(res)
-    const imageErrors = events.filter((e: any) => e.type === 'image_error')
-    expect(imageErrors).toHaveLength(3)
-    expect((imageErrors[0] as any).message).toContain('Recraft failed')
-    // done event still fires after all 3 settle
     expect(events.find((e: any) => e.type === 'done')).toBeDefined()
   })
 
-  it('allows an anonymous request (no userId) and keys the logo limiter by anon id', async () => {
+  it('allows an anonymous request (no userId) and keys the mood limiter by anon id', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     try {
       vi.mocked(auth).mockResolvedValue({ userId: null } as any)
-      mockLogoLimit.mockResolvedValue({ success: true })
-      mockLogoLimit.mockClear()
+      mockMoodLimit.mockResolvedValue({ success: true })
+      mockMoodLimit.mockClear()
 
-      const res = await POST(new Request('https://x.test/api/brand/logo/generate', {
+      const res = await POST(new Request('https://x.test/api/brand/mood/generate', {
         method: 'POST',
         headers: { 'x-anon-id': 'dev-XYZ' },
-        body: JSON.stringify({
-          brandInput: mockInput,
-          brandResult: mockBrandResult,
-          selectedName: 'Nexio',
-          logoType: 'symbol-text',
-        }),
+        body: JSON.stringify({ brandInput: mockInput, brandResult: mockBrandResult }),
       }))
       expect(res.status).toBe(200)
-      expect(mockLogoLimit).toHaveBeenCalledWith('anon:dev-XYZ')
+      expect(mockMoodLimit).toHaveBeenCalledWith('anon:dev-XYZ')
     } finally {
       vi.unstubAllEnvs()
     }
@@ -157,17 +135,12 @@ describe('POST /api/brand/logo/generate', () => {
     vi.stubEnv('NODE_ENV', 'production')
     try {
       vi.mocked(auth).mockResolvedValue({ userId: null } as any)
-      mockLogoLimit.mockResolvedValue({ success: false })
+      mockMoodLimit.mockResolvedValue({ success: false })
 
-      const res = await POST(new Request('https://x.test/api/brand/logo/generate', {
+      const res = await POST(new Request('https://x.test/api/brand/mood/generate', {
         method: 'POST',
         headers: { 'x-anon-id': 'dev-XYZ' },
-        body: JSON.stringify({
-          brandInput: mockInput,
-          brandResult: mockBrandResult,
-          selectedName: 'Nexio',
-          logoType: 'symbol-text',
-        }),
+        body: JSON.stringify({ brandInput: mockInput, brandResult: mockBrandResult }),
       }))
       expect(res.status).toBe(429)
     } finally {

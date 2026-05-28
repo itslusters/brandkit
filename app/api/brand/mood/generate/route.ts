@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { resolveRequestIdentity } from '@/lib/request-identity'
 import { getMoodLimiter } from '@/lib/ratelimit'
 import { MOOD_TEMPLATES, MOOD_FREE_COUNT, buildMoodPrompt, getMoodById, pickMoodStyle } from '@/lib/mood-templates'
 import { generateMoodImage } from '@/lib/recraft'
@@ -16,17 +16,13 @@ function sse(data: object): Uint8Array {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return new Response(
-      JSON.stringify({ type: 'error', message: 'Sign in required.' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
+  const { userId, rlKey } = await resolveRequestIdentity(req)
+  // Anonymous users resolve to free tier; getUserTier() is only called for
+  // signed-in users to capture any paid entitlements.
+  const tier = userId ? await getUserTier() : 'free'
 
   if (process.env.NODE_ENV !== 'development') {
-    const tier = await getUserTier()
-    const { success } = await getMoodLimiter(tier).limit(userId)
+    const { success } = await getMoodLimiter(tier).limit(rlKey)
     if (!success) {
       return new Response(
         JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),
@@ -37,7 +33,6 @@ export async function POST(req: Request) {
 
   const { brandInput, brandResult, templateIds }: RequestBody = await req.json()
 
-  const tier = await getUserTier()
   const isFree = tier === 'free'
 
   const requestedIds = templateIds && templateIds.length > 0

@@ -1,6 +1,6 @@
 export const maxDuration = 60
 
-import { auth } from '@clerk/nextjs/server'
+import { resolveRequestIdentity } from '@/lib/request-identity'
 import { put } from '@vercel/blob'
 import { nanoid } from 'nanoid'
 import { generateRecraftMockup } from '@/lib/mockups-recraft'
@@ -24,9 +24,10 @@ interface RequestBody {
  * subsequent PDF / ZIP downloads can rehydrate without re-invoking Recraft.
  */
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) return Response.json({ error: 'unauthorized' }, { status: 401 })
+  const { userId, rlKey } = await resolveRequestIdentity(req)
 
+  // Mockups are Essentials+. Anonymous free users fall through to the tier gate
+  // and receive 403 — the correct business response (not 401).
   const gate = await requireTier('essentials')
   if (!gate.ok) {
     return Response.json(
@@ -43,8 +44,8 @@ export async function POST(req: Request) {
   // Reuse the logo limiter (same tier ladder: free 30 / essentials 80 /
   // solo+pro 250 / studio 800 per day).
   if (process.env.NODE_ENV !== 'development') {
-    const tier = await getUserTier()
-    const { success } = await getLogoLimiter(tier).limit(`mockup:${userId}`)
+    const tier = userId ? await getUserTier() : 'free'
+    const { success } = await getLogoLimiter(tier).limit(`mockup:${rlKey}`)
     if (!success) {
       return Response.json(
         { error: 'rate_limited', message: 'Daily mockup limit reached. Try again tomorrow.' },
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
       const raw = await generateRecraftMockup(id, brandName, brandResult, brandInput)
-      const { url } = await put(`mockups/u/${userId}/${batchId}/${id}.png`, raw, {
+      const blobOwner = userId ?? rlKey
+      const { url } = await put(`mockups/u/${blobOwner}/${batchId}/${id}.png`, raw, {
         access: 'public',
         contentType: 'image/png',
         addRandomSuffix: true,

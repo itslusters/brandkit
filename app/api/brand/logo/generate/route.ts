@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { resolveRequestIdentity } from '@/lib/request-identity'
 import { buildLogoPrompt, ITERATION_MODIFIERS } from '@/lib/gemini'
 import { generateRecraftImage } from '@/lib/recraft'
 import { pickLogoStyle } from '@/lib/industry-anchor'
@@ -59,20 +59,14 @@ async function generateWithRecraft(
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return new Response(
-      JSON.stringify({ type: 'error', message: 'Sign in required.' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
+  const { userId, rlKey } = await resolveRequestIdentity(req)
 
   // Tier-aware, per-user 24h rate limit. Skipped in local dev so unit
   // testing doesn't burn through the quota. Paid tiers get markedly
   // higher limits; see LOGO_PER_TIER in lib/ratelimit.ts.
   if (process.env.NODE_ENV !== 'development') {
-    const tier = await getUserTier()
-    const { success } = await getLogoLimiter(tier).limit(userId)
+    const tier = userId ? await getUserTier() : 'free'
+    const { success } = await getLogoLimiter(tier).limit(rlKey)
     if (!success) {
       return new Response(
         JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' }),
