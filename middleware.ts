@@ -1,13 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// Force sign-in for the brand creation flow + account + every private API.
-// Public surfaces that stay open: /, /pricing, /share/*, /poll/*, /sign-in,
+// Force sign-in only for account + saved-brand CRUD. The brand *creation*
+// funnel and generation APIs are public (friction-zero) — anonymous abuse is
+// bounded by per-device/IP rate limits, not by login. See lib/request-identity.
+// Public surfaces also include: /, /pricing, /share/*, /poll/*, /sign-in,
 // /sign-up, /api/public/*, /api/waitlist, /api/poll/*, /api/revenuecat/webhook.
-const isProtectedRoute = createRouteMatcher([
+export const isProtectedRoute = createRouteMatcher([
   '/account(.*)',
-  '/brand(.*)',
-  '/api/brand(.*)',   // content generation (logo/mockup/mood/guide/assets/…)
-  '/api/brands(.*)',  // saved-brand CRUD
+  '/api/brands(.*)',  // saved-brand CRUD (save/list/duplicate/[id])
 ])
 
 export default clerkMiddleware(async (auth, req) => {
