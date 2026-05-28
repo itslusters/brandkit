@@ -7,7 +7,13 @@
 
 export function industryAnchor(industry: string): string {
   const i = industry.toLowerCase()
-  if (/\b(saas|software|tech|fintech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
+  // Finance/fintech is checked BEFORE tech so "Finance & Fintech" lands on the
+  // trustworthy-structural finance anchor instead of the generic tech monoline
+  // (the tech regex used to grab "fintech" first).
+  if (/\b(finance|fintech|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
+    return 'FINANCE IDENTITY: refined, serious, structural, trustworthy. No playful gestures.'
+  }
+  if (/\b(saas|software|tech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
     return 'TECH-PRODUCT IDENTITY: geometric, monoline, monochromatic, grid-based. No serifs, no magazine framing, no human figures.'
   }
   if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
@@ -15,9 +21,6 @@ export function industryAnchor(industry: string): string {
   }
   if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
     return 'WELLNESS IDENTITY: calm, restrained, breathing, soft. No aggressive contrast.'
-  }
-  if (/\b(finance|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
-    return 'FINANCE IDENTITY: refined, serious, structural, trustworthy. No playful gestures.'
   }
   if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
     return 'FASHION IDENTITY: elegant, contemporary, minimal, premium. No tech monoline.'
@@ -30,6 +33,15 @@ export function industryAnchor(industry: string): string {
   }
   if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
     return 'PROPERTY / ARCHITECTURE IDENTITY: structural, grounded, geometric, refined.'
+  }
+  if (/\b(e-?commerce|retail|marketplace|d2c|dtc|consumer\s*goods|online\s*shop)\b/.test(i)) {
+    return 'RETAIL / COMMERCE IDENTITY: confident, approachable, conversion-ready, vibrant yet clean, versatile across packaging and screen. No sterile tech monoline, no luxury austerity.'
+  }
+  if (/\b(travel|hospitality|hotel|tourism|airline|resort|vacation|hostel)\b/.test(i)) {
+    return 'TRAVEL & HOSPITALITY IDENTITY: evocative, warm, sense-of-place, inviting, effortless. No corporate stiffness, no tech monoline.'
+  }
+  if (/\b(agency|consulting|consultancy|advisory|creative\s*studio)\b/.test(i)) {
+    return 'AGENCY / CONSULTING IDENTITY: confident, refined, versatile, quietly creative, credible. No clip-art, no generic startup feel.'
   }
   return ''
 }
@@ -65,7 +77,10 @@ export function pickLogoStyle(
 // the brief's typography signal as the only family hint.
 export function industryTypefaceHint(industry: string): string {
   const i = industry.toLowerCase()
-  if (/\b(saas|software|tech|fintech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
+  if (/\b(finance|fintech|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
+    return 'Typefaces like Söhne, GT America, Maison Neue (structural, serious).'
+  }
+  if (/\b(saas|software|tech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
     return 'Typefaces like Inter, Founders Grotesk, GT America (geometric grotesk).'
   }
   if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
@@ -73,9 +88,6 @@ export function industryTypefaceHint(industry: string): string {
   }
   if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
     return 'Typefaces like GT Sectra, Söhne Light, Tiempos Headline (refined, breathing).'
-  }
-  if (/\b(finance|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
-    return 'Typefaces like Söhne, GT America, Maison Neue (structural, serious).'
   }
   if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
     return 'Typefaces like Tiempos Headline, GT Super, Romain Grotesque (elegant, high-contrast).'
@@ -89,6 +101,15 @@ export function industryTypefaceHint(industry: string): string {
   if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
     return 'Typefaces like Söhne, GT America, Maison Neue (structural, restrained).'
   }
+  if (/\b(e-?commerce|retail|marketplace|d2c|dtc|consumer\s*goods|online\s*shop)\b/.test(i)) {
+    return 'Typefaces like Söhne, GT America, Aeonik (clean, versatile, commerce-friendly).'
+  }
+  if (/\b(travel|hospitality|hotel|tourism|airline|resort|vacation|hostel)\b/.test(i)) {
+    return 'Typefaces like GT Super, Tiempos Headline, Söhne (warm, characterful).'
+  }
+  if (/\b(agency|consulting|consultancy|advisory|creative\s*studio)\b/.test(i)) {
+    return 'Typefaces like Söhne, Neue Haas Grotesk, GT America (refined, versatile grotesk).'
+  }
   return ''
 }
 
@@ -98,7 +119,10 @@ export function industryTypefaceHint(industry: string): string {
 // industries so callers keep the original prop.
 export function industryMockupSurface(industry: string): string {
   const i = industry.toLowerCase()
-  if (/\b(saas|software|tech|fintech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
+  if (/\b(finance|fintech|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
+    return 'polished dark wood or marble desk surface, refined and structural, restrained props'
+  }
+  if (/\b(saas|software|tech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
     return 'minimalist tech studio surface — matte concrete or brushed metal, cool neutral palette, no organic props'
   }
   if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
@@ -106,9 +130,6 @@ export function industryMockupSurface(industry: string): string {
   }
   if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
     return 'soft linen or stone surface, diffused morning light, single botanical accent, breathing whitespace'
-  }
-  if (/\b(finance|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
-    return 'polished dark wood or marble desk surface, refined and structural, restrained props'
   }
   if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
     return 'soft fabric or pale marble surface, editorial lighting, premium minimal styling'
@@ -122,5 +143,60 @@ export function industryMockupSurface(industry: string): string {
   if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
     return 'architectural concrete or stone surface, structural shadows, refined props'
   }
+  if (/\b(e-?commerce|retail|marketplace|d2c|dtc|consumer\s*goods|online\s*shop)\b/.test(i)) {
+    return 'clean retail surface — bright neutral seamless backdrop or soft pastel, product-forward, even soft light'
+  }
+  if (/\b(travel|hospitality|hotel|tourism|airline|resort|vacation|hostel)\b/.test(i)) {
+    return 'sunlit natural surface — warm stone or weathered wood with a sense of place, soft golden light'
+  }
+  if (/\b(agency|consulting|consultancy|advisory|creative\s*studio)\b/.test(i)) {
+    return 'minimal studio desk — matte neutral surface, considered props, refined professional light'
+  }
   return ''
+}
+
+// The closing render directive of the logo prompt. Previously a single constant
+// ("Flat 2D vector, white background, crisp edges, print-ready.") that — sitting
+// at the end, after the category anchor — homogenised every brand into the same
+// flat-vector look regardless of industry. This injects category character INTO
+// that dominant render line (length-neutral swap, not an addition) so the
+// industry actually shifts the visual style. Always returns a directive that
+// keeps the logo flat vector on a white background; unmatched industries get the
+// original neutral default.
+export function industryRenderHint(industry: string): string {
+  const i = industry.toLowerCase()
+  if (/\b(finance|fintech|bank|invest|wealth|asset|insurance|accounting)\b/.test(i)) {
+    return 'Flat 2D vector, geometric precision with structural restraint, crisp edges, white background, print-ready.'
+  }
+  if (/\b(saas|software|tech|api|cloud|platform|developer|ai|ml|b2b|crypto|web3|cyber)\b/.test(i)) {
+    return 'Flat 2D vector, geometric monoline precision, crisp edges, white background, print-ready.'
+  }
+  if (/\b(food|restaurant|cafe|bakery|beverage|drink|culinary|kitchen|grocery)\b/.test(i)) {
+    return 'Flat 2D vector with warm organic character, soft confident curves, white background, print-ready.'
+  }
+  if (/\b(wellness|fitness|yoga|spa|health|mindfulness|meditation|skincare)\b/.test(i)) {
+    return 'Flat 2D vector, soft and breathing with gentle curves, generous whitespace, white background, print-ready.'
+  }
+  if (/\b(fashion|apparel|beauty|cosmetic|jewelry|luxury\s*goods)\b/.test(i)) {
+    return 'Flat 2D vector, refined high-contrast elegance, generous whitespace, white background, print-ready.'
+  }
+  if (/\b(publishing|magazine|media|newsletter|literary|book|editorial)\b/.test(i)) {
+    return 'Flat 2D vector, editorial serif-forward refinement, crisp edges, white background, print-ready.'
+  }
+  if (/\b(education|school|learning|tutor|academy|course)\b/.test(i)) {
+    return 'Flat 2D vector, approachable friendly geometry, crisp edges, white background, print-ready.'
+  }
+  if (/\b(real\s*estate|property|architecture|construction|interior)\b/.test(i)) {
+    return 'Flat 2D vector, architectural structure and grounded geometry, crisp edges, white background, print-ready.'
+  }
+  if (/\b(e-?commerce|retail|marketplace|d2c|dtc|consumer\s*goods|online\s*shop)\b/.test(i)) {
+    return 'Flat 2D vector, confident vibrant clarity, crisp edges, white background, print-ready.'
+  }
+  if (/\b(travel|hospitality|hotel|tourism|airline|resort|vacation|hostel)\b/.test(i)) {
+    return 'Flat 2D vector, evocative warmth and sense of place, soft curves, white background, print-ready.'
+  }
+  if (/\b(agency|consulting|consultancy|advisory|creative\s*studio)\b/.test(i)) {
+    return 'Flat 2D vector, refined versatile confidence, crisp edges, white background, print-ready.'
+  }
+  return 'Flat 2D vector, white background, crisp edges, print-ready.'
 }
