@@ -1,6 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// vi.hoisted ensures mockBriefLimit is available inside vi.mock factories,
+// which are hoisted to the top of the file before other variable declarations.
+const { mockBriefLimit } = vi.hoisted(() => ({
+  mockBriefLimit: vi.fn().mockResolvedValue({ success: true }),
+}))
+
 vi.mock('@clerk/nextjs/server', () => ({
   auth: vi.fn().mockResolvedValue({ userId: 'u_test', sessionClaims: { publicMetadata: { tier: 'free' } } }),
 }))
@@ -10,9 +16,10 @@ vi.mock('@/lib/tier', async () => {
   return { ...actual, getUserTier: vi.fn().mockResolvedValue('free') }
 })
 
-// Mock rate limiter so tests don't hit Upstash
+// Mock rate limiter so tests don't hit Upstash.
+// mockBriefLimit is stable across calls so tests can assert on it.
 vi.mock('@/lib/ratelimit', () => ({
-  getBriefLimiter: () => ({ limit: vi.fn().mockResolvedValue({ success: true }) }),
+  getBriefLimiter: () => ({ limit: mockBriefLimit }),
   getLogoLimiter: () => ({ limit: vi.fn().mockResolvedValue({ success: true }) }),
   briefLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
   logoLimiter: { limit: vi.fn().mockResolvedValue({ success: true }) },
@@ -40,6 +47,7 @@ vi.mock('@/lib/claude', () => ({
   })),
 }))
 
+import { auth } from '@clerk/nextjs/server'
 import { anthropic } from '@/lib/claude'
 import { POST } from '@/app/api/brand/stream/route'
 import type { BrandInput } from '@/lib/types'
@@ -72,6 +80,9 @@ async function collectSSE(res: Response): Promise<object[]> {
 
 describe('POST /api/brand/stream', () => {
   beforeEach(() => {
+    // Reset to signed-in default
+    vi.mocked(auth).mockResolvedValue({ userId: 'u_test', sessionClaims: { publicMetadata: { tier: 'free' } } } as any)
+    mockBriefLimit.mockResolvedValue({ success: true })
     vi.mocked(anthropic.messages.create).mockResolvedValue(
       makeAsyncIterator([
         '[INDUSTRY_START]\n',
@@ -129,5 +140,41 @@ describe('POST /api/brand/stream', () => {
     const errorEvent = events.find((e: any) => e.type === 'error') as any
     expect(errorEvent).toBeDefined()
     expect(errorEvent.message).toContain('API error')
+  })
+
+  it('allows an anonymous request (no userId) and keys the limit by anon id', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      vi.mocked(auth).mockResolvedValue({ userId: null } as any)
+      mockBriefLimit.mockResolvedValue({ success: true })
+      mockBriefLimit.mockClear()
+
+      const res = await POST(new Request('https://x.test/api/brand/stream', {
+        method: 'POST',
+        headers: { 'x-anon-id': 'dev-XYZ' },
+        body: JSON.stringify({ brandName: 'Acme', industry: 'tech', tones: [] }),
+      }))
+      expect(res.status).toBe(200)
+      expect(mockBriefLimit).toHaveBeenCalledWith('anon:dev-XYZ')
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
+  it('rate-limits an anonymous request that is over the cap', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    try {
+      vi.mocked(auth).mockResolvedValue({ userId: null } as any)
+      mockBriefLimit.mockResolvedValue({ success: false })
+
+      const res = await POST(new Request('https://x.test/api/brand/stream', {
+        method: 'POST',
+        headers: { 'x-anon-id': 'dev-XYZ' },
+        body: JSON.stringify({ brandName: 'Acme', industry: 'tech', tones: [] }),
+      }))
+      expect(res.status).toBe(429)
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 })

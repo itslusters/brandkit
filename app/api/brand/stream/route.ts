@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { resolveRequestIdentity } from '@/lib/request-identity'
 import { anthropic, buildBrandPrompt, parseNamingCandidates, parseStyleBrief } from '@/lib/claude'
 import { getBriefLimiter } from '@/lib/ratelimit'
 import { getUserTier } from '@/lib/tier'
@@ -11,17 +11,13 @@ function sse(data: object): Uint8Array {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return new Response(
-      `data: ${JSON.stringify({ type: 'error', message: 'Sign in required.' })}\n\n`,
-      { status: 401, headers: { 'Content-Type': 'text/event-stream' } }
-    )
-  }
+  const { userId, rlKey } = await resolveRequestIdentity(req)
 
   if (process.env.NODE_ENV !== 'development') {
-    const tier = await getUserTier()
-    const { success } = await getBriefLimiter(tier).limit(userId)
+    // userId present → that user's tier; anonymous → free (getUserTier returns
+    // free for no-userId). Brief limiter is keyed by the resolved rlKey.
+    const tier = userId ? await getUserTier() : 'free'
+    const { success } = await getBriefLimiter(tier).limit(rlKey)
     if (!success) {
       return new Response(
         `data: ${JSON.stringify({ type: 'error', message: 'Daily limit reached. Please try again tomorrow.' })}\n\n`,
