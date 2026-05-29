@@ -90,7 +90,7 @@ export function buildMoodPrompt(
     `Aesthetic: ${recommendedStyle}.`,
     packDirective ? `Surface treatment: ${packDirective}` : '',
     `Color palette: ${colors.join(', ')}.`,
-    'No text, no logos, no watermarks. Award-winning craft, studio masterclass lighting, art-director composition, gallery-quality finish. No AI-photo look, no plastic skin, no warped geometry.',
+    'No text, no logos, no watermarks. No people, no faces, no human figures, no mannequins — objects, surfaces, and environments only. Award-winning craft, studio masterclass lighting, art-director composition, gallery-quality finish. No AI-photo look, no plastic skin, no warped geometry.',
   ].filter(Boolean)
 
   let prompt = parts.join(' ')
