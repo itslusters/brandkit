@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { buildMoodPrompt, getMoodById, pickMoodStyle } from '@/lib/mood-templates'
+import { buildMoodPrompt, getMoodById, moodAspect } from '@/lib/mood-templates'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
 const input: BrandInput = {
@@ -24,10 +24,11 @@ const result: BrandResult = {
 }
 
 describe('buildMoodPrompt', () => {
-  it('opens with the industry anchor so Recraft locks the category early', () => {
+  it('threads the industry category CHARACTER (no leak-prone label) early', () => {
     const tpl = getMoodById('lifestyle')!
     const prompt = buildMoodPrompt(input, result, tpl)
-    expect(prompt).toContain('TECH-PRODUCT IDENTITY')
+    expect(prompt.toLowerCase()).toMatch(/geometric|monoline/)
+    expect(prompt).not.toContain('IDENTITY:')
   })
 
   it('still includes the raw industry string', () => {
@@ -61,23 +62,19 @@ describe('buildMoodPrompt', () => {
     expect(prompt).toContain('Marine logistics')
   })
 
-  it('emits a different anchor for a food brand', () => {
+  it('emits different category character for a food brand', () => {
     const tpl = getMoodById('lifestyle')!
     const foodInput: BrandInput = { ...input, industry: 'Bakery & Cafe' }
     const prompt = buildMoodPrompt(foodInput, result, tpl)
-    expect(prompt).toContain('FOOD & BEVERAGE IDENTITY')
+    expect(prompt.toLowerCase()).toMatch(/warm|organic|appetite/)
+    expect(prompt).not.toContain('IDENTITY:')
   })
 })
 
-describe('pickMoodStyle (unchanged behavior, regression guard)', () => {
-  it('returns vector_illustration for vector/geometric briefs', () => {
-    expect(pickMoodStyle('vector flat geometric')).toBe('vector_illustration')
-    expect(pickMoodStyle('clean minimal monoline iconography')).toBe('vector_illustration')
-  })
-  it('returns digital_illustration for illustrated briefs', () => {
-    expect(pickMoodStyle('hand-drawn whimsical illustration')).toBe('digital_illustration')
-  })
-  it('defaults to realistic_image', () => {
-    expect(pickMoodStyle('Restrained editorial luxury')).toBe('realistic_image')
+describe('moodAspect', () => {
+  it('maps template pixel sizes to Imagen aspect ratios', () => {
+    expect(moodAspect('1024x1024')).toBe('1:1')
+    expect(moodAspect('1365x1024')).toBe('4:3')
+    expect(moodAspect('1024x1365')).toBe('3:4')
   })
 })
