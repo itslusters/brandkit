@@ -5,13 +5,13 @@
  *
  *   npx tsx scripts/qa-mockups.ts
  *
- * Requires RECRAFT_API_KEY. Costs roughly (fixtures × 9 templates × $0.04).
+ * Requires GEMINI_API_KEY. Costs roughly (fixtures × 9 templates × $0.04).
  * Default fixture set = 3 brands = $1.08 per run. Override via --brands=N
  * when you want a wider sample.
  */
 import { writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
-import { generateRecraftMockup } from '../lib/mockups-recraft'
+import { generateMockup } from '../lib/mockups-imagen'
 import type { BrandResult } from '../lib/types'
 
 interface Fixture {
@@ -85,7 +85,7 @@ interface Outcome {
 async function runOne(fixture: Fixture, template: string): Promise<Outcome> {
   const start = Date.now()
   try {
-    const buf = await generateRecraftMockup(template, fixture.brandName, fixture.brandResult)
+    const buf = await generateMockup(template, fixture.brandName, fixture.brandResult)
     return {
       fixture: fixture.label,
       template,
@@ -105,8 +105,8 @@ async function runOne(fixture: Fixture, template: string): Promise<Outcome> {
 }
 
 async function main() {
-  if (!process.env.RECRAFT_API_KEY) {
-    console.error('RECRAFT_API_KEY not set')
+  if (!process.env.GEMINI_API_KEY) {
+    console.error('GEMINI_API_KEY not set')
     process.exit(1)
   }
 

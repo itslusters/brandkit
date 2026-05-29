@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildLogoPrompt } from '@/lib/gemini'
 import { STYLE_PACKS } from '@/lib/style-packs'
-import type { BrandInput, BrandResult, LogoType } from '@/lib/types'
+import type { BrandInput, BrandResult } from '@/lib/types'
 
 const input: BrandInput = {
   companyName: 'Nexio',
@@ -24,127 +24,88 @@ const result: BrandResult = {
   },
 }
 
-describe('buildLogoPrompt', () => {
+describe('buildLogoPrompt (Imagen)', () => {
   it('includes the brand name', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('Nexio')
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)).toContain('Nexio')
   })
 
-  it('includes wordmark description for wordmark type', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt.toLowerCase()).toContain('wordmark')
+  it('describes the logo type per type', () => {
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()).toContain('wordmark')
+    expect(buildLogoPrompt(input, result, 'Nexio', 'symbol-text', 0).toLowerCase()).toContain('symbol')
+    expect(buildLogoPrompt(input, result, 'Nexio', 'emblem', 0).toLowerCase()).toContain('emblem')
   })
 
-  it('includes symbol-and-text description for symbol-text type', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'symbol-text', 0)
-    expect(prompt.toLowerCase()).toContain('symbol')
+  // --- Imagen text-leak defenses: Imagen renders shouted directives as image text ---
+  it('states the brand name is the ONLY text', () => {
+    const p = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(p).toContain('only text')
   })
 
-  it('includes emblem description for emblem type', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'emblem', 0)
-    expect(prompt.toLowerCase()).toContain('emblem')
+  it('never emits leak-prone uppercase directive labels', () => {
+    for (const type of ['wordmark', 'symbol-text', 'emblem'] as const) {
+      const p = buildLogoPrompt(input, result, 'Nexio', type, 0)
+      expect(p).not.toContain('WORDMARK ONLY')
+      expect(p).not.toContain('IDENTITY:')
+      expect(p).not.toContain('Reconfirm')
+    }
   })
 
   it('does not leak raw hex codes (Imagen renders them as text)', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).not.toContain('#')
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)).not.toContain('#')
   })
 
   it('translates palette to descriptive color names', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    // #18181b → dark gray, #ffffff → off-white, #f59e0b → orange
-    expect(prompt.toLowerCase()).toMatch(/orange/)
-    expect(prompt.toLowerCase()).toMatch(/off-white/)
+    const p = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(p).toMatch(/orange/)
+    expect(p).toMatch(/off-white/)
   })
 
-  it('includes avoid list items', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('그라디언트 남용')
+  it('includes brief avoid-list items', () => {
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)).toContain('그라디언트 남용')
   })
 
-  it('includes variation hint — variation 0 is asymmetric', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt.toLowerCase()).toContain('asymmetric')
+  it('threads variation character (0 asymmetric, 1 minimal, 2 expressive)', () => {
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()).toContain('asymmetric')
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 1).toLowerCase()).toContain('minimal')
+    expect(buildLogoPrompt(input, result, 'Nexio', 'wordmark', 2).toLowerCase()).toContain('expressive')
   })
 
-  it('includes variation hint — variation 1 leans minimal', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 1)
-    expect(prompt.toLowerCase()).toContain('minimal')
+  it('threads industry CHARACTER (not a leak-prone label) so logos differ by category', () => {
+    const saas = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(saas).toMatch(/geometric|monoline/)
+    const food = buildLogoPrompt({ ...input, industry: 'Bakery & Cafe' }, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(food).toMatch(/warm|organic|appetite/)
+    const wellness = buildLogoPrompt({ ...input, industry: 'Wellness coaching' }, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(wellness).toMatch(/calm|breathing|soft/)
   })
 
-  it('includes variation hint — variation 2 is expressive (industry-agnostic)', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 2)
-    expect(prompt.toLowerCase()).toContain('expressive')
+  it('threads brand tones, omitting the voice line when empty', () => {
+    const withTones = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(withTones).toContain('minimal')
+    expect(withTones).toContain('trusted')
+    const noTones = buildLogoPrompt({ ...input, tones: [] }, result, 'Nexio', 'wordmark', 0)
+    expect(noTones).not.toContain('Brand voice:')
   })
 
-  it('threads industry into the prompt so logos differ across categories', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('SaaS B2B')
+  it('defends against human figures and vintage scripts', () => {
+    const p = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0).toLowerCase()
+    expect(p).toContain('illustrated human figures')
+    expect(p).toContain('vintage script')
   })
 
-  it('threads brand tones into the prompt', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt.toLowerCase()).toContain('minimal')
-    expect(prompt.toLowerCase()).toContain('trusted')
-    expect(prompt.toLowerCase()).toContain('bold')
+  it('demotes stylePack to a surface treatment, not brand framing', () => {
+    const p = buildLogoPrompt({ ...input, stylePack: 'editorial' }, result, 'Nexio', 'wordmark', 0)
+    expect(p).toContain('Surface treatment:')
+    expect(p).not.toContain('Editorial luxury brand')
   })
 
-  it('omits the brand voice line when tones are empty', () => {
-    const noToneInput: BrandInput = { ...input, tones: [] }
-    const prompt = buildLogoPrompt(noToneInput, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).not.toContain('Brand voice:')
-  })
-
-  it('emits a tech industry anchor for SaaS so Recraft locks the category early', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('TECH-PRODUCT IDENTITY')
-  })
-
-  it('emits a food anchor for food industries', () => {
-    const foodInput: BrandInput = { ...input, industry: 'Bakery & Cafe' }
-    const prompt = buildLogoPrompt(foodInput, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('FOOD & BEVERAGE IDENTITY')
-  })
-
-  it('emits a wellness anchor for wellness industries', () => {
-    const wellnessInput: BrandInput = { ...input, industry: 'Wellness coaching' }
-    const prompt = buildLogoPrompt(wellnessInput, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).toContain('WELLNESS IDENTITY')
-  })
-
-  it('emits no anchor for industries outside the curated set', () => {
-    const otherInput: BrandInput = { ...input, industry: 'Marine logistics' }
-    const prompt = buildLogoPrompt(otherInput, result, 'Nexio', 'wordmark', 0)
-    expect(prompt).not.toContain('IDENTITY:')
-  })
-
-  it('defends against human figures and vintage scripts via HOUSE_AVOID', () => {
-    const prompt = buildLogoPrompt(input, result, 'Nexio', 'wordmark', 0)
-    expect(prompt.toLowerCase()).toContain('illustrated human figures')
-    expect(prompt.toLowerCase()).toContain('vintage script')
-  })
-
-  it('demotes stylePack to surface treatment, not a brand framing', () => {
-    const editorialInput: BrandInput = { ...input, stylePack: 'editorial' }
-    const prompt = buildLogoPrompt(editorialInput, result, 'Nexio', 'wordmark', 0)
-    // The directive label should read "Surface treatment", not "Mood",
-    // because the prior framing was strong enough to override industry.
-    expect(prompt).toContain('Surface treatment:')
-    expect(prompt).not.toContain('Editorial luxury brand')
-    expect(prompt).not.toContain('Monocle')
-  })
-
-  // Recraft V3 caps prompts at 1000 chars. Prior revision overflowed and
-  // truncated HOUSE_AVOID + the avoid list — keep regression coverage.
-  for (const pack of STYLE_PACKS) {
-    for (const logoType of ['wordmark', 'symbol-text', 'emblem'] as const) {
-      it(`stays under Recraft cap (pack=${pack.id}, type=${logoType})`, () => {
-        const packInput: BrandInput = { ...input, stylePack: pack.id }
-        const prompt = buildLogoPrompt(packInput, result, 'Nexio', logoType, 0)
-        expect(prompt.length).toBeLessThanOrEqual(1000)
-        // And the avoid list must survive at the tail.
-        expect(prompt).toContain('그라디언트 남용')
-      })
+  it('stays under the Imagen prompt cap with the avoid list intact', () => {
+    for (const pack of STYLE_PACKS) {
+      for (const logoType of ['wordmark', 'symbol-text', 'emblem'] as const) {
+        const p = buildLogoPrompt({ ...input, stylePack: pack.id }, result, 'Nexio', logoType, 0)
+        expect(p.length).toBeLessThanOrEqual(2000)
+        expect(p).toContain('그라디언트 남용')
+      }
     }
-  }
+  })
 })

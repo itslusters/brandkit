@@ -29,10 +29,8 @@ vi.mock('@/lib/ratelimit', () => ({
   getIp: () => '127.0.0.1',
 }))
 
-vi.mock('@/lib/recraft', () => ({
-  generateMoodImage: vi.fn(),
-  generateRecraftImage: vi.fn(),
-  resolveStyleId: vi.fn(() => undefined),
+vi.mock('@/lib/imagen', () => ({
+  generateImagenImage: vi.fn(),
 }))
 
 vi.mock('@/lib/mood-templates', () => ({
@@ -43,11 +41,11 @@ vi.mock('@/lib/mood-templates', () => ({
   MOOD_FREE_COUNT: 1,
   buildMoodPrompt: vi.fn(() => 'mock mood prompt'),
   getMoodById: vi.fn((id: string) => ({ id, size: '1024x1024' })),
-  pickMoodStyle: vi.fn(() => 'natural'),
+  moodAspect: vi.fn(() => '1:1'),
 }))
 
 import { auth } from '@clerk/nextjs/server'
-import { generateMoodImage } from '@/lib/recraft'
+import { generateImagenImage } from '@/lib/imagen'
 import { POST } from '@/app/api/brand/mood/generate/route'
 import type { BrandInput, BrandResult } from '@/lib/types'
 
@@ -91,7 +89,7 @@ describe('POST /api/brand/mood/generate', () => {
     // Reset to signed-in default
     vi.mocked(auth).mockResolvedValue({ userId: 'u_test', sessionClaims: { publicMetadata: { tier: 'free' } } } as any)
     mockMoodLimit.mockResolvedValue({ success: true })
-    vi.mocked(generateMoodImage).mockResolvedValue(Buffer.from('mockimage'))
+    vi.mocked(generateImagenImage).mockResolvedValue(Buffer.from('mockimage'))
   })
 
   it('returns SSE content-type header', async () => {

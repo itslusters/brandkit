@@ -15,16 +15,13 @@ export { hexToColorName }
 // short end-cap so the type constraint survives the brand-context middle.
 // Compressed in this revision to leave room for industryAnchor + HOUSE signals
 // under Recraft V3's 1000-char prompt cap.
-const LOGO_TYPE_DESCRIPTIONS: Record<LogoType, string> = {
-  'wordmark': 'WORDMARK ONLY — pure typography logo. Brand name as stylized lettering fills the frame. NO icon, NO symbol, NO enclosing shape.',
-  'symbol-text': 'COMBINATION MARK — one distinct abstract icon or symbol plus the brand name as adjacent typography. Both equally crafted, not fused.',
-  'emblem': 'EMBLEM badge — brand name fully enclosed inside one continuous outer container shape (circle, shield, hexagon, badge border).',
-}
-
-const LOGO_TYPE_END_CAP: Record<LogoType, string> = {
-  'wordmark': 'Reconfirm: typography only, zero icons.',
-  'symbol-text': 'Reconfirm: icon and wordmark side by side.',
-  'emblem': 'Reconfirm: all text inside one container.',
+// Descriptive, lowercase logo-type phrasing. Imagen renders ALL-CAPS directive
+// labels (e.g. "WORDMARK ONLY") as literal text INSIDE the logo, so these read
+// as natural design descriptions instead of shouted instructions.
+const LOGO_TYPE_PHRASE: Record<LogoType, string> = {
+  'wordmark': 'a pure typographic wordmark logo — the brand name set as distinctive custom lettering, no icon, no symbol, no enclosing shape',
+  'symbol-text': 'a combination-mark logo — one simple distinctive abstract symbol paired beside the brand name in clean type, both equally crafted',
+  'emblem': 'an emblem / badge logo — the brand name enclosed inside a single clean container shape (circle, shield, or badge)',
 }
 
 // Three industry-agnostic variant levers — weight, restraint, expressiveness
@@ -61,10 +58,10 @@ const VARIATION_AXES: Array<{
 // type-designer caliber letterforms; the prior version only said "Pentagram
 // polish" without naming the letterform discipline explicitly.
 const HOUSE_AESTHETIC =
-  'Awwwards-caliber identity. Type-designer-perfect letterforms, optical alignment, deliberate kerning.'
+  'Award-winning, type-designer-quality letterforms with optical alignment and deliberate kerning. Flat, crisp, scalable, professional brand identity.'
 
 const HOUSE_AVOID =
-  'illustrated human figures, hand-drawn mascots, vintage script lettering, garbled letterforms, ornate scripts, 3D bevels, drop shadows, clip-art, generic startup feel, AI-generic look'
+  'illustrations, illustrated human figures, hand-drawn mascots, scenes, vintage script lettering, garbled letterforms, ornate flourishes, 3D bevels, drop shadows, clip-art, photographic elements, generic startup feel, AI-generic look'
 
 // industryAnchor moved to lib/industry-anchor.ts so the same logic drives
 // logo + mood + mockup prompts.
@@ -77,7 +74,7 @@ export const ITERATION_MODIFIERS: Record<IterationModifier, string> = {
   playful: 'More playful, energetic, unexpected.',
 }
 
-const RECRAFT_PROMPT_LIMIT = 1000
+const IMAGEN_PROMPT_LIMIT = 2000
 
 export function buildLogoPrompt(
   input: BrandInput,
@@ -100,40 +97,35 @@ export function buildLogoPrompt(
     ? recommendedStyle.slice(0, 100).trimEnd() + '…'
     : recommendedStyle
 
-  // Type constraint is bookended (start + end-cap) so it survives the middle
-  // brand-context block. Recraft V3 has a 1000-char limit; descriptions are
-  // sized to leave room for the brand-specific middle.
-  //
-  // industryAnchor + industryTypefaceHint sit ahead of `recommendedStyle` so
-  // Recraft locks the category and the right letterform family before it
-  // reads the brief. The avoid list concatenates the brief's brand-specific
-  // avoids with HOUSE_AVOID so we always defend against generic AI cliches
-  // + the specific failure modes seen in dogfood (vintage scripts, human
-  // figures, garbled letterforms).
-  const combinedAvoid = [...avoidList.slice(0, 2), HOUSE_AVOID].filter(Boolean).join(', ')
+  // Imagen follows natural-language description and will literally render any
+  // shouted directive label ("WORDMARK ONLY", "TECH-PRODUCT IDENTITY:") as text
+  // inside the logo. So: no labels, the category anchor has its "X IDENTITY:"
+  // prefix stripped to its descriptive clause, hex is pre-translated to color
+  // names, and we state plainly that the ONLY text is the brand name.
+  const anchorDesc = anchor ? anchor.replace(/^[^:]+:\s*/, '') : ''
+  const combinedAvoid = [...avoidList.slice(0, 3), HOUSE_AVOID].filter(Boolean).join(', ')
   const parts = [
-    LOGO_TYPE_DESCRIPTIONS[logoType],
-    anchor,
+    `Design ${LOGO_TYPE_PHRASE[logoType]}.`,
+    `The only text anywhere in the image is the single word "${selectedName}" — no taglines, labels, captions, color codes, or any other words.`,
+    anchorDesc ? `Category character: ${anchorDesc}` : '',
     typefaceHint,
-    `Brand: "${selectedName}".`,
-    `Industry: ${input.industry}.`,
     toneLine ? `Brand voice: ${toneLine}.` : '',
     `Composition: ${variant.composition}.`,
-    `Weight: ${variant.typography}.`,
-    `Palette: ${variant.palette(colors)}.`,
-    `Aesthetic: ${aestheticLine}.`,
-    packDirective ? `Surface treatment: ${packDirective}` : '',
+    `Typography: ${variant.typography}.`,
+    `Colors: ${variant.palette(colors)}.`,
+    `Overall aesthetic: ${aestheticLine}.`,
+    packDirective ? `Surface treatment: ${packDirective}.` : '',
     iterationModifier ? ITERATION_MODIFIERS[iterationModifier] : '',
     HOUSE_AESTHETIC,
-    `Only word visible: "${selectedName}". No other text, watermarks, captions, hex codes, or annotations.`,
-    `Avoid: ${combinedAvoid}.`,
-    LOGO_TYPE_END_CAP[logoType],
     industryRenderHint(input.industry),
+    `Do not include: ${combinedAvoid}, or any text other than "${selectedName}".`,
   ].filter(Boolean)
 
+  // Imagen accepts long prompts; keep a generous safety cap well above the
+  // ~980-char content so the brand-name-only clause + avoids always survive.
   let prompt = parts.join(' ')
-  if (prompt.length > RECRAFT_PROMPT_LIMIT - 20) {
-    prompt = prompt.slice(0, RECRAFT_PROMPT_LIMIT - 23) + '...'
+  if (prompt.length > IMAGEN_PROMPT_LIMIT) {
+    prompt = prompt.slice(0, IMAGEN_PROMPT_LIMIT - 3) + '...'
   }
   return prompt
 }

@@ -27,8 +27,8 @@ vi.mock('@/lib/ratelimit', () => ({
   getIp: () => '127.0.0.1',
 }))
 
-vi.mock('@/lib/mockups-recraft', () => ({
-  generateRecraftMockup: vi.fn().mockResolvedValue(Buffer.from('mockimage')),
+vi.mock('@/lib/mockups-imagen', () => ({
+  generateMockup: vi.fn().mockResolvedValue(Buffer.from('mockimage')),
 }))
 
 vi.mock('@vercel/blob', () => ({
