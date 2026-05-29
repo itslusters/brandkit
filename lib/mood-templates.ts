@@ -53,24 +53,14 @@ export function getMoodById(id: string): MoodTemplate | undefined {
 }
 
 /**
- * Map the LLM-generated styleBrief.recommendedStyle string to one of Recraft's
- * built-in style presets. A minimal-vector brand should get vector_illustration
- * mood images, an illustrated brand should get digital_illustration ones, and
- * everything else defaults to photographic realistic_image — which is what the
- * mood pipeline was hard-locked to before (a problem when the brief clearly
- * wanted vector or illustration aesthetics).
+ * Map a template's pixel size to the nearest Imagen aspect ratio. Imagen takes
+ * an aspectRatio (not pixel dimensions); the values returned here are all valid
+ * `ImagenAspect` members.
  */
-export function pickMoodStyle(
-  recommendedStyle: string,
-): 'vector_illustration' | 'digital_illustration' | 'realistic_image' {
-  const s = recommendedStyle.toLowerCase()
-  if (/\b(vector|flat\s*2?d?|geometric|minimal|clean\s*line|iconographic|isometric|graphic\s*mark|svg)\b/.test(s)) {
-    return 'vector_illustration'
-  }
-  if (/\b(illustrat|hand[-\s]?drawn|painted|watercolor|gouache|sketch|cartoon|whimsical|playful)\b/.test(s)) {
-    return 'digital_illustration'
-  }
-  return 'realistic_image'
+export function moodAspect(size: MoodTemplate['size']): '1:1' | '4:3' | '3:4' {
+  if (size === '1365x1024') return '4:3'
+  if (size === '1024x1365') return '3:4'
+  return '1:1'
 }
 
 export const MOOD_FREE_COUNT = 3
@@ -85,17 +75,17 @@ export function buildMoodPrompt(
   const colors = colorPalette.slice(0, 3).map(hexToColorName)
   const packDirective = input.stylePack ? getStylePack(input.stylePack)?.promptDirective ?? '' : ''
   const tones = [...(input.tones ?? []), ...(input.customTone?.split(/[\s,]+/).filter(Boolean) ?? [])].slice(0, 4)
+  // Strip the "X IDENTITY:" label from the anchor — Imagen renders shouted
+  // labels as literal caption text inside the image. The descriptive clause
+  // still locks the category before the brief (without it a SaaS brand drifts
+  // into lifestyle imagery full of cars and handbags). Craft footer names the
+  // grade to push past the generic AI-photo look.
   const anchor = industryAnchor(input.industry)
-
-  // Anchor sits ahead of `recommendedStyle` so the model locks the category
-  // before reading the brief — without it a SaaS brand would land lifestyle
-  // imagery full of cars and handbags when the brief drifted into editorial
-  // luxury. Craft footer names the grade ("award-winning craft", "studio
-  // masterclass lighting") to push past the generic AI-photo look.
+  const anchorDesc = anchor ? anchor.replace(/^[^:]+:\s*/, '') : ''
   const parts = [
     template.concept + '.',
-    anchor,
-    `Industry: ${input.industry}.`,
+    anchorDesc ? `Category character: ${anchorDesc}` : '',
+    `Industry context: ${input.industry}.`,
     `Brand mood: ${tones.join(', ')}.`,
     `Aesthetic: ${recommendedStyle}.`,
     packDirective ? `Surface treatment: ${packDirective}` : '',
