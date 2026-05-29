@@ -21,13 +21,17 @@ function cssColor(hex: string): string {
   return hex.startsWith('#') ? hex : `#${hex}`
 }
 
-// Load Inter for card text (brand name label, style label)
-let interFont: ArrayBuffer | null = null
+// Card text font. MUST be a STATIC font (no fvar table): satori's opentype
+// parser throws "Cannot read properties of undefined (reading '256')" on a
+// variable font's fvar table, which silently 500'd the DNA + brand cards.
+// Inter-var / Bricolage-800 / Playfair-400 are all VARIABLE despite the names;
+// IBMPlexMono-400 is genuinely static and suits the spec-card / hex aesthetic.
+let cardFont: ArrayBuffer | null = null
 function getInterFont(): ArrayBuffer {
-  if (interFont) return interFont
-  const buf = readFileSync(path.join(process.cwd(), 'public', 'fonts', 'Inter-var.ttf'))
-  interFont = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
-  return interFont
+  if (cardFont) return cardFont
+  const buf = readFileSync(path.join(process.cwd(), 'public', 'fonts', 'IBMPlexMono-400.ttf'))
+  cardFont = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
+  return cardFont
 }
 
 function isColorDark(hex: string): boolean {

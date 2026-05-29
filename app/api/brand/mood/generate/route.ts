@@ -51,22 +51,31 @@ export async function POST(req: Request) {
       const lockedIds = isFree ? requestedIds.slice(MOOD_FREE_COUNT) : []
       controller.enqueue(sse({ type: 'plan', generating: effectiveIds, locked: lockedIds, tier }))
 
-      const tasks = effectiveIds.map(async (id, i) => {
-        try {
-          const tpl = getMoodById(id)
-          if (!tpl) throw new Error(`Unknown mood template: ${id}`)
-          const prompt = buildMoodPrompt(brandInput, brandResult, tpl)
-          const raw = await generateImagenImage(prompt, { aspectRatio: moodAspect(tpl.size) })
-          const dataUrl = `data:image/png;base64,${raw.toString('base64')}`
-          controller.enqueue(sse({ type: 'image_ready', index: i, templateId: id, dataUrl }))
-        } catch (err) {
-          const message = err instanceof Error ? err.message : 'Mood image generation failed'
-          console.error(`[mood] generation failed for template=${id}:`, err)
-          controller.enqueue(sse({ type: 'image_error', index: i, templateId: id, message }))
+      // Cap concurrent Imagen calls — firing all 9 at once blew past the
+      // model's per-minute quota (the "model limit" failures). 3 in-flight +
+      // the retry/backoff in generateImagenImage keeps the set under quota
+      // while still streaming each image in as it finishes.
+      const CONCURRENCY = 3
+      let next = 0
+      async function worker() {
+        while (next < effectiveIds.length) {
+          const i = next++
+          const id = effectiveIds[i]
+          try {
+            const tpl = getMoodById(id)
+            if (!tpl) throw new Error(`Unknown mood template: ${id}`)
+            const prompt = buildMoodPrompt(brandInput, brandResult, tpl)
+            const raw = await generateImagenImage(prompt, { aspectRatio: moodAspect(tpl.size) })
+            const dataUrl = `data:image/png;base64,${raw.toString('base64')}`
+            controller.enqueue(sse({ type: 'image_ready', index: i, templateId: id, dataUrl }))
+          } catch (err) {
+            const message = err instanceof Error ? err.message : 'Mood image generation failed'
+            console.error(`[mood] generation failed for template=${id}:`, err)
+            controller.enqueue(sse({ type: 'image_error', index: i, templateId: id, message }))
+          }
         }
-      })
-
-      await Promise.allSettled(tasks)
+      }
+      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, effectiveIds.length) }, worker))
       controller.enqueue(sse({ type: 'done' }))
       controller.close()
     },

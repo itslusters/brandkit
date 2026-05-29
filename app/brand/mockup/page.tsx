@@ -31,6 +31,8 @@ export default function MockupPage() {
   const [waitlistPlan, setWaitlistPlan] = useState<'essentials' | 'pro' | null>(null)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'limit' | 'error'>('idle')
   const [saveMessage, setSaveMessage] = useState<string>('')
+  const [dnaCardUrl, setDnaCardUrl] = useState<string | null>(null)
+  const [dnaCardLoading, setDnaCardLoading] = useState(false)
 
   // Session guard — runs FIRST before any render that depends on session data
   useEffect(() => {
@@ -137,8 +139,8 @@ export default function MockupPage() {
   async function generateMockups() {
     const brandName = getSession<string>('selectedName')
     const brandResult = getSession<BrandResult>('brandResult')
-    const brandInput = getSession<BrandInput>('brandInput')
-    if (!brandName || !brandResult || selectedIds.length === 0) return
+    const selectedLogoDataUrl = getSession<string>('selectedLogoDataUrl')
+    if (!brandName || !brandResult || !selectedLogoDataUrl || selectedIds.length === 0) return
     setGenerating(true)
     setHasError(false)
     setErrorMessage('')
@@ -147,7 +149,7 @@ export default function MockupPage() {
       const res = await fetch('/api/brand/mockup/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateIds: selectedIds, brandName, brandResult, brandInput }),
+        body: JSON.stringify({ templateIds: selectedIds, selectedLogoDataUrl }),
       })
       if (!res.ok) {
         setErrorMessage(`Server error ${res.status}`)
@@ -358,27 +360,47 @@ export default function MockupPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
+                disabled={dnaCardLoading}
                 onClick={async () => {
                   const brandResult = getSession<BrandResult>('brandResult')
                   const brandName = getSession<string>('selectedName') ?? 'brand'
                   if (!brandResult) return
-                  const res = await fetch('/api/brand/dna-card', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ brandName, brandResult }),
-                  })
-                  if (!res.ok) return
-                  const blob = await res.blob()
-                  await saveBlob(blob, `${brandName}-dna-card.png`)
+                  setDnaCardLoading(true)
+                  try {
+                    const res = await fetch('/api/brand/dna-card', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ brandName, brandResult }),
+                    })
+                    if (!res.ok) { setSaveMessage('DNA card failed to generate.'); return }
+                    const blob = await res.blob()
+                    setDnaCardUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(blob) })
+                  } finally {
+                    setDnaCardLoading(false)
+                  }
                 }}
                 className="btn btn-primary"
               >
-                ✨ Download DNA Card
+                {dnaCardLoading ? 'Generating…' : dnaCardUrl ? '↻ Regenerate DNA Card' : '✨ Generate DNA Card'}
               </button>
               <a href="/account/brands" className="btn btn-secondary">
                 View in library →
               </a>
             </div>
+
+            {dnaCardUrl && (
+              <div className="mt-6">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={dnaCardUrl} alt="Brand DNA card" className="w-full rounded-2xl border border-zinc-800/70" />
+                <a
+                  href={dnaCardUrl}
+                  download="dna-card.png"
+                  className="mt-3 inline-block text-sm text-zinc-400 hover:text-white"
+                >
+                  ↓ Download
+                </a>
+              </div>
+            )}
           </div>
         </motion.div>
       )}

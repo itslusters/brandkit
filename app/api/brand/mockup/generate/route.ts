@@ -3,25 +3,22 @@ export const maxDuration = 60
 import { auth } from '@clerk/nextjs/server'
 import { put } from '@vercel/blob'
 import { nanoid } from 'nanoid'
-import { generateMockup } from '@/lib/mockups-imagen'
+import { composeMockupById } from '@/lib/mockups-compose'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { requireTier, getUserTier } from '@/lib/tier'
-import type { BrandInput, BrandResult, MockupResult } from '@/lib/types'
+import type { MockupResult } from '@/lib/types'
 
 interface RequestBody {
   templateIds: string[]
-  brandName: string
-  brandResult: BrandResult
-  /** Optional — passes the original industry string straight through so the
-   *  mockup anchor uses the user input rather than the LLM's industry
-   *  archetype paraphrase, which sometimes drifts away from the keyword set. */
-  brandInput?: BrandInput
+  /** The user's selected logo as a PNG data URL — composited onto each template. */
+  selectedLogoDataUrl: string
 }
 
 /**
- * Mockups are an Essentials+ feature. Each selected template renders
- * through Imagen 4 and gets uploaded to Vercel Blob so subsequent PDF / ZIP
- * downloads can rehydrate without re-invoking the image model.
+ * Mockups are an Essentials+ feature. Each selected template COMPOSITES the
+ * user's actual generated logo onto a real product photo (lib/mockups-compose
+ * — white→transparent + place in the template's logoZone), then uploads to
+ * Vercel Blob. Compositing is local (sharp), so no image-model quota is spent.
  */
 export async function POST(req: Request) {
   const { userId } = await auth()
@@ -56,19 +53,21 @@ export async function POST(req: Request) {
   let body: RequestBody
   try { body = await req.json() as RequestBody } catch { return Response.json({ error: 'invalid_json' }, { status: 400 }) }
 
-  const { templateIds, brandName, brandResult, brandInput } = body
+  const { templateIds, selectedLogoDataUrl } = body
   if (!Array.isArray(templateIds) || templateIds.length === 0) {
     return Response.json({ error: 'no_templates' }, { status: 400 })
   }
-  if (!brandName || !brandResult?.styleBrief) {
-    return Response.json({ error: 'missing_brand' }, { status: 400 })
+  const logoMatch = selectedLogoDataUrl?.match(/^data:image\/\w+;base64,(.+)$/)
+  if (!logoMatch) {
+    return Response.json({ error: 'missing_logo' }, { status: 400 })
   }
+  const logoBuffer = Buffer.from(logoMatch[1], 'base64')
 
   const batchId = nanoid(8)
 
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
-      const raw = await generateMockup(id, brandName, brandResult, brandInput)
+      const raw = await composeMockupById(id, logoBuffer)
       const { url } = await put(`mockups/u/${userId}/${batchId}/${id}.png`, raw, {
         access: 'public',
         contentType: 'image/png',
