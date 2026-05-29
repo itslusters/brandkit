@@ -7,11 +7,35 @@ import {
   revokeSubscriptionTier,
 } from '@/lib/entitlements'
 import {
+  grantAnonOnetime,
+  grantAnonSubscription,
+  revokeAnonSubscription,
+} from '@/lib/anon-entitlement'
+import {
   isOnetimeTier,
   isSubscriptionTier,
   type OnetimeTier,
   type SubscriptionTier,
 } from '@/lib/tier'
+
+/**
+ * Route an entitlement change to the right store by the shape of the RevenueCat
+ * App User ID: a Clerk userId ("user_…") → Clerk publicMetadata (signed-in
+ * buyers); anything else → the anon-entitlement Upstash store (friction-zero
+ * buyers whose App User ID is our device anon id). Both stores share the same
+ * two-bucket / never-downgrade semantics.
+ */
+const isClerkId = (id: string) => id.startsWith('user_')
+
+function grantOnetime(id: string, tier: OnetimeTier) {
+  return isClerkId(id) ? grantOnetimeTier(id, tier) : grantAnonOnetime(id, tier)
+}
+function grantSubscription(id: string, tier: SubscriptionTier) {
+  return isClerkId(id) ? grantSubscriptionTier(id, tier) : grantAnonSubscription(id, tier)
+}
+function revokeSubscription(id: string) {
+  return isClerkId(id) ? revokeSubscriptionTier(id) : revokeAnonSubscription(id)
+}
 
 /**
  * RevenueCat webhook — https://www.revenuecat.com/docs/integrations/webhooks
@@ -117,7 +141,7 @@ async function routeEvent(event: RevenueCatEvent): Promise<void> {
   switch (event.type) {
     case 'NON_RENEWING_PURCHASE': {
       const tier = resolveOnetime(event)
-      if (tier) await grantOnetimeTier(userId, tier)
+      if (tier) await grantOnetime(userId, tier)
       else logUnresolved(event)
       return
     }
@@ -130,12 +154,12 @@ async function routeEvent(event: RevenueCatEvent): Promise<void> {
       // fall through to onetime resolution if subscription lookup misses.
       const subTier = resolveSubscription(event)
       if (subTier) {
-        await grantSubscriptionTier(userId, subTier)
+        await grantSubscription(userId, subTier)
         return
       }
       const oneTier = resolveOnetime(event)
       if (oneTier) {
-        await grantOnetimeTier(userId, oneTier)
+        await grantOnetime(userId, oneTier)
         return
       }
       logUnresolved(event)
@@ -143,7 +167,7 @@ async function routeEvent(event: RevenueCatEvent): Promise<void> {
     }
     case 'EXPIRATION':
     case 'SUBSCRIPTION_PAUSED': {
-      await revokeSubscriptionTier(userId)
+      await revokeSubscription(userId)
       return
     }
     default:

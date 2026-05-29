@@ -16,6 +16,7 @@
  */
 
 import { isNative } from './native'
+import { getAnonId } from './anon'
 import type { PaidPlan } from './tier'
 
 let initialized = false
@@ -58,11 +59,16 @@ const PRODUCT_IDS: Record<PaidPlan, string> = {
  *
  * On web this is a no-op returning false; callers should fall back to the
  * Stripe checkout path.
+ *
+ * `userId` is the Clerk id when signed in; friction-zero buyers pass nothing
+ * and we fall back to the device anon id, so RevenueCat ties the entitlement
+ * to an id our webhook can route (see lib/anon-entitlement).
  */
-export async function startIapPurchase(plan: PaidPlan, userId: string): Promise<boolean> {
+export async function startIapPurchase(plan: PaidPlan, userId?: string): Promise<boolean> {
   if (!isNative()) return false
-  if (!userId) return false
-  if (!(await ensureInitialized(userId))) return false
+  const appUserId = userId || getAnonId()
+  if (!appUserId) return false
+  if (!(await ensureInitialized(appUserId))) return false
 
   try {
     const { Purchases } = await import('@revenuecat/purchases-capacitor')
@@ -89,9 +95,11 @@ export async function startIapPurchase(plan: PaidPlan, userId: string): Promise<
  * entitlements from the App Store to RevenueCat, which fires the webhook
  * again if anything new was discovered.
  */
-export async function restorePurchases(userId: string): Promise<boolean> {
+export async function restorePurchases(userId?: string): Promise<boolean> {
   if (!isNative()) return false
-  if (!(await ensureInitialized(userId))) return false
+  const appUserId = userId || getAnonId()
+  if (!appUserId) return false
+  if (!(await ensureInitialized(appUserId))) return false
   try {
     const { Purchases } = await import('@revenuecat/purchases-capacitor')
     const info = await Purchases.restorePurchases()
