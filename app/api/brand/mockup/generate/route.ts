@@ -3,7 +3,7 @@ export const maxDuration = 60
 import { auth } from '@clerk/nextjs/server'
 import { put } from '@vercel/blob'
 import { nanoid } from 'nanoid'
-import { generateRecraftMockup } from '@/lib/mockups-recraft'
+import { generateMockup } from '@/lib/mockups-imagen'
 import { getLogoLimiter } from '@/lib/ratelimit'
 import { requireTier, getUserTier } from '@/lib/tier'
 import type { BrandInput, BrandResult, MockupResult } from '@/lib/types'
@@ -20,8 +20,8 @@ interface RequestBody {
 
 /**
  * Mockups are an Essentials+ feature. Each selected template renders
- * through Recraft V3 `realistic_image` and gets uploaded to Vercel Blob so
- * subsequent PDF / ZIP downloads can rehydrate without re-invoking Recraft.
+ * through Imagen 4 and gets uploaded to Vercel Blob so subsequent PDF / ZIP
+ * downloads can rehydrate without re-invoking the image model.
  */
 export async function POST(req: Request) {
   const { userId } = await auth()
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
   const outcomes = await Promise.allSettled(
     templateIds.map(async (id) => {
-      const raw = await generateRecraftMockup(id, brandName, brandResult, brandInput)
+      const raw = await generateMockup(id, brandName, brandResult, brandInput)
       const { url } = await put(`mockups/u/${userId}/${batchId}/${id}.png`, raw, {
         access: 'public',
         contentType: 'image/png',

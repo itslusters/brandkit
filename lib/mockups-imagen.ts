@@ -1,22 +1,20 @@
 import 'server-only'
-import { generateRecraftImage } from './recraft'
+import { generateImagenImage } from './imagen'
 import { hexToColorName } from './colors'
 import { industryAnchor, industryMockupSurface } from './industry-anchor'
 import type { BrandInput, BrandResult } from './types'
 
 /**
- * Recraft-driven mockup generation.
+ * Imagen-driven mockup generation.
  *
  * Each template ID maps to a photorealistic scene prompt that weaves in the
  * brand name, palette color names, and typography hint from the style
  * brief. The generated logo is not composited — the scene carries the
- * brand *name* (rendered as text by Recraft) + aesthetic cues. Users who
+ * brand *name* (rendered as text by Imagen) + aesthetic cues. Users who
  * need precise logo placement get the clean logo PNG download + optional
  * designer polish on paid tiers.
  *
- * Every prompt renders at 1024×1024 — Recraft V3 is safest on the square
- * dimension, and keeping one size across templates avoids per-template
- * "unsupported size" failures we were seeing in production.
+ * Square 1:1 aspect across templates keeps one size for consistent layout.
  */
 
 type MockupId =
@@ -55,7 +53,9 @@ function buildContext(brandName: string, brandResult: BrandResult, input?: Brand
     style: brandResult.styleBrief.recommendedStyle,
     typography: brandResult.styleBrief.typography[0] ?? 'modern sans-serif',
     industry,
-    anchor: industryAnchor(industry),
+    // Strip the "X IDENTITY:" label — Imagen renders shouted labels as literal
+    // caption text in the scene. The descriptive clause still locks the category.
+    anchor: industryAnchor(industry).replace(/^[^:]+:\s*/, ''),
     surface: industryMockupSurface(industry),
   }
 }
@@ -83,7 +83,7 @@ export function isMockupId(id: string): id is MockupId {
   return id in MOCKUP_PROMPTS
 }
 
-export async function generateRecraftMockup(
+export async function generateMockup(
   templateId: string,
   brandName: string,
   brandResult: BrandResult,
@@ -94,8 +94,5 @@ export async function generateRecraftMockup(
   }
   const ctx = buildContext(brandName, brandResult, brandInput)
   const prompt = MOCKUP_PROMPTS[templateId](ctx)
-  return generateRecraftImage(prompt, {
-    style: 'realistic_image',
-    size: '1024x1024',
-  })
+  return generateImagenImage(prompt, { aspectRatio: '1:1' })
 }
