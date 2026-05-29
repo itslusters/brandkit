@@ -31,7 +31,11 @@ const config: CapacitorConfig = {
     ],
   },
   ios: {
-    contentInset: 'always',
+    // `never`: the web app owns safe-area insets via CSS env(safe-area-inset-*)
+    // (e.g. GlassHeader's pt-[env(safe-area-inset-top)]). With the previous
+    // `always`, WKWebView ALSO inset the content for the safe area, double-
+    // counting it and opening a gap above the sticky header on scroll.
+    contentInset: 'never',
     backgroundColor: '#09090b',
     scheme: 'Atriium',
     // Disable scroll bounce so the app feels more native.
