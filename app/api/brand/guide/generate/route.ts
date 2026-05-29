@@ -1,5 +1,7 @@
+import { auth } from '@clerk/nextjs/server'
 import { buildBrandGuidePDF } from '@/lib/pdf'
-import { requireTier } from '@/lib/tier'
+import { getLogoLimiter } from '@/lib/ratelimit'
+import { requireTier, getUserTier } from '@/lib/tier'
 import type { BrandResult } from '@/lib/types'
 
 interface RequestBody {
@@ -28,10 +30,26 @@ async function fetchAsBuffer(url: string): Promise<Buffer | null> {
 
 export async function POST(req: Request) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return Response.json({ error: 'unauthorized' }, { status: 401 })
+    }
+
     const gate = await requireTier('essentials')
     if (!gate.ok) {
       return Response.json({ error: 'tier_required', message: 'Upgrade to Essentials or Pro to download the brand guide.' }, { status: 403 })
     }
+
+    // Rate limit before building the PDF (CPU-bound + potential mockup fetches).
+    // Reuse the logo limiter (same tier ladder). Skipped in local dev.
+    if (process.env.NODE_ENV !== 'development') {
+      const tier = await getUserTier()
+      const { success } = await getLogoLimiter(tier).limit(`guide:${userId}`)
+      if (!success) {
+        return Response.json({ error: 'rate_limited', message: 'Daily limit reached. Try again tomorrow.' }, { status: 429 })
+      }
+    }
+
     const body: RequestBody = await req.json()
     if (!body.selectedLogoDataUrl?.startsWith('data:image/')) {
       return Response.json({ error: 'invalid_logo' }, { status: 400 })
