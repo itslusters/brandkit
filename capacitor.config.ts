@@ -17,16 +17,19 @@ const config: CapacitorConfig = {
   appName: 'Atriium',
   webDir: 'out',
   server: {
-    url: 'https://brandkit-wheat.vercel.app',
+    // Primary domain. Must match the Clerk production instance (clerk.atriium.xyz)
+    // — Clerk production is locked to this domain, so loading the shell from the
+    // old *.vercel.app origin would break auth (domain mismatch).
+    url: 'https://atriium.xyz',
     cleartext: false,
-    // Allow the App Store-bound shell to talk to our API + Vercel Blob origins.
+    // Allow the App Store-bound shell to talk to our app + Clerk (prod) + Blob.
     allowNavigation: [
-      'brandkit-wheat.vercel.app',
+      'atriium.xyz',
+      '*.atriium.xyz', // clerk.atriium.xyz, accounts.atriium.xyz (Clerk prod)
       '*.vercel.app',
       '*.vercel.com',
-      '*.vercel-storage.com',
+      '*.vercel-storage.com', // Vercel Blob image origins
       'clerk.com',
-      '*.clerk.accounts.dev',
       '*.clerk.com',
     ],
   },
